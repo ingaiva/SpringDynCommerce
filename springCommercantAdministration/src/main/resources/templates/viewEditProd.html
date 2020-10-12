@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+
+<title>Produit</title>
+<link rel="stylesheet" th:href="@{css/style.css}">
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+	crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+	<div class="  p-3 my-2"
+		style="width: 100%; margin-left: auto; margin-right: auto; text-align: center;">
+		<form class="my-1 " enctype="multipart/form-data"  style="width: 100%;" method="post"
+			th:action="@{saveProduit}" th:object="${produit}">
+
+			<div th:if="${produit.id==null}">
+				<h3>Création produit</h3>
+			</div>
+			<div th:unless="${produit.id==null}">
+				<h3>Modification du produit</h3>
+			</div>
+			<small style="color: red" th:text="${msgErr}"></small>
+
+			<div th:if="${produit.id != null}">
+				<input type="hidden" th:field="*{id}" />
+			</div>
+			<div class="divProduit">
+				
+				<div class="divPhoto m-2">
+					<div class="d-flex">
+						<h4 class=" my-2">Images</h4>
+						<input type="button" class="mx-2 py-0 btn btn-sm btn-outline-success" onclick="getfile()" value="Ajouter les images" />
+						<div class="d-none">
+							<input type="file" accept="image/*" name="choixImg"	id="choixImg" onchange="readURL(this);" />
+							<button type="submit" name="action" value="addImg"	id="submitImg" class=" d-none btn btn-outline-success  px-1">Valider</button>
+						</div>
+					</div>
+
+					<div class="d-flex flex-wrap my-2 justify-content-between"	th:if="${produit.photos.size() > 0}">
+
+						<div th:class="${iter.index==0} ? 'border border-info rounded p-2 mt-2 divPhotoMain' : 'border border-info rounded p-2 mt-2  divPhotoSmall'"								
+							th:each="ph, iter : *{photos}">
+
+							<img th:src="'data:image/png;base64,'+ ${ph.getImageStr()}"	class="border" width="auto" height="auto" style="max-width: 100%;">
+
+							<div class="input-group  mt-1">
+								<input type="hidden" th:value="${ph.id}" th:name="|photos[${iter.index}].id|"> 
+								<input type="hidden" th:value="${ph.produit.id}" th:name="|photos[${iter.index}].produit.id|">
+								<input type="hidden" th:value="${ph.ordre}"	th:name="|photos[${iter.index}].ordre|">
+								<div class="input-group-prepend">
+									<span class="input-group-text"> 
+										<i class="fa fa-commenting-o text-info" aria-hidden="true"></i>
+									</span>
+								</div>
+								<input type="text" class="form-control text-info font-italic" th:value="${ph.legende}" th:name="|photos[${iter.index}].legende|" placeholder="Intitulé" aria-label="Intitulé">
+								<div class="input-group-append" id="button-addon-line">
+									<button type="submit" th:if="${iter.index > 0}" name="action"	th:value="'upImg' + ${ph.id}" class="btn btn-outline-success  px-2" data-toggle="tooltip" data-placement="top" title="Déplacer">
+										<i	th:class="${iter.index % 2 ==0} ? 'fa fa-arrow-left' : 'fa fa-arrow-up'" aria-hidden="true"></i>
+									</button>
+									
+									<button type="submit" th:if="${iter.index < produit.photos.size()-1}" name="action" th:value="'downImg' + ${ph.id}"	class=" btn btn-outline-success  px-2" data-toggle="tooltip"
+										data-placement="top" title="Déplacer">
+										<i	th:class="${iter.index % 2 ==0} ? 'fa fa-arrow-down' : 'fa fa-arrow-right'"	aria-hidden="true"></i>
+									</button>
+
+									<div class="text-left">
+										<a	th:href="@{supprimerPhotoProduit(id=${ph.id},idProd=${produit.id})}"
+											class=" px-2 ml-1 btn btn-outline-danger"	data-toggle="tooltip" data-placement="top"	title="Supprimer image"> 
+											<i class="fa fa-trash text-danger" aria-hidden="true"></i>
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+
+				<div class="divInfoProduit ">
+					<div class="mx-1 mb-3 d-flex flex-row-reverse">
+						<a th:href="@{accueil}" class="col-2 px-1 mx-1 btn btn-danger">Annuler</a>
+						<button type="submit" name="action" value="save" class="btn btn-success col-2 px-1"
+							style="width: 100%;">Valider</button>
+					</div>
+
+					<div class="row  mb-3 ">
+						<div class="form-group text-left col ">
+							<label class="text-info font-weight-bold">Catégorie</label> 
+							<select class="form-control font-italic text-info font-weight-bold"
+								th:field="*{categorieProduit}">
+								<option th:each="cat : ${lstCat}" th:value="${cat.id}"	th:text="${cat.titre}">
+								</option>
+							</select>
+						</div>
+					</div>
+					
+					<div class="row text-left ">
+						<div class="form-group text-left col font-weight-bold input-group-lg">
+							<label for="libelle">Titre</label> 
+							<input	class="form-control font-weight-bold" th:field="*{libelle}"
+								required>
+						</div>
+						<div class="form-group text-left col-6 ">
+							<label class="col-form-label " for="statut">Statut</label>
+							<div class="d-flex flex-lg-row flex-md-column justify-content-between card border-info px-2">
+								<div th:each="st : ${statutProduit}">
+									<input type="radio" th:field="*{statut}" th:value="${st}" /> <label
+										th:for="${#ids.prev('statut')}" th:text="${T(data.entitys.Produit).getStatutLibelle(st)}"></label>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row form-group text-left ">
+						<div class="col-6">
+							<div class="form-group text-left ">
+								<label for="conditionnement">Conditionnement</label> <input
+									class="form-control" th:field="*{conditionnement}">
+							</div>
+						</div>
+						<div class="col">
+							<div class="form-group text-left ">
+								<label for="prix">Prix</label>
+								<div style="display: flex">
+									<input type=number step=0.01 class="form-control"
+										th:field="*{prix}" required>
+									<div class="font-weight-bold p-1">€</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="col">
+							<div class="form-group text-left ">
+								<label for="stock">Stock</label> <input type=number step=0.01
+									class="form-control" th:field="*{stock}">
+							</div>
+						</div>
+					</div>
+					<div class="form-group text-left ">
+						<label for="description">Déscription</label>
+						<textarea class="form-control" th:field="*{description}"></textarea>
+					</div>
+					
+					<div class="infoCompProduit">
+						<div class="d-flex ">
+							<h4>Informations complementaires</h4>						
+							<button type="submit" name="action" value="addInfoComp" class=" px-1 mx-3 btn  btn-outline-success">Ajouter</button>													
+							
+						</div>
+						<div class="form-group text-left m-4 p-3 card border-info" th:each="info, itemStat : *{lstInfoComp}">							
+							
+							<div class="divInfoProduit ">								
+								<div >
+									<input type="hidden" th:value="${info.id}" th:name="|lstInfoComp[${itemStat.index}].id|"/>
+									<input type="hidden" th:value="${info.produit.id}" th:name="|lstInfoComp[${itemStat.index}].produit.id|"/>
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text">
+												<i class="fa fa-bars text-info" aria-hidden="true"></i>
+											</span>
+										</div>
+										<input class="form-control text-info" placeholder="Titre" th:value="${info.titre}"  th:name="|lstInfoComp[${itemStat.index}].titre|" /> 
+										<input class="form-control text-info" placeholder="Description" th:value="${info.description}"  th:name="|lstInfoComp[${itemStat.index}].description|" />
+										<div class="input-group-append" id="button-addon-line">
+											<a	th:href="@{supprimerInfo(id=${info.id},idProd=${produit.id})}" class=" px-1 mx-1 btn btn-outline-danger">supprimer</a>
+										</div>
+									</div>
+
+									
+									<div class="d-flex my-2 mx-5">
+										<h5 class="text-info">Précisions</h5>
+										<!-- <a th:href="@{addLigneInfo(id=${info.id},idProd=${produit.id})}" class=" px-1 mx-3 btn btn-outline-success">Ajouter</a> -->	
+										<button type="submit" name="action" th:value="'addLigneInfo' + ${info.id}" class=" px-1 mx-3 btn  btn-outline-success">Ajouter</button>													
+							
+									</div>
+									<div class="mx-5" th:each="l, iter : ${info.lignesInfosComp}">
+										<div class="input-group mb-3">
+											<input type="hidden" th:value="${l.id}" th:name="|lstInfoComp[${itemStat.index}].lignesInfosComp[${iter.index}].id|">
+											<input type="hidden" th:value="${l.infoComp.id}" th:name="|lstInfoComp[${itemStat.index}].lignesInfosComp[${iter.index}].infoComp.id|">
+											
+											<div class="input-group-prepend">
+											    <span class="input-group-text">
+											    <i class="fa fa-commenting-o text-info" aria-hidden="true"></i>
+											    </span>
+											 </div>
+											<input type="text"  class="form-control text-info" th:value="${l.titre}"  th:name="|lstInfoComp[${itemStat.index}].lignesInfosComp[${iter.index}].titre|" 	placeholder="Titre"	aria-label="Titre"	aria-describedby="button-addon-line">
+											<input type="text" class="form-control text-info" th:value="${l.description}"  th:name="|lstInfoComp[${itemStat.index}].lignesInfosComp[${iter.index}].description|" 	placeholder="Description"	aria-label="Description" aria-describedby="button-addon-line">
+											
+											<div class="input-group-append" id="button-addon-line">
+												<a th:href="@{supprimerLigneInfo(id=${l.id},idProd=${produit.id})}" class=" px-1 mx-1 btn btn-outline-danger" >Supprimer</a>
+											
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>						
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<script>
+	
+		function getfile(){
+	        document.getElementById('choixImg').click();	        
+	    }		
+	   	    
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+				document.getElementById('submitImg').click();	 
+			}
+		}
+		
+	</script>
+	
+</body>
+</html>
+
+
+
+<!-- <input type="hidden" th:field="*{lstInfoComp[__${itemStat.index}__].id}" th:value="${info.id}" />
+									<input type="hidden" th:field="*{lstInfoComp[__${itemStat.index}__].produit.id}" th:value="${info.produit.id}" />
+									<label th:for="*{lstInfoComp[__${itemStat.index}__].titre}">Titre</label>
+									<input class="form-control"  th:field="*{lstInfoComp[__${itemStat.index}__].titre}"  th:value="${info.titre}" />
+									<label th:for="*{lstInfoComp[__${itemStat.index}__].description}">Déscription</label>
+									<input class="form-control"  th:field="*{lstInfoComp[__${itemStat.index}__].description}" th:value="${info.description}"/>
+ -->

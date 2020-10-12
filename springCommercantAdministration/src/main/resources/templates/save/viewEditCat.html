@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+
+<title>Catégorie</title>
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+	crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+	
+	<div class=" bg-light py-2 my-5"
+		style="width: 100%; margin-left: auto; margin-right: auto; text-align: center;">
+		<form id="frm" class="my-1 " enctype="multipart/form-data" style="width: 100%;" method="post"
+			th:action="@{saveCategorie}" th:object="${categorie}">
+			<div th:if="${categorie.id==null}">
+				<h3>Nouvelle catégorie</h3>
+			</div>
+			<div th:unless="${categorie.id==null}">
+				<h3>Modification de la catégorie</h3>
+			</div>
+
+			<div class="divCategorie" style="display: grid; grid-template-columns: 300px auto; column-gap: 10px;">
+				
+				<div class="divPhotoCategorie m-2">
+					<div class="d-flex">
+						<h4 class=" my-2">Images</h4>
+						<input type="button"
+							class="mx-2 py-0 btn btn-sm btn-outline-success "
+							onclick="getfile()" value="Ajouter les images" />
+						<div class="d-none">
+							<input type="file" accept="image/*" name="choixImg" id="choixImg"
+								onchange="readURL(this);" />
+							<button type="submit" name="action" value="addImg" id="submitImg"
+								class=" d-none btn btn-outline-success  px-1">Valider</button>
+						</div>
+					</div>
+
+					<div class=" my-2" th:if="${categorie.photos.size() > 0}">
+						<div class="border border-info  rounded p-2 mt-2" th:each="ph, iter : *{photos}">
+							<img th:src="'data:image/png;base64,'+ ${ph.getImageStr()}"
+								class="border" width="auto" height="auto"
+								style="max-width: 100%;">
+
+							<div class="input-group  mt-1">
+								<input type="hidden" th:value="${ph.id}"
+									th:name="|photos[${iter.index}].id|"> <input
+									type="hidden" th:value="${ph.categorieProduit.id}"
+									th:name="|photos[${iter.index}].categorieProduit.id|">
+								<input type="hidden" th:value="${ph.ordre}"
+									th:name="|photos[${iter.index}].ordre|">
+								<div class="input-group-prepend">
+									<span class="input-group-text"> <i
+										class="fa fa-commenting-o text-info" aria-hidden="true"></i>
+									</span>
+								</div>
+								<input type="text" class="form-control text-info font-italic "
+									th:value="${ph.legende}"
+									th:name="|photos[${iter.index}].legende|"
+									placeholder="Intitulé" aria-label="Intitulé">
+								<div class="input-group-append" id="button-addon-line">
+									<button type="submit" th:if="${iter.index > 0}" name="action"
+										th:value="'upImg' + ${ph.id}"
+										class="btn btn-outline-success  px-2" data-toggle="tooltip"
+										data-placement="top" title="Monter">
+										<i class="fa fa-arrow-up text-success" aria-hidden="true"></i>
+									</button>
+									<button type="submit"
+										th:if="${iter.index < categorie.photos.size()-1}"
+										name="action" th:value="'downImg' + ${ph.id}"
+										class=" btn btn-outline-success  px-2" data-toggle="tooltip"
+										data-placement="top" title="Descendre">
+										<i class="fa fa-arrow-down text-success" aria-hidden="true"></i>
+									</button>
+
+									<div class="text-left">
+										<a	th:href="@{supprimerPhotoCategorie(id=${ph.id},idCat=${categorie.id})}"
+											class=" px-2 ml-1 btn btn-outline-danger" data-toggle="tooltip"
+										data-placement="top" title="Supprimer image"><i class="fa fa-trash text-danger" aria-hidden="true"></i></a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="divCategorieInfo">					
+					<div class="headden">
+						<input type="hidden" th:field="*{id}" />
+					</div>
+
+					<div class=" mx-2">
+						<small style="color: red" th:text="${msgErr}"></small>
+						<!-- row -->
+						<div class="form-group text-left input-group-lg">
+							<label class="font-weight-bold text-info" for="titre">Titre catégorie</label> 
+							<input	class="form-control font-weight-bold text-info" th:field="*{titre}" required>
+						</div>
+						<div class="form-group text-left ">
+							<label for="description">Déscription</label>
+							<textarea class="form-control" th:field="*{description}"></textarea>
+						</div>
+					</div>
+					<div class="row mx-2  ">
+						<button type="submit" class="btn btn-success col-3 px-1"
+							style="width: 100%;">Valider</button>
+						<a th:href="@{accueil}" class="col-3 px-1 mx-1 btn btn-danger">Annuler</a>
+					</div>
+				</div>
+			</div>			
+			
+		</form>
+	</div>
+	<script>
+	
+		function getfile(){
+	        document.getElementById('choixImg').click();	        
+	    }		
+	   	    
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+				document.getElementById('submitImg').click();	 
+			}
+		}
+		
+	</script>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+		crossorigin="anonymous"></script>
+</body>
+</html>

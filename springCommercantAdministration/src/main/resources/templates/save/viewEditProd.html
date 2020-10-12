@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+
+<title>Produit</title>
+<link rel="stylesheet" th:href="@{css/style.css}">
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+	crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+	<div class="bg-light border-info p-3 my-2"
+		style="width: 100%; margin-left: auto; margin-right: auto; text-align: center;">
+		<form class="my-1 " style="width: 100%;" method="post"
+			th:action="@{saveProduit}" th:object="${produit}">
+
+			<div th:if="${produit.id==null}">
+				<h3>Création produit</h3>
+			</div>
+			<div th:unless="${produit.id==null}">
+				<h3>Modification du produit</h3>
+			</div>
+			<small style="color: red" th:text="${msgErr}"></small>
+
+			<div class="headden">
+				<input type="hidden" th:field="*{id}" />
+			</div>
+			<div class="divProduit">
+				<div class="divPhotoProduit">
+					<div class=" text-center" style="width:100%" th:if="${produit.photos.size()==0}">
+						<i class="fa fa-gift fa-5x text-info" aria-hidden="true"></i>
+					</div>
+					<div th:if="${produit.photos.size() > 0}">
+						<div th:each="ph : ${produit.photos}">
+							<i class="fa fa-gift fa-4x" aria-hidden="true"></i>						
+						</div>						
+					</div>
+				</div>
+
+				<div class="divInfoProduit ">
+					<div class="mx-1 mb-3 d-flex flex-row-reverse">
+						<a th:href="@{accueil}" class="col-2 px-1 mx-1 btn btn-danger">Annuler</a>
+						<button type="submit" name="action" value="save" class="btn btn-success col-2 px-1"
+							style="width: 100%;">Valider</button>
+					</div>
+
+					<div class="row  mb-3 ">
+						<div class="form-group text-left col">
+							<label>Catégorie</label> <select class="form-control"
+								th:field="*{categorieProduit}">
+								<option th:each="cat : ${lstCat}" th:value="${cat.id}"
+									th:text="${cat.titre}"></option>
+							</select>
+						</div>
+					</div>
+
+					<!-- row -->
+					<div class="row text-left ">
+						<div class="form-group text-left col font-weight-bold">
+							<label for="libelle">Titre</label> <input
+								class="form-control font-weight-bold" th:field="*{libelle}"
+								required>
+						</div>
+						<div class="form-group text-left col-4">
+							<label class="col-form-label " for="statut">Statut</label>
+
+							<div th:each="st : ${statutProduit}">
+								<input type="radio" th:field="*{statut}" th:value="${st}" /> <label
+									th:for="${#ids.prev('statut')}" th:text="${T(data.entitys.Produit).getStatutLibelle(st)}"></label>
+							</div>
+						</div>
+					</div>
+					<div class="row form-group text-left ">
+						<div class="col-6">
+							<div class="form-group text-left ">
+								<label for="conditionnement">Conditionnement</label> <input
+									class="form-control" th:field="*{conditionnement}">
+							</div>
+						</div>
+						<div class="col">
+							<div class="form-group text-left ">
+								<label for="prix">Prix</label>
+								<div style="display: flex">
+									<input type=number step=0.01 class="form-control"
+										th:field="*{prix}" required>
+									<div class="font-weight-bold p-1">€</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="col">
+							<div class="form-group text-left ">
+								<label for="stock">Stock</label> <input type=number step=0.01
+									class="form-control" th:field="*{stock}">
+							</div>
+						</div>
+					</div>
+					<div class="form-group text-left ">
+						<label for="description">Déscription</label>
+						<textarea class="form-control" th:field="*{description}"></textarea>
+					</div>
+					
+					<div class="infoCompProduit">
+						<div class="d-flex ">
+							<h4>Informations complementaires</h4>						
+							<button type="submit" name="action" value="addInfoComp" class=" px-1 mx-3 btn  btn-success">Ajouter</button>													
+							
+						</div>
+						<div class="form-group text-left m-4 p-3 card border-info" th:each="info, itemStat : *{lstInfoComp}">
+							<form method="post"	th:action="@{saveInfo}" th:object="${info}">
+								<button type="submit" name="action" value="addInfoComp" class=" px-1 mx-3 btn  btn-success">Tester</button>												
+							
+							</form>
+							
+							<div class="divInfoProduit">
+								<div class="divPhotoInfoProduit mx-1 mb-3 d-flex justify-content-between">
+									<i class="fa fa-gift fa-4x" aria-hidden="true"></i>	
+									<div class="">										
+										<a th:href="@{supprimerInfo(id=${info.id},idProd=${produit.id})}" class=" px-1 mx-1 btn btn-danger">supprimer</a>											
+									</div>
+									
+								</div>
+								<div >
+									<input type="hidden" th:field="*{lstInfoComp[__${itemStat.index}__].id}" th:value="${info.id}" />
+									<input type="hidden" th:field="*{lstInfoComp[__${itemStat.index}__].produit.id}" th:value="${info.produit.id}" />
+									<label th:for="*{lstInfoComp[__${itemStat.index}__].titre}">Titre</label>
+									<input class="form-control"  th:field="*{lstInfoComp[__${itemStat.index}__].titre}"  th:value="${info.titre}" />
+									<label th:for="*{lstInfoComp[__${itemStat.index}__].description}">Déscription</label>
+									<input class="form-control"  th:field="*{lstInfoComp[__${itemStat.index}__].description}" th:value="${info.description}"/>
+
+
+									<div class="d-flex my-2 mx-5">
+										<h5>Précisions</h5>
+										<button type="submit" name="action" value="addLigneInfoComp"
+											class=" px-1 mx-3 btn  btn-success">Ajouter</button>
+									</div>
+								</div>
+							</div>							
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+</body>
+</html>

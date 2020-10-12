@@ -1,0 +1,53 @@
+.divProduit, .divCategorie {
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 40% auto;   
+    column-gap: 10px;
+    align-items: left;
+}
+/* .divPhoto{
+    background-color: whitesmoke;
+    min-height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    
+    mon test
+} */
+.divPhotoMain{
+	 width: 100%;
+}
+.divPhotoSmall{
+	 width: 49%;
+}
+
+.fa{
+	/* margin:5px; */
+}
+.fa-plus-square, .fa-plus-square-o, .fa-plus{
+	/* color: #1b926c; */
+	color:white;
+}
+.fa-pencil-square-o{
+	color: #17a2b8;
+}
+.fa-trash, .fa-eraser{
+	color: red;
+}
+.fa-eraser{
+	color: orange;
+}
+
+/* .divInfoProduit{
+	display: grid;
+    grid-template-columns: 100px auto;   
+    column-gap: 10px;
+    align-items: left;
+}
+.divPhotoInfoProduit{
+	background-color: whitesmoke;
+    min-height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+} */

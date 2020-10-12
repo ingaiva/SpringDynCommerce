@@ -1,0 +1,174 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Accueil</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" th:href="@{css/style.css}">
+	<link rel="stylesheet"
+		href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+		crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<body>
+	<div th:insert="fragments/general.html :: navbarDynamique">	
+	</div>	
+
+	<div class="pt-1 px-5 mt-3"	style="width: 100%; margin-left: auto; margin-right: auto; text-align: center;">
+		<h3>Liste des produits</h3>
+		<h4 th:if="${hasProd==false}">Aucun produit n'existe encore</h4>
+		<div th:if="${lstCat.size() > 0}">
+			<div class="card border-info mb-3"  th:each="c:${lstCat}">
+				
+				<div class="card text-white bg-info  "> 				
+					<div  class="card-header row text-left mx-0">
+						<!-- <div class="col-1" th:text="${c.id}">
+						</div> -->
+						<div class="col card-title d-flex ">
+							<img th:if="${c.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${c.defPhotoData()}"	class="border p-1 mr-2" width="auto" height="auto" style="max-width: 100%;">
+							<h4  th:text="${c.titre}"></h4>
+						</div>
+							
+									
+						<div class="col-4"  >
+							<div>
+								<a class="mx-2 text-white"  th:href="@{modifierCat(id=${c.id})}" ><i class="fa fa-2x mx-2 fa-pencil-square-o text-white" aria-hidden="true"></i>Modifier</a>
+							</div>
+							<div>
+								<a class="mx-2 text-white" th:href="@{addProdInCat(id=${c.id})}" ><i class="fa fa-2x mx-2 fa-plus-square-o text-white" aria-hidden="true"></i>Ajouter produits dans cette catégorie</a>
+							</div>
+							<div>
+								<a class="mx-2 text-white" th:href="@{supprCat(id=${c.id})}" ><i class="fa fa-2x mx-2 fa-trash text-white" aria-hidden="true"></i>Supprimer</a>						
+							</div>
+						</div>
+					</div>
+					
+					<div class="card-body">
+						<div class="card-text font-italic" th:text="${c.description}">
+						</div>
+					</div>
+				</div>
+				
+				<div class="text-danger" th:if="${c.produits.size()==0}">Aucun produit dans cette catégorie</div>
+				
+				<div th:if="${c.produits.size() > 0}">
+					<table class="table">
+						<thead class="thead ">
+							<tr>
+								<!-- <th class="bg-white" scope="col">id</th> -->
+								<th class="bg-white" scope="col" style="min-width: 250px;">Libelle</th>
+								<th class="bg-white" scope="col">Description</th>
+								<th class="bg-white" scope="col">Conditionnement</th>							
+								<th class="bg-white" scope="col">prix</th>
+								<th class="bg-white" scope="col">Stock</th>
+								<th class="bg-white" scope="col">Status</th>
+								<th class="bg-white" scope="col" style="width: 250px;">..</th>							
+							</tr>
+						</thead>
+						<tbody>
+								<tr th:each="p:${c.produits}">
+									<!-- <td th:text="${p.id}"></td> -->
+									<td><!-- <td th:text="${p.libelle}"> -->
+										<div class="col card-title d-flex ">
+											<img th:if="${p.photos.size() > 0 }"
+											th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"
+											class="border p-1 mr-2" width="auto" height="auto"
+											style="max-width: 100%;">
+											<p th:text="${p.libelle}"></p>
+										</div>
+									</td>
+									<td th:text="${p.description}"></td>
+									<td th:text="${p.conditionnement}"></td>
+									<td th:text="${p.prix} + '€'"></td>
+									<td th:text="${p.stock}"></td>
+									<td th:text="${p.statut}"></td>
+									<td >								
+										<span class="text-left">
+											<div><a class="mx-3 text-dark" th:href="@{modifierProd(id=${p.id})}" ><i class="fa  mx-2 fa-pencil-square-o" aria-hidden="true"></i>Modifier</a>
+											</div>
+											<div><a class="mx-3 text-dark" th:href="@{effacerCatProd(id=${p.id})}" ><i class="fa  mx-2 fa-eraser" aria-hidden="true"></i>Retirer de cette cat.</a>
+											</div>
+											<div><a class="mx-3 text-dark" th:href="@{supprimerProd(id=${p.id})}" ><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer	</a>
+											</div>																					
+										</span>										
+									</td>
+								</tr>	
+						</tbody>
+					</table>
+				</div>
+				
+			</div>			
+		</div>
+
+		<div th:if="${lstProdSansCat.size() > 0}">
+			<h4 >Produits sans catégorie</h4>
+			<table class="table">
+				<thead class="thead-light ">
+					<tr>
+						<!-- <th class="bg-warning" scope="col">id</th> -->
+						<th class="bg-warning" scope="col" style="min-width: 250px;">Libelle</th>
+						<th class="bg-warning" scope="col">Description</th>
+						<th class="bg-warning" scope="col">Conditionnement</th>
+						<th class="bg-warning" scope="col">prix</th>
+						<th class="bg-warning" scope="col">Stock</th>
+						<th class="bg-warning" scope="col">Status</th>
+						<th class="bg-warning" scope="col">..</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="p:${lstProdSansCat}">
+						<!-- <td th:text="${p.id}"></td> -->
+						<td><!--  th:text="${p.libelle}" -->
+							<div class="d-flex ">
+								<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2" width="auto" height="auto" style="max-width: 100%;">
+								<p th:text="${p.libelle}"></p>
+							</div>
+
+						</td>
+						<td th:text="${p.description}"></td>
+						<td th:text="${p.conditionnement}"></td>
+						<td th:text="${p.prix} + '€'"></td>
+						<td th:text="${p.stock}"></td>
+						<td th:text="${p.statut}"></td>
+						<td><span class="d-flex flex-column text-left"> 
+								<a class="mx-2 text-dark"  name="btnModifP" th:href="@{modifierProd(id=${p.id})}"><i class="fa  mx-2 fa-pencil-square-o" aria-hidden="true"></i>Modifier</a>
+								<a class="mx-2 text-dark"  name="btnSupprP"	th:href="@{supprimerProd(id=${p.id})}"><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer </a>
+							</span> 
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"></script>
+	<script>
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#liProduit');   // liAccuil
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');        
+      	})
+    </script>
+</body>
+
+</html>
