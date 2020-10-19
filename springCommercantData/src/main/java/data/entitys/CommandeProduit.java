@@ -15,12 +15,14 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
-@Getter @Setter @ToString
+@NoArgsConstructor
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "commande_Produit")
 public class CommandeProduit   implements Serializable  {
@@ -43,7 +45,18 @@ public class CommandeProduit   implements Serializable  {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "\"id_promotionActivation\"")
 	private PromotionActivation promoCommande;
+
+	public CommandeProduit(Produit produit) {
+		this.produit = produit;
+		this.qte=produit.getQte();
+	}
 	
-	
-	
+	public Float getTotalProduit() {
+		if (this.produit!=null && this.produit.getPrix()!=null && this.getQte()!=null) {
+			return	(float) (Math.round((this.produit.getPrix() * this.getQte()) * 100) / 100);
+			
+		}
+		else
+			return 0f;
+	}	
 }

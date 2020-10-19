@@ -19,6 +19,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,10 +28,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter @ToString
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "produit")
 public class Produit  implements Serializable  {	
@@ -50,6 +51,18 @@ public class Produit  implements Serializable  {
 	private Float prix;
 	private Float stock;
 	private String statut;//liste des statuts
+	
+	@Transient
+	private Float qte;
+	
+	public Float getTotalProduit() {
+		if (this.prix!=null && this.qte!=null) {
+			return	(float) (Math.round((this.getPrix() * this.getQte()) * 100) / 100);
+			//return this.getPrix() * this.getQte();
+		}
+		else
+			return 0f;
+	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "\"id_categorieProduit\"")
@@ -99,17 +112,17 @@ public class Produit  implements Serializable  {
 		this.stock = stock;
 	}
 
-	@Override
-	public String toString() {
-		return "Produit [" + (id != null ? "id=" + id + ", " : "")
-				+ (libelle != null ? "libelle=" + libelle + ", " : "")
-				+ (description != null ? "description=" + description + ", " : "")
-				+ (conditionnement != null ? "conditionnement=" + conditionnement + ", " : "")
-				+ (prix != null ? "prix=" + prix + ", " : "") + (stock != null ? "stock=" + stock + ", " : "")
-				+ (statut != null ? "statut=" + statut + ", " : "")
-				+ (categorieProduit != null ? "categorieProduit=" + categorieProduit.getTitre() + ", " : "")
-				+ (lstInfoComp != null ? "lstInfoComp=" + lstInfoComp.size() : "") + "]";
-	}
+//	@Override
+//	public String toString() {
+//		return "Produit [" + (id != null ? "id=" + id + ", " : "")
+//				+ (libelle != null ? "libelle=" + libelle + ", " : "")
+//				+ (description != null ? "description=" + description + ", " : "")
+//				+ (conditionnement != null ? "conditionnement=" + conditionnement + ", " : "")
+//				+ (prix != null ? "prix=" + prix + ", " : "") + (stock != null ? "stock=" + stock + ", " : "")
+//				+ (statut != null ? "statut=" + statut + ", " : "")
+//				+ (categorieProduit != null ? "categorieProduit=" + categorieProduit.getTitre() + ", " : "")
+//				+ (lstInfoComp != null ? "lstInfoComp=" + lstInfoComp.size() : "") + "]";
+//	}
 
 	public String defPhotoData() {
 		Photo_Produit mainPhoto=null;
@@ -124,7 +137,19 @@ public class Produit  implements Serializable  {
 		}
 		return "";
 	}
-	
+	public String defPhotoDataMd() {
+		Photo_Produit mainPhoto=null;
+		for (Photo_Produit photo : photos) {
+			if (mainPhoto==null) 
+				mainPhoto=photo;
+			else if (mainPhoto.getOrdre()> photo.getOrdre()) 
+				mainPhoto=photo;
+			}
+		if (mainPhoto!=null) {			
+			return "data:image/png;base64," + mainPhoto.getImageThStrMd();
+		}
+		return "";
+	}
 	
 	
 }

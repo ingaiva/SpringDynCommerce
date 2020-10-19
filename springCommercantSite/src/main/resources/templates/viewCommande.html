@@ -1,0 +1,113 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Commande</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarUser"></div>
+</header>
+
+	<div th:replace="fragments/general.html :: logoSite"></div>
+
+	<div class="my-1">	
+		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
+	</div>
+	
+	<div>
+		<form method="post"	th:action="@{saveCommande}" th:object="${cmd}" >
+				<div class="text-center">
+					<h4>Votre commande</h4>
+					<input type="hidden" th:field="*{id}" />
+					<input type="hidden" th:field="*{date}" />							
+					<input type="hidden" th:field="*{infoComp}" />							
+					<input type="hidden" th:field="*{msgCommercant}" />	
+				</div>
+				<table class="table">					
+					<tbody>
+						<tr class="item" th:each="lp, itemStat :*{lignesCommandeProduit}"  th:with="p=${lp.produit}">
+							<td>
+								<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" >								
+							</td>
+							<td>
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
+								
+								<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
+								<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
+								<label class="prixV"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
+								<label class="prix d-none" th:text="${p.prix}"></label>
+							</td>
+							<td >								
+								<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQteCmd(this)"></i>
+										</span>
+									</div>
+									<input style="width:60px;" class="form-control qte" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" onchange="updateQteCmd(this);">
+									
+									<div class="input-group-append" id="button-addon-line">
+										<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQteCmd(this);"></i>
+										</span>	
+									</div>
+								</div>
+							</td>							
+														
+							<td >								
+								<h5	class="subtotalCmdV font-weight-bold mr-3 " th:text="${#numbers.formatDecimal(lp.getTotalProduit(), 1, 2, 'COMMA')} + '€'"></h5>
+								<label class="subtotalCmd d-none" th:text="${lp.getTotalProduit()}"></label>
+							</td>							
+							<td>
+								<span class="input-group-text justify-content-center" style="width:30px;" > <i class="fa fa-trash text-danger" aria-hidden="true" onclick="supprimerProdCmd(this)"></i>
+								</span>																	
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				
+				<div class="d-flex justify-content-end mx-4">
+					<div>
+						<h6 class="etiquette" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>
+					</div>				
+				</div>
+				<div class="d-flex justify-content-end mx-4">										
+					<h5	class="font-weight-bold mr-3 totalCmd" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(cmd.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
+				</div>	
+				<div class="d-flex justify-content-end mx-4">
+	 		        <button type="button" class="py-1 px-2 mx-1  btn btn-danger" data-dismiss="modal">Annuler</button>				
+					<button type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>      	
+			      
+				</div>
+		</form>
+	</div>	
+		
+	<div th:replace="fragments/general.html :: footerContact"></div>
+    <div th:replace="fragments/general.html :: assets"></div>
+	<script>
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#liPanier');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');  
+        	$liTag.attr('disabled', 'disabled');
+        	 
+      	})
+      	
+      	$(document).unload(function() {         	
+        	let $liTag =  $('#liPanier'); 
+        	$liTag.removeAttr('disabled');        	 
+      	})
+    </script>	
+</body>
+<footer th:replace="fragments/general.html :: footerTrade"></footer>
+</html>

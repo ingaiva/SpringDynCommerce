@@ -23,8 +23,7 @@
 			<i class="fa fa-home"
 			aria-hidden="true"
 			style="margin-right: 5px; color: rgb(73, 192, 178);">
-			</i>
-			 Home
+			</i>			 
 		</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse"
 			data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
@@ -33,11 +32,11 @@
 		</button>
 		<div class="collapse navbar-collapse" id="navbarNavDropdown">
 			<ul class="navbar-nav">
-				<li id="liAccuil" class="nav-item">
+				<!-- <li id="liAccuil" class="nav-item">
 					<a class="nav-link" th:href="@{accueil}"> Accueil </a>
-				</li>
+				</li> -->
 				<li id="liMainPage" class="nav-item">
-					<a class="nav-link" th:href="@{accueil}"> Paramétrage de la page principale </a>
+					<a class="nav-link" th:href="@{mainPage}"> Paramétrage de la page principale </a>
 				</li>
 				<li id="liProduit"  class="nav-item dropdown" >
 					<a class="nav-link dropdown-toggle"  th:href="@{accueil}"
@@ -61,7 +60,40 @@
 	</nav>
 	
 	
-	
+	<nav th:fragment="navbarSiteCommercant" class="navbar navbar-expand-md navbar-dark bg-dark">
+		<a class="navbar-brand text-white" >
+			<i class="fa fa-user-o text-warning" aria-hidden="true" style="margin-right: 5px; color: rgb(73, 192, 178);"></i>
+			Exemple de la barre de navigation			 
+		</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse"
+			data-target="#navbarNavDropdownS" aria-controls="navbarNavDropdownS"
+			aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNavDropdownS">
+			<ul class="navbar-nav">
+				<li id="liAccuilS" class="nav-item">
+					<a class="nav-link"> Accueil </a>
+				</li>				
+				<li id="liProduitS"  class="nav-item dropdown" >
+					<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinkS" data-toggle="dropdown"	aria-haspopup="true" aria-expanded="false"> Nos produits</a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkS">
+						<a class="dropdown-item" >Tous les produits</a> 
+						<a class="dropdown-item" th:each="c : ${lstCat}" th:text="${c.titre}">
+						</a>											
+					</div>
+				</li>			
+				
+				<li id="liPromoS" class="nav-item" >
+					<a class="nav-link" >Actualités / promotions</a>
+				</li>
+				
+				<li id="liCmdS" class="nav-item" >
+					<a class="nav-link" >Vos commandes (client connecté)</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
 	
 
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

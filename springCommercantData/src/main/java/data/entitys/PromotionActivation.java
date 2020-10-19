@@ -15,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -28,9 +29,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
-@Getter @Setter @ToString
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "\"promotionActivation\"")
 public class PromotionActivation  implements Serializable {	
@@ -51,6 +52,9 @@ public class PromotionActivation  implements Serializable {
 	private String statut;// liste des statuts
 	private Integer priorite;// a afficher sur la page home ou pas, etc
 	private Integer ordre;
+	
+	@Lob @Column(columnDefinition="MEDIUMBLOB",nullable = true)
+	private byte[] imgData;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_promotion")

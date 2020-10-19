@@ -23,10 +23,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter @ToString
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "infoComp_Produit")
 public class InfoCompProduit  implements Serializable {	
@@ -54,15 +54,15 @@ public class InfoCompProduit  implements Serializable {
 	List<LigneInfoCompProduit> lignesInfosComp = new ArrayList<LigneInfoCompProduit>();	//List<LigneInfoCompProduit> lignesInfosComp = new ArrayList<LigneInfoCompProduit>();
 
 
-	@Override
-	public String toString() {
-		return "InfoCompProduit [" + (id != null ? "id=" + id + ", " : "")
-				+ (titre != null ? "titre=" + titre + ", " : "")
-				+ (description != null ? "description=" + description + ", " : "")
-				+ (pathLogo != null ? "pathLogo=" + pathLogo + ", " : "")
-				+ (produit != null ? "produit=" + produit.getLibelle() + ", " : "")
-				+ (lignesInfosComp != null ? "lignesInfosComp=" + lignesInfosComp.size() : "") + "]";
-	}
+//	@Override
+//	public String toString() {
+//		return "InfoCompProduit [" + (id != null ? "id=" + id + ", " : "")
+//				+ (titre != null ? "titre=" + titre + ", " : "")
+//				+ (description != null ? "description=" + description + ", " : "")
+//				+ (pathLogo != null ? "pathLogo=" + pathLogo + ", " : "")
+//				+ (produit != null ? "produit=" + produit.getLibelle() + ", " : "")
+//				+ (lignesInfosComp != null ? "lignesInfosComp=" + lignesInfosComp.size() : "") + "]";
+//	}
 
 
 	public InfoCompProduit(Produit produit) { 		
@@ -70,7 +70,8 @@ public class InfoCompProduit  implements Serializable {
 	}
 	
 	public boolean isEmpty() {
-		if (this.titre.isBlank() && this.description.isBlank() && this.pathLogo.isBlank()) {
+		
+		if ((this.titre==null || this.titre.isBlank()) && (this.description == null || this.description.isBlank()) && (this.pathLogo == null || this.pathLogo.isBlank())) {
 			if (this.lignesInfosComp.size()>0) {
 				for (LigneInfoCompProduit ligne : this.lignesInfosComp) {
 					if (! ligne.isEmpty()) {

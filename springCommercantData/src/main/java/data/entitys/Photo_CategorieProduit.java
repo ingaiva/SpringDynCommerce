@@ -22,10 +22,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter @ToString
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "photo_CategorieProduit")
 public class Photo_CategorieProduit   implements Serializable  {
@@ -64,6 +64,11 @@ public class Photo_CategorieProduit   implements Serializable  {
 		return Utilitys.getImgDataThAs64String(this.getImgData());
 	}
 
+	@Transient
+	public String getImageThStrMd() {
+		return Utilitys.getImgDataThAs64String(this.getImgData(),300,300);
+	}
+	
 	@Override
 	public String toString() {
 		return "Photo_CategorieProduit [" + (id != null ? "id=" + id + ", " : "")

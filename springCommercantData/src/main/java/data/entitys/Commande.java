@@ -20,15 +20,18 @@ import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import data.entitys.Produit.StatutProduit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
-@Getter @Setter @ToString
+@NoArgsConstructor
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "commande")
 public class Commande  implements Serializable  {	
@@ -69,4 +72,32 @@ public class Commande  implements Serializable  {
 	Set<CommandeProduit> lignesCommandeProduit = new HashSet<CommandeProduit>();	//List<CommandeProduit> lignesCommandeProduit = new ArrayList<CommandeProduit>();
 
 	
+	public enum StatutCommande {
+		EnAttente, Valide, Finalise, Annule;
+	}
+	
+	public static String getStatutLibelle(String statutValue) {
+		if (statutValue.equals(StatutCommande.EnAttente.toString())) 
+			return "En attente de validation";
+		else if (statutValue.equals(StatutCommande.Valide.toString()))
+			return "Validée";
+		else if (statutValue.equals(StatutCommande.Finalise.toString()))
+			return "Finalisée";
+		else if (statutValue.equals(StatutCommande.Annule.toString()))
+			return "Annulée";
+		else
+			return statutValue;
+	}
+
+	public void setStatut(StatutCommande newStatut) {
+		this.statut=newStatut.toString();		
+	}
+	
+	public Float getTotal() {
+		Float total = 0f;
+		for (CommandeProduit cp : this.getLignesCommandeProduit()) {
+			total += cp.getTotalProduit();
+		}
+		return total;
+	}
 }

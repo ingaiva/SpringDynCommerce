@@ -1,0 +1,47 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Login</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarUser"></div>
+</header>
+
+	<div th:replace="fragments/general.html :: logoSite"></div>
+
+	<div class="my-1">	
+		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
+	</div>
+	
+	<div th:replace="fragments/general.html :: loginFrm"></div>
+	
+	<div th:replace="fragments/general.html :: footerContact"></div>
+    <div th:replace="fragments/general.html :: assets"></div>
+	<script>
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#liConnect');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');  
+        	
+        	 let $liBisTag =  $('#liHome');   //
+        	$liBisTag.siblings('.active').removeClass('active');
+        	$liBisTag.removeClass('active');  
+        	
+      	})
+    </script>	
+</body>
+<footer th:replace="fragments/general.html :: footerTrade"></footer>
+</html>

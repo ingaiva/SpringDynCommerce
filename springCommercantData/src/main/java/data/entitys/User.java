@@ -1,10 +1,8 @@
 package data.entitys;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -19,14 +17,14 @@ import javax.persistence.Table;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
-@Getter @Setter @ToString
+@NoArgsConstructor
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "user")
 public class User implements Serializable {

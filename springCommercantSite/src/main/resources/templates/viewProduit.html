@@ -1,0 +1,149 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Produit</title>	
+	<link th:insert="fragments/general.html :: headWithLinks"> 
+	<meta charset="utf-8">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarUser"></div>
+</header>
+
+	<div th:replace="fragments/general.html :: logoSite"></div>
+
+	<div class="my-1">	
+		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
+	</div>
+	
+		
+	
+	<div class="d-flex my-2 align-items-center " th:if="${produit.categorieProduit!=null}">
+		<a th:href="@{listProdByCat(idCat=${produit.categorieProduit.id})}" th:text="${produit.categorieProduit.titre}" class="text-dark mx-2"></a>
+		<i class="fa fa-angle-right" aria-hidden="true"></i>		
+	 	<a th:text="${produit.libelle}" class="text-dark mx-2"></a>
+	</div>
+	
+	<div class="divProduit">				
+		<div class="divPhoto mx-2">			
+			<div class="d-flex flex-wrap  justify-content-between align-items-center"	th:if="${produit.photos.size() > 0}">
+	
+				<div th:class="${iter.index==0} ? 'border rounded p-2 mt-2 divPhotoMain' : 'border rounded p-2 mt-2  divPhotoSmall'" th:each="ph, iter : ${produit.photos}">
+	
+					<img th:src="'data:image/png;base64,'+ ${ph.getImageStr()}"	class="border" width="auto" height="auto" style="max-width: 100%;">
+	
+					<div th:if="${ph.legende !=null && ph.legende.length()>0}" class="input-group text-left mt-1">
+						<label class="form-control font-italic " th:text="${ph.legende}"></label>								
+					</div>
+				</div>
+			</div>
+		</div>
+				
+
+		<div class="divInfoProduit ">
+			
+			<div class="d-flex text-left align-items-end">
+				<h3 th:text="${produit.libelle}" class="font-weight-bold mr-2 capitale"></h3> 							
+				<h5 th:text="${T(data.entitys.Produit).getStatutLibelle(produit.statut)}" class="mr-3"></h5>							
+				<h5 th:if="${produit.stock!=null}" th:text="'Stock: '+${produit.stock}"></h5>
+			</div>
+			<div class="text-left align-items-end">
+				<h4	class="font-weight-bold mr-3" th:text="${produit.conditionnement}"></h4>				
+				<h4	class="font-weight-bold mr-3" th:text="'Prix: '+${produit.prix} + '€'"></h4>
+			</div>
+			<div class=" text-left ">
+				<h5 class="textWithCrLf" th:text="${produit.description}" ></h5>	
+			</div>
+			
+			<div class="addPanier" style="width:300px;">
+				<form method="post"	th:action="@{addProd}" th:object="${produit}">
+					<input type="hidden" th:field="*{id}" />
+					
+					<small style="color: red" th:text="${msgErr}"></small>
+					
+					<div class="input-group mb-1">
+						<div class="input-group-prepend">
+							<span class="input-group-text" onclick="dimQteP()">
+								<i class="fa fa-minus-square" aria-hidden="true" ></i>															
+							</span>
+						</div>
+						
+						<input class="form-control"  type="number" th:id="qte" th:value="${qte ==null}? '1': ${qte}"  th:name="|qteToAdd|" /> 
+						
+						<div class="input-group-append" id="button-addon-line">
+							<span class="input-group-text" onclick="addQteP()">
+								<i class="fa fa-plus-square" aria-hidden="true" ></i>															
+							</span>
+							<button type="submit" name="action" value="addProd" class=" px-1 mx-0 btn  btn-outline-success">Ajouter au panier</button>													
+							
+						</div>
+					</div>
+				</form>
+			</div>
+			
+			<div class="infoCompProduit">						
+				<div class="form-group text-left m-4 p-3 card border" th:each="info, itemStat : ${produit.lstInfoComp}" th:if="${info.isEmpty()==false}">							
+					<div class="d-flex align-items-baseline mb-2">
+						<i class="fa fa-info-circle text-info mr-3" aria-hidden="true"></i>
+						<label class="textWithCrLf font-weight-bold mr-3" th:text="${info.titre}" > </label>
+						<label class="textWithCrLf" th:text="${info.description}"></label>	
+					</div>
+
+					
+					<div class="mx-5" th:each="l, iter : ${info.lignesInfosComp}">
+						<div class="d-flex align-items-baseline mb-1" th:if="${l.isEmpty()==false}">
+							<i class="fa fa-dot-circle-o text-info  mr-3" aria-hidden="true"></i>
+							<label  class="textWithCrLf  mr-3" th:text="${l.titre}" ></label>
+							<label  class="textWithCrLf font-weight-light" th:text="${l.description}" ></label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>			
+	
+	
+	
+	
+	<div th:replace="fragments/general.html :: footerContact"></div>
+    <div th:replace="fragments/general.html :: assets"></div>   
+
+	<script>
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#listProd');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');        
+      	})
+      	
+      	function addQteP() { 
+ 			let qte = document.getElementById('qte').value;
+ 			
+ 			if(qte==null){
+ 				qte=1;
+ 			}
+ 			 document.getElementById('qte').value = parseInt(qte)+1;
+ 		}
+		function dimQteP() {
+			let qte = document.getElementById('qte').value;
+			if(qte==null){
+				qte=1;
+ 			}
+			if(qte > 0){				
+				document.getElementById('qte').value = qte-1;
+			}
+			else
+				document.getElementById('qte').value = 0;
+ 		}
+    </script>
+</body>	
+<footer th:replace="fragments/general.html :: footerTrade"></footer>
+</html>

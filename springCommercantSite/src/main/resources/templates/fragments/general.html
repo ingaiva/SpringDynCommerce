@@ -1,0 +1,435 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="headWithLinks" th:remove="tag">
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" th:href="@{css/style.css}">
+	<link rel="stylesheet"	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"	crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<body>
+
+	<nav th:fragment="navbarUser" class="navbar navbar-expand-md navbar-dark bg-dark">		
+		<button class="navbar-toggler" type="button" data-toggle="collapse"	data-target="#navbarNavDropdownU" aria-controls="navbarNavDropdownU" aria-expanded="false" aria-label="Navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNavDropdownU">
+			<ul class="navbar-nav ml-auto">
+				<li id="liPanier" class="nav-item">	
+					<a class="nav-link"  th:if="${panier==null || panier.produits==null || panier.produits.size()==0}" data-toggle="modal" data-target="#panierVide">
+						<i class="fa fa-shopping-cart" aria-hidden="true"></i>
+						Panier</a>						
+					<!-- <a class="nav-link"  th:href="@{panier}" th:unless="${panier==null || panier.size()==0}" th:text="'Panier (' + ${panier.size()} + ')'">
+						<i class="fa fa-shopping-cart" aria-hidden="true"></i>
+						Panier</a> -->
+					<a class="nav-link"  th:unless="${panier==null || panier.produits==null || panier.produits.size()==0}" th:text="'Panier (' + ${panier.produits.size()} + ')'" data-toggle="modal" data-target="#panierModal">
+						<i class="fa fa-shopping-cart" aria-hidden="true"></i>
+						Panier</a>
+				</li>
+							
+				<li id="liConnect" class="nav-item" th:if="${connectedCli==null}">
+					<a class="nav-link" th:href="@{login}">Se connecter</a>
+				</li>
+				<li id="liCompte"  class="nav-item dropdown" th:if="${connectedCli!=null}">
+					<a class="nav-link dropdown-toggle"  id="navbarDropdownMenuLink" data-toggle="dropdown"
+						aria-haspopup="true" aria-expanded="false" th:text=" 'ESPACE CLIENT '+ ${connectedCli.nom} + ' ' +${connectedCli.prenom} "> Votre compte	</a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+						<a class="dropdown-item" th:href="@{listCmd}">Vos commandes</a> 
+						<!-- <a class="dropdown-item" th:href="@{panier}">Commander</a> -->
+						<a	class="dropdown-item" th:href="@{modifierCompte}">Votre compte</a> 
+						<a class="dropdown-item" th:href="@{deconnexion}">Se deconnecter</a> 
+						<a class="dropdown-item" th:href="@{supprimerCompte}">Supprimer votre compte </a>
+					</div>
+				</li>				
+			</ul>
+		</div>
+		
+		<div th:if="${panier!=null && panier.produits!=null && panier.produits.size()>0}" th:replace="fragments/general.html :: viewPanier"></div>
+	</nav>
+	
+	<div  th:fragment="viewPanier" class="modal fade" tabindex="-1"  id="panierVide" >
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">				        
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">	 			      
+	       <h3>Votre panier est vide</h3>	        
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>	        
+	      </div>
+	    </div>
+	  </div>
+	</div>
+				
+	<form th:fragment="viewPanier"  method="post"	th:action="@{creerCommande}" th:object="${panier}" >
+		<div class="modal fade " tabindex="-1"  id="panierModal" th:if="${panier!=null && panier.produits!=null && panier.produits.size()>0}">
+		  <div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		      <div class="modal-header">	        
+		        <h4 class="modal-title" >Panier</h4>	
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">	
+		      	<!-- <h3 th:text="${session.monTest.libelle}"></h3> -->
+		       	<table class="table">					
+					<tbody>
+						<tr class="item" th:each="p, itemStat :*{produits}">
+							<td>
+								<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" >								
+							</td>
+							<td>
+								<input type="hidden" th:field="*{produits[__${itemStat.index}__].id}" />								
+								<input type="hidden" th:field="*{produits[__${itemStat.index}__].libelle}" />
+								<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
+								<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
+								<label class="prixV" th:text="${p.prix} + '€'"></label>
+								<label class="prix d-none" th:text="${p.prix}"></label>
+							</td>
+							<td >								
+								<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQte(this)"></i>
+										</span>
+									</div>
+									<input style="width:60px;" class="form-control qte" type="number" th:field="*{produits[__${itemStat.index}__].qte}" onchange="updateQuantity(this);">
+									
+									<div class="input-group-append" id="button-addon-line">
+										<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQte(this);"></i>
+										</span>	
+									</div>
+								</div>
+							</td>							
+														
+							<td >
+								<h5	class="subtotalV font-weight-bold mr-3" th:text="${p.getTotalProduit()} + '€' "></h5>
+								<label class="subtotal d-none" th:text="${p.getTotalProduit()}"></label>
+							</td>							
+							<td>
+								<span class="input-group-text"> <i class="fa fa-trash text-danger" aria-hidden="true" onclick="supprimerProd(this)"></i>
+								</span>																	
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				
+				<div>
+					<h5	class="font-weight-bold mr-3 totalPanier" id="totalPanier" th:text="'Total : ' + ${panier.getTotal()} + '€'"></h5>					
+				</div>		        
+		      </div>
+		      <div class="modal-footer">
+		      	<button type="submit" class="py-0 btn btn-sm btn-outline-danger" name="action" value="valPanier" id="submitPanier"><i class="fa fa-times" aria-hidden="true"></i></button>	      	
+		      
+<!-- 		        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button> -->
+		        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="cmd" id="submitPanier">Passer la commande</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	</form>
+	
+	<nav th:fragment="navbarSiteCommercant" class="navbar navbar-expand-md navbar-light border">
+		<a class="navbar-brand " th:href="@{accueil}">									 
+		</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse"	data-target="#navbarNavDropdownS" aria-controls="navbarNavDropdownS" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNavDropdownS">
+			<ul class="navbar-nav mx-auto">
+				<li id="liHome" class="nav-item mx-2">
+					<a class="nav-link"  th:href="@{accueil}"> 
+					<i class="fa fa-home text-warning" aria-hidden="true" style="margin-right: 5px;"></i>
+						Accueil 
+					</a>
+				</li>
+				
+				<li th:if="${lstCat.size()<5}" id="listProd" class="nav-item mx-2">
+					<a class="nav-link" th:href="@{listProd}" >Tous les produits</a> 
+				</li>
+				<li th:if="${lstCat.size()<5}" th:each="c : ${lstCat}" th:id="'liCatProd' + ${c.id}" class="nav-item">
+					<a class="nav-link"  th:text="${c.titre}" th:href="@{listProdByCat(idCat=${c.id})}"></a>
+				</li>
+								
+				<li th:if="${lstCat.size()>4}" id="listProd"  class="nav-item dropdown mx-2" >
+					<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinkS" th:href="@{listProd}"  data-toggle="dropdown"	aria-haspopup="true" aria-expanded="false"> Nos produits</a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkS">
+						<a class="dropdown-item" th:href="@{listProd}" >Tous les produits</a> 
+						<a class="dropdown-item" th:each="c : ${lstCat}" th:text="${c.titre}" th:href="@{listProdByCat(idCat=${c.id})}" >
+						</a>											
+					</div>
+				</li>
+				<li id="liContact" class="nav-item mx-2">
+					<a class="nav-link" > Contact </a>
+				</li>				
+			</ul>
+		</div>
+	</nav>
+	
+	<div th:fragment="logoSite" th:if="${session.paramMP.hasLogo()}" th:class="${session.paramMP.logoPositionClass()}">
+		<div th:if="${session.paramMP.hasLogo()}" class="text-center px-2 divLogo" style="min-width: 100px; max-width: 200px;">
+			<img th:src="${session.paramMP.getLogoStr()}" id="logoData" width="auto"	height="auto" style="max-width: 100%;">
+			<div class="input-group  mt-1">	
+				<label class="" th:text="${session.paramMP.logoTitre}"></label>
+			</div>
+		</div>
+	</div>		
+	
+	
+	
+	
+	<div th:fragment="productList(lstProd)" th:if="${lstProd.size() > 0}" class="divProduitMd mt-1 justify-content-start">	
+		<div  class="divProduitBoxColor d-flex align-items-baseline justify-content-center p-1" th:each="p:${lstProd}" >				
+			<div class="text-center">
+				<a th:href="@{produit(id=${p.id})}" >
+					<img th:if="${p.photos.size() > 0 }" th:src="${p.defPhotoDataMd()}"	class="border p-1 imgAutoSize">
+				</a>
+				<p th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquette"></p>							
+				<h4 class="font-weight-bold capitale">
+					<a class="text-dark"  th:text="${p.libelle}" th:href="@{produit(id=${p.id})}"></a>
+				</h4>
+				<h4	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h4>				
+				<h4	class="font-weight-bold mr-3" th:text="'Prix: '+${p.prix} + '€'"></h4>		
+			</div>							
+		</div>
+	</div>
+	
+	<div th:fragment="loginFrm"  class="row">
+		<div class="col-5 bg-light pt-2" style="margin-left: auto; margin-right: auto; margin-top: 50px; text-align: center;">
+
+			<form class="mt-1 " style="width: 100%;" method="post" th:action="@{login}" th:object="${user}">
+				<h3>Login</h3>
+				<small id="msglogin" class="text-danger"  th:text="${msglogin}"></small>
+				<div class="form-group text-left">
+					<label>E-mail</label> 
+					<input type="text"	class="form-control" placeholder="Votre mail" th:field="*{mail}" required>
+				</div>				
+				<div class="form-group text-left ">
+					<label>Mot de passe</label> 
+					<input type="password"	class="form-control" aria-describedby="msgpwd" placeholder="mot de passe" th:field="*{password}" required> 
+					<small id="msgpwd" class="text-danger" th:text="${msgpwd}"></small>
+				</div>
+
+				<div class="d-flex text-center py-2">
+					<button type="submit" class="btn btn-outline-primary col mx-1" >
+						Se connecter
+					</button>
+					<a th:href="@{accueil}" class="col mx-1 btn btn-outline-danger">Annuler	</a>
+				</div>
+
+				<div class="text-left my-3">
+					<a th:href="@{creerCompte}" class=" text-success">Créer nouveau compte	</a>
+				</div>
+			</form>
+		</div>
+	</div>
+	
+	<div th:fragment="infoCompte">
+		<div th:if="${user.id==null}">
+			<h3>Nouveau compte</h3>
+		</div>
+		<div th:unless="${user.id==null}">
+			<h3>Informations personnelles</h3>
+			<input type="hidden" th:field="*{id}" />
+			<input type="hidden" th:field="*{dateCreation}" />
+		</div>			
+		
+		<small id="msg" class="text-danger" th:text="${msg}"></small>
+		<div class="row bg-info">
+			<div class=" col form-group text-left">
+				<label for="nom">Nom</label> 
+				<input type="text"	class="form-control" placeholder="Votre nom" th:field="*{nom}"  required> 
+			</div>
+			<div class=" col form-group text-left">
+				<label for="prenom">Prénom</label> 
+				<input type="text"	class="form-control" placeholder="Votre prénom"	th:field="*{prenom}" > 					
+			</div>			
+		</div>
+		<div class="row  bg-info">
+			<div class="col-7 form-group text-left">
+				<label>E-mail</label> 
+				<input type="email"	class="form-control" placeholder="Votre mail" th:field="*{mail}" required>
+			</div>	
+			<div class="col form-group text-left ">
+				<label for="password">Mot de passe</label> 
+				<input type="password"	class="form-control"  placeholder="Mot de passe" th:field="*{password}" required>
+			</div>				
+		</div>
+		
+		<div class="row">
+			<div class="col form-group text-left">
+				<label>Votre n° de téléphone portable</label> 
+				<input type="text"	class="form-control" placeholder="Votre n° de téléphone portable" th:field="*{tel1}" >
+			</div>	
+			<div class="col form-group text-left ">
+				<label for="tel2">Votre n° de téléphone</label> 
+				<input type="text"	class="form-control"  placeholder="Votre n° de téléphone" th:field="*{tel2}" >
+			</div>				
+		</div>
+		
+		<div  class="bg-warning p-3 text-left">			
+			<div class="form-group">
+				<label for="nomVoie">Adresse</label> 
+				<textarea type="text" class="form-control textWithCrLf" th:field="*{nomVoie}"></textarea>
+			</div>
+			<div class="form-group">
+				<label for="inputAddress2">Complement d'adresse</label> 
+				<input type="text"class="form-control" th:field="*{complNomVoie}" >
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-2">
+					<label for="cp">Code postal</label> 
+					<input type="text"	class="form-control" th:field="*{cp}" >
+				</div>
+				<div class="form-group col-md-6">
+					<label for="ville">Ville</label> 
+					<input type="text"	class="form-control" th:field="*{ville}" >
+				</div>
+				<div class="form-group col-md-4">
+					<label for="pays">Pays</label> 
+					<input type="text"	class="form-control" th:field="*{pays}" >
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div th:fragment="footerContact" >
+		<hr>	
+		<div style="padding: 10px 20px; display: flex; justify-content: space-between; flex-wrap: wrap;">
+	
+	        <div> 	       
+	            <div th:if="${session.paramMP.hasContact()}">            	
+	            	<div  class="d-flex align-items-center" >
+	            		<i class="fa fa-address-card-o  my-2 mr-2" aria-hidden="true"></i>
+						<h5 class=" my-2" th:text="${session.paramMP.contactTitre!=null && session.paramMP.contactTitre.length()>0} ? ${session.paramMP.contactTitre} : 'Contact'"></h5>
+					</div>				
+	            	<div th:if="${session.paramMP.contactTel1 !=null && session.paramMP.contactTel1.length()>0}">
+		            	<i class="fa fa-phone" aria-hidden="true"></i>
+						<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.contactTel1}" ></label>            	
+	            	</div>
+	            	<div th:if="${session.paramMP.contactTel2!=null && session.paramMP.contactTel2.length()>0}">
+		            	<i class="fa fa-phone" aria-hidden="true"></i>
+						<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.contactTel2}" ></label>            	
+	            	</div>
+	            	<div th:if="${session.paramMP.contactMail !=null && session.paramMP.contactMail.length()>0}">
+		            	<i class="fa fa-envelope-o" aria-hidden="true"></i>
+						<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.contactMail}" ></label>            	
+	            	</div>
+	            </div> 
+	           
+	        </div>
+	        <div th:if="${session.paramMP.hasHoraires()}">
+	            <div class="d-flex align-items-center" >
+					<i class="fa fa-calendar my-2 mr-2" aria-hidden="true"></i>
+					<h5 class=" my-2" th:text="${session.paramMP.horairesTitre!=null && session.paramMP.horairesTitre.length()>0} ? ${session.paramMP.horairesTitre} : 'Horaires'">					
+					</h5>
+				</div>				
+	            <div th:if="${session.paramMP.horairesText !=null && session.paramMP.horairesText.length()>0}">	            	
+					<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.horairesText}" ></label>            	
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	
+	<footer th:fragment="footerTrade"> 
+		 <div class="text-center border" style="color: lightslategray; padding: 20px 10px;">© 2020 Aqualas -  ♥	        
+		 </div>
+	</footer>
+	
+	<div th:fragment="assets" th:remove="tag">
+	    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"	crossorigin="anonymous"></script>
+		<script	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>	
+		<script type="text/javascript" th:inline="javascript">
+		
+			
+			function addQte(btn) {
+				let parent = btn.parentElement.parentElement.parentElement;
+
+				let cible = parent.querySelector(".qte");
+
+				if (cible != null) {
+					let qte = cible.value;
+
+					if (qte == null) {
+						qte = 1;
+					}
+					cible.value = parseFloat(qte) + 1;
+					updateQuantity(cible);
+				}
+			}
+			function dimQte(btn) {
+				let parent = btn.parentElement.parentElement.parentElement;
+				let cible = parent.querySelector(".qte");
+
+				if (cible != null) {
+					let qte = cible.value;
+					if (qte == null) {
+						qte = 1;
+					}
+					if (qte > 0) {
+						cible.value = qte - 1;
+					} else
+						cible.value = 0;
+					
+					updateQuantity(cible);
+				}
+
+			}
+
+			function supprimerProd(btn) {
+				let parentTR = btn.closest("tr");
+				if (parentTR != null) {
+					parentTR.remove();
+					recalculateCart();
+				}
+			}			
+
+			function updateQuantity(quantityInput) {
+				  
+				var parent = quantityInput.closest("tr");
+				
+				var price = parseFloat(parent.querySelector(".prix").textContent);			
+				
+				var quantity = parseFloat(parent.querySelector(".qte").value);
+				var linePrice = price * quantity;			
+				
+				var subTotalElt = parent.querySelector(".subtotal");
+				var subTotalEltVisible = parent.querySelector(".subtotalV");
+				subTotalElt.textContent = linePrice.toFixed(2) ; //+ '€';				
+				subTotalEltVisible.textContent = linePrice.toFixed(2) + '€';	
+				recalculateCart();
+				
+			}
+
+			/* Recalculate cart */
+			function recalculateCart() {				  
+				  
+				var subtotal = 0;
+				
+				var allByClass = document.getElementsByClassName('item');
+				for (var i=0, len=allByClass.length|0; i<len; i=i+1|0) {
+					var subTotalElt = allByClass[i].querySelector(".subtotal");
+					subtotal += parseFloat(subTotalElt.textContent);					
+				}
+								
+				var totalElt = document.getElementById('totalPanier');
+				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€';
+
+			}
+		</script>
+	</div>
+	
+	
+</body>
+
+</html>

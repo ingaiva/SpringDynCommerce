@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter @ToString
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "ligne_InfoComp_Produit")
 public class LigneInfoCompProduit implements Serializable  {	
@@ -48,7 +48,7 @@ public class LigneInfoCompProduit implements Serializable  {
 	private InfoCompProduit infoComp;
 	
 	public boolean isEmpty() {
-		if (this.titre.isBlank()&& this.description.isBlank() && this.pathLogo.isBlank()) 
+		if ((this.titre==null ||  this.titre.isBlank()) && (this.description==null || this.description.isBlank()) && (this.pathLogo == null || this.pathLogo.isBlank())) 
 			return true;		
 		else
 			return false;

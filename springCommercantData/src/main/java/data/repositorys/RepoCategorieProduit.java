@@ -24,4 +24,5 @@ public interface RepoCategorieProduit  extends JpaRepository<CategorieProduit, L
 	
 	@Query( queryProdWithDependency + " where c.id =:x")
 	public CategorieProduit getCategoriesWithDependencyById(@Param("x") Long idCategorie);
+		
 }

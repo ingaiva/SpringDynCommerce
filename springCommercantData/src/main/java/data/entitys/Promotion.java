@@ -12,18 +12,23 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import data.Utilitys;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
-@Getter @Setter @ToString
+@NoArgsConstructor
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "promotion")
 public class Promotion implements Serializable {
@@ -42,6 +47,9 @@ public class Promotion implements Serializable {
 	private String codePromo;
 	private String pathLogo;
 	
+	@Lob @Column(columnDefinition="MEDIUMBLOB",nullable = true)
+	private byte[] imgData;
+	
 	@Column( name = "\"newPrix\"")
 	private Float newPrix;
 	
@@ -54,7 +62,29 @@ public class Promotion implements Serializable {
 	@Column( name = "\"qteMin\"")
 	private Float qteMin;
 	
+	@Column( name = "\"prixAdditionMin\"")
+	private Float prixAdditionMin;
+	
+	@Column( name = "\"isUnitaire\"")
+	private boolean isUnitaire;
+	
 	@OneToMany (mappedBy = "promo",fetch = FetchType.LAZY)
-	Set<PromotionActivation> promoActivations = new HashSet<PromotionActivation>();	//List<PromotionActivation> promoActivations = new ArrayList<PromotionActivation>();
+	List<PromotionActivation> promoActivations = new ArrayList<PromotionActivation>();	//List<PromotionActivation> promoActivations = new ArrayList<PromotionActivation>();
 
+	
+	@Transient
+	public boolean hasLogo() {
+		if (this.getImgData() != null) {
+			return true;			
+		}
+		return false;
+	}
+	
+	public String getLogoStr() {
+		String retVal ="";
+		if (this.getImgData()!=null) {			
+			retVal="data:image/png;base64,"+Utilitys.getImgDataAs64String(this.getImgData());			
+		}				
+		return retVal;
+	}
 }

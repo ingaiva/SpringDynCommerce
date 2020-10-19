@@ -23,10 +23,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter @ToString
+@Getter @Setter //@ToString
 @Entity
 @Table(name = "photo_param")
 public class Photo_param  implements Serializable {	
@@ -49,5 +49,11 @@ public class Photo_param  implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_param")
 	private ParamMainPage param;
+	
+	
+	@Transient
+	public String getImageStr() {
+		return Utilitys.getImgDataAs64String(this.getImgData());
+	}
 		
 }

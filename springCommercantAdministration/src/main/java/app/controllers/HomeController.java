@@ -31,8 +31,8 @@ public class HomeController {
 	data.repositorys.RepoPromotion promoR;
 	
 	@GetMapping({ "/","/accueil" })
-	public String getAcceuilFrm(Model model, HttpSession session) {	
-		
+	public String getAcceuilFrm(Model model) {	
+		//, HttpSession session
 		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();		
 		Set<Produit> lstProdSansCat=prodR.getProduitWithDependencyByCategorieNull();
 		

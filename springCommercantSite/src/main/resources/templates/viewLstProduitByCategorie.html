@@ -1,0 +1,69 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Produits</title>	
+	<link th:insert="fragments/general.html :: headWithLinks"> 
+	<meta charset="utf-8">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarUser"></div>
+</header>
+
+	<div th:replace="fragments/general.html :: logoSite"></div>
+
+	<div class="my-1">	
+		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
+	</div>
+	
+	
+	<div  th:class="${categorie.photos.size() > 0} ? 'divCategorie divCategorieColor mx-2' : 'divCategorieColor text-center mx-2'" >				
+		<div class="divPhotoCategorie mx-2">
+			
+			<div class="d-flex flex-wrap my-2 justify-content-between" th:if="${categorie.photos.size() > 0}">
+				
+				<div th:class="${iter.index==0} ? 'border rounded p-2 mt-2 divPhotoMain' : 'border rounded p-2 mt-2  divPhotoSmall'" th:each="ph, iter : ${categorie.photos}">
+					
+					<img th:src="'data:image/png;base64,'+ ${ph.getImageStr()}"	class="border imgAutoSize">
+
+					<div th:if="${ph.legende !=null && ph.legende.length()>0}" class="input-group  mt-1">
+						<label class="form-control font-italic " th:text="${ph.legende}"></label>								
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="divCategorieInfo">
+			<div class=" mx-2">	
+				<h4  th:text="${categorie.titre}"  class="capitale font-weight-bold" ></h4>							
+				<h5  th:text="${categorie.description}" class="text-left textWithCrLf"></h5>
+			</div>					
+		</div>
+	</div>		
+	
+	<div class="text-danger capitale text-center  my-2" th:if="${categorie.produits.size()==0}">Aucun produit dans cette catégorie</div>
+				
+	<div th:replace="fragments/general.html :: productList(${categorie.produits})"></div>
+	
+	<div th:replace="fragments/general.html :: footerContact"></div>
+    <div th:replace="fragments/general.html :: assets"></div>   
+
+	<script>
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#listProd');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');        
+      	})
+    </script>
+</body>	
+<footer th:replace="fragments/general.html :: footerTrade"></footer>
+</html>

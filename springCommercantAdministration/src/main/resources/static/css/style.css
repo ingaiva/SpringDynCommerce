@@ -1,3 +1,16 @@
+/* div{ */
+/* 	border: red solid 1px; */
+/* } */
+.divCenterContainer {
+/* 	width: 100%; */
+/* 	margin-left: auto; */
+/* 	margin-right: auto; */
+ 	padding: 0px 5px ;
+	text-align: center;
+	background-repeat: no-repeat; 
+	background-size: cover;
+}
+
 .divProduit, .divCategorie {
     padding: 10px;
     display: grid;
@@ -5,15 +18,7 @@
     column-gap: 10px;
     align-items: left;
 }
-/* .divPhoto{
-    background-color: whitesmoke;
-    min-height: 50px;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    
-    mon test
-} */
+
 .divPhotoMain{
 	 width: 100%;
 }
@@ -37,7 +42,55 @@
 .fa-eraser{
 	color: orange;
 }
+.divCategoriesMP , .divPromoMP{
+    display: flex;
+    flex-wrap: wrap;    
+    justify-content: space-between;
+    align-content: space-between;
+/*  	display: grid;    */
+/*     grid-template-columns: repeat(3, 1fr); */
+/*     align-content: center; */
+/*     justify-content: space-between; */
+}
+.divCategoriesMP>div {
+	
+/* 	display: flex; */
+/*     flex-wrap: nowrap;  */
+/*     flex-direction :column;    */
+/*     justify-content: space-between; */
+/*     align-content: space-between; */
+	background-color:#f4f4f4;
+	box-shadow: 0 2px 2px 2px rgb(236, 236, 236);
+    margin-top: 1%;
+    margin-bottom: 1%;
+    padding:1%;
+    width: 32%;  
+    border-radius: 5px;
+    min-height: 150px;
+    overflow: auto;   
+    
+}
 
+.divPromoMP>div {
+	
+/* 	display: flex; */
+/*     flex-wrap: nowrap;  */
+/*     flex-direction :column;    */
+/*     justify-content: space-between; */
+/*     align-content: space-between; */
+    
+    width: 32%;  
+    border-radius: 5px;
+    border: 1px black solid;
+    min-height: 150px;
+    overflow: auto;  
+    margin-top: 1%;
+    margin-bottom: 1%;
+}
+.divCategorieColor{
+	background-color:#f4f4f4;
+	box-shadow: 0 2px 2px 2px rgb(236, 236, 236);
+}
 /* .divInfoProduit{
 	display: grid;
     grid-template-columns: 100px auto;   

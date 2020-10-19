@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
+//@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter @ToString
+@Getter @Setter // @ToString
 @Entity
 @Table(name = "categorie_Produit")
 public class CategorieProduit  implements Serializable {		
@@ -60,6 +60,20 @@ public class CategorieProduit  implements Serializable {
 			}
 		if (mainPhoto!=null) {			
 			return mainPhoto.getImageThStr();
+		}
+		return "";
+	}
+	
+	public String defPhotoDataMd() {
+		Photo_CategorieProduit mainPhoto=null;
+		for (Photo_CategorieProduit photo : photos) {
+			if (mainPhoto==null) 
+				mainPhoto=photo;
+			else if (mainPhoto.getOrdre()> photo.getOrdre()) 
+				mainPhoto=photo;
+			}
+		if (mainPhoto!=null) {			
+			return "data:image/png;base64,"+ mainPhoto.getImageThStrMd();
 		}
 		return "";
 	}
