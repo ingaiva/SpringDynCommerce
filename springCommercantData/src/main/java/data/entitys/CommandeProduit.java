@@ -13,11 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 //@Data
 @AllArgsConstructor
@@ -51,12 +49,27 @@ public class CommandeProduit   implements Serializable  {
 		this.qte=produit.getQte();
 	}
 	
-	public Float getTotalProduit() {
+	public Float calculeTotalProduit() {
 		if (this.produit!=null && this.produit.getPrix()!=null && this.getQte()!=null) {
-			return	(float) (Math.round((this.produit.getPrix() * this.getQte()) * 100) / 100);
+			return	this.produit.getPrix() * this.getQte();
 			
 		}
 		else
 			return 0f;
 	}	
+	
+	public Float calculeTotalReduction() {
+		if (this.produit!=null && this.produit.getPrix()!=null && this.getQte()!=null) {
+			return	0f;//pour l'instant...
+			
+		}
+		else
+			return 0f;
+	}	
+	
+	public void calculeTotaux() {
+		this.total=this.calculeTotalProduit() - this.calculeTotalReduction();
+		if (this.total < 0) 
+			this.total = 0f;		
+	}
 }

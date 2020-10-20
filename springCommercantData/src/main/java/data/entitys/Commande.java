@@ -3,9 +3,7 @@ package data.entitys;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,13 +18,10 @@ import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import data.entitys.Produit.StatutProduit;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 //@Data
 @AllArgsConstructor
@@ -69,35 +64,103 @@ public class Commande  implements Serializable  {
 	private User user;
 	
 	@OneToMany (mappedBy = "commande",fetch = FetchType.LAZY)
-	Set<CommandeProduit> lignesCommandeProduit = new HashSet<CommandeProduit>();	//List<CommandeProduit> lignesCommandeProduit = new ArrayList<CommandeProduit>();
+	List<CommandeProduit> lignesCommandeProduit = new ArrayList<CommandeProduit>();	//List<CommandeProduit> lignesCommandeProduit = new ArrayList<CommandeProduit>();
 
 	
 	public enum StatutCommande {
-		EnAttente, Valide, Finalise, Annule;
+		EnAttente, Valide, Finalise, Annule, AnnuleParCommercant;
 	}
-	
-	public static String getStatutLibelle(String statutValue) {
-		if (statutValue.equals(StatutCommande.EnAttente.toString())) 
-			return "En attente de validation";
-		else if (statutValue.equals(StatutCommande.Valide.toString()))
-			return "Validée";
-		else if (statutValue.equals(StatutCommande.Finalise.toString()))
-			return "Finalisée";
-		else if (statutValue.equals(StatutCommande.Annule.toString()))
-			return "Annulée";
+	public String getCssClassStatut() {
+		if (this.getStatut()!=null) {
+			if (this.getStatut().equals(StatutCommande.EnAttente.toString())) 
+				return "etiquetteJaune";
+			else if (this.getStatut().equals(StatutCommande.Valide.toString()))
+				return "etiquetteVerte";
+			else if (this.getStatut().equals(StatutCommande.Finalise.toString()))
+				return "etiquetteGrise";
+			else if (this.getStatut().equals(StatutCommande.Annule.toString()))
+				return "etiquetteRouge";
+			else if (this.getStatut().equals(StatutCommande.AnnuleParCommercant.toString())) 
+				return "etiquetteRouge";		
+			else
+				return "etiquetteJaune";			
+		}
 		else
-			return statutValue;
+			return "etiquetteJaune";		
+	}
+	public static String getStatutLibelle(String statutValue) {
+		if (statutValue!=null) {
+			if (statutValue.equals(StatutCommande.EnAttente.toString())) 
+				return "En attente de validation";
+			else if (statutValue.equals(StatutCommande.Valide.toString()))
+				return "Validée";
+			else if (statutValue.equals(StatutCommande.Finalise.toString()))
+				return "Finalisée";
+			else if (statutValue.equals(StatutCommande.Annule.toString()))
+				return "Annulée";
+			else if (statutValue.equals(StatutCommande.AnnuleParCommercant.toString())) 
+				return "Annulée par commerçant";		
+			else
+				return statutValue;			
+		}
+		else
+			return statutValue;	
 	}
 
-	public void setStatut(StatutCommande newStatut) {
+	public void setStatutCmd(StatutCommande newStatut) {
 		this.statut=newStatut.toString();		
 	}
 	
-	public Float getTotal() {
+	public boolean allowEdit() {
+		return this.statut.equalsIgnoreCase(StatutCommande.EnAttente.toString());
+	}
+	
+	public boolean allowDelete() {
+		return this.statut.equalsIgnoreCase(StatutCommande.EnAttente.toString());
+	}
+	
+	public boolean allowCancel() {
+		return this.statut.equalsIgnoreCase(StatutCommande.Valide.toString());
+	}
+	
+	public boolean isValide() {
+		return this.statut.equalsIgnoreCase(StatutCommande.Valide.toString());
+	}
+	
+	public boolean isCanceled() {
+		return this.statut.equalsIgnoreCase(StatutCommande.Annule.toString()) || this.statut.equalsIgnoreCase(StatutCommande.AnnuleParCommercant.toString());
+	}
+	
+	
+	public Float calculeTotal() {
 		Float total = 0f;
 		for (CommandeProduit cp : this.getLignesCommandeProduit()) {
-			total += cp.getTotalProduit();
+			total += cp.calculeTotalProduit();
 		}
 		return total;
+	}
+	
+	public Float calculeTotalReductionStandard() {
+		Float total = 0f;
+		for (CommandeProduit cp : this.getLignesCommandeProduit()) {
+			total += cp.calculeTotalReduction();
+		}		
+		return total;
+	}
+	public void calculeTotaux() {
+		this.setTotalSansPromo(this.calculeTotal());
+		this.setTotalReductionStandard(this.calculeTotalReductionStandard());
+		if(this.reductionSpeciale==null)
+			this.reductionSpeciale=0f;
+		this.totalFinal=this.totalSansPromo - calculeTotalReductionAll();
+		if (this.totalFinal < 0) 
+			this.totalFinal=0f;		
+	}
+	public Float calculeTotalReductionAll() {
+		if(this.reductionSpeciale==null)
+			this.reductionSpeciale=0f;
+		if(this.totalReductionStandard==null)
+			this.totalReductionStandard=0f;
+		return	(this.totalReductionStandard + this.reductionSpeciale);
 	}
 }

@@ -57,8 +57,7 @@ public class Produit  implements Serializable  {
 	
 	public Float getTotalProduit() {
 		if (this.prix!=null && this.qte!=null) {
-			return	(float) (Math.round((this.getPrix() * this.getQte()) * 100) / 100);
-			//return this.getPrix() * this.getQte();
+			return	this.getPrix() * this.getQte();			
 		}
 		else
 			return 0f;

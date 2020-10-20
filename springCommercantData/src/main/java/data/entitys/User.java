@@ -1,8 +1,10 @@
 package data.entitys;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -71,6 +73,6 @@ public class User implements Serializable {
 	private String pays;	
 	
 	@OneToMany (mappedBy = "user",fetch = FetchType.LAZY)
-	Set<Commande> commandes = new HashSet<Commande>();	//List<Commande> commandes = new ArrayList<Commande>();
+	List<Commande> commandes = new ArrayList<Commande>();	//List<Commande> commandes = new ArrayList<Commande>();
 
 }

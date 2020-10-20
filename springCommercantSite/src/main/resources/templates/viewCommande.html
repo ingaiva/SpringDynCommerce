@@ -22,67 +22,16 @@
 	
 	<div>
 		<form method="post"	th:action="@{saveCommande}" th:object="${cmd}" >
-				<div class="text-center">
-					<h4>Votre commande</h4>
-					<input type="hidden" th:field="*{id}" />
-					<input type="hidden" th:field="*{date}" />							
-					<input type="hidden" th:field="*{infoComp}" />							
-					<input type="hidden" th:field="*{msgCommercant}" />	
-				</div>
-				<table class="table">					
-					<tbody>
-						<tr class="item" th:each="lp, itemStat :*{lignesCommandeProduit}"  th:with="p=${lp.produit}">
-							<td>
-								<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" >								
-							</td>
-							<td>
-								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
-								
-								<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
-								<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
-								<label class="prixV"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
-								<label class="prix d-none" th:text="${p.prix}"></label>
-							</td>
-							<td >								
-								<div class="input-group mb-1">
-									<div class="input-group-prepend">
-										<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQteCmd(this)"></i>
-										</span>
-									</div>
-									<input style="width:60px;" class="form-control qte" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" onchange="updateQteCmd(this);">
-									
-									<div class="input-group-append" id="button-addon-line">
-										<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQteCmd(this);"></i>
-										</span>	
-									</div>
-								</div>
-							</td>							
-														
-							<td >								
-								<h5	class="subtotalCmdV font-weight-bold mr-3 " th:text="${#numbers.formatDecimal(lp.getTotalProduit(), 1, 2, 'COMMA')} + '€'"></h5>
-								<label class="subtotalCmd d-none" th:text="${lp.getTotalProduit()}"></label>
-							</td>							
-							<td>
-								<span class="input-group-text justify-content-center" style="width:30px;" > <i class="fa fa-trash text-danger" aria-hidden="true" onclick="supprimerProdCmd(this)"></i>
-								</span>																	
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				
-				<div class="d-flex justify-content-end mx-4">
-					<div>
-						<h6 class="etiquette" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>
-					</div>				
-				</div>
-				<div class="d-flex justify-content-end mx-4">										
-					<h5	class="font-weight-bold mr-3 totalCmd" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(cmd.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
-				</div>	
-				<div class="d-flex justify-content-end mx-4">
-	 		        <button type="button" class="py-1 px-2 mx-1  btn btn-danger" data-dismiss="modal">Annuler</button>				
-					<button type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>      	
-			      
-				</div>
+			
+			<div th:insert="fragments/cmdFragments.html :: viewCmd(${cmd})"></div>
+			
+			<div class="d-flex justify-content-end mx-4">
+				<a th:if="${ cmd.id != null && (cmd.allowDelete() or cmd.allowCancel())}"  th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir supprimer cette commande')" class="py-1 px-2 mx-1  btn btn-danger">Supprimer</a>
+				<a th:if="${cmd.id == null} " th:href="@{accueil}" class="py-1 px-2 mx-1  btn btn-danger">Annuler	</a>
+ 		        <a  th:unless="${cmd.id == null} " th:href="@{listCmd}" class="py-1 px-2 mx-1  btn btn-primary text-white">Revenir à la liste des commandes</a>
+ 		        				
+				<button th:if="${cmd.allowEdit()}"  type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>    	
+		    </div>
 		</form>
 	</div>	
 		
@@ -107,6 +56,81 @@
         	let $liTag =  $('#liPanier'); 
         	$liTag.removeAttr('disabled');        	 
       	})
+      	
+      	function addQteCmd(btn) {
+				let parent = btn.parentElement.parentElement.parentElement;
+
+				let cible = parent.querySelector(".qte");
+
+				if (cible != null) {
+					let qte = cible.value;
+
+					if (qte == null) {
+						qte = 1;
+					}
+					cible.value = parseFloat(qte) + 1;
+					updateQuantityCmd(cible);
+				}
+			}
+			function dimQteCmd(btn) {
+				let parent = btn.parentElement.parentElement.parentElement;
+				let cible = parent.querySelector(".qte");
+
+				if (cible != null) {
+					let qte = cible.value;
+					if (qte == null) {
+						qte = 1;
+					}
+					if (qte > 0) {
+						cible.value = qte - 1;
+					} else
+						cible.value = 0;
+					
+					updateQuantityCmd(cible);
+				}
+
+			}
+
+			function supprimerProdCmd(btn) {
+				let parentTR = btn.closest("tr");
+				if (parentTR != null) {
+					parentTR.remove();
+					recalculateCartCmd();
+				}
+			}			
+
+			function updateQuantityCmd(quantityInput) {
+				  
+				var parent = quantityInput.closest("tr");
+				
+				var price = parseFloat(parent.querySelector(".prixCmd").textContent);			
+				
+				var quantity = parseFloat(parent.querySelector(".qte").value);
+				var linePrice = price * quantity;			
+				
+				var subTotalElt = parent.querySelector(".subtotalCmd");
+				var subTotalEltVisible = parent.querySelector(".subtotalCmdV");
+				subTotalElt.textContent = linePrice ; 				
+				subTotalEltVisible.textContent = linePrice.toFixed(2) + '€';	
+				recalculateCartCmd();
+				
+			}
+
+			/* Recalculate cart */
+			function recalculateCartCmd() {				  
+				  
+				var subtotal = 0;
+				
+				var allByClass = document.getElementsByClassName('itemCmd');
+				for (var i=0, len=allByClass.length|0; i<len; i=i+1|0) {
+					var subTotalElt = allByClass[i].querySelector(".subtotalCmd");
+					subtotal += parseFloat(subTotalElt.textContent);					
+				}
+								
+				var totalElt = document.getElementById('totalCmd');
+				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€';
+
+			}
     </script>	
 </body>
 <footer th:replace="fragments/general.html :: footerTrade"></footer>

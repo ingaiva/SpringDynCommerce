@@ -1,0 +1,90 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Vos commandes</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarUser"></div>
+</header>
+
+	<div th:replace="fragments/general.html :: logoSite"></div>
+
+	<div class="my-1">	
+		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
+	</div>
+	
+	
+	<div>
+		<h3 class="text-center">Vos commandes</h3>
+		<h4 th:if="${connectedCli.commandes.size()==0}">Aucune commande n'existe encore</h4>
+		<div th:if="${connectedCli.commandes.size() > 0}">
+			<table class="table">					
+					<tbody>
+						<tr class="rowCmd" th:each="cmd, itemStat :${connectedCli.commandes}">						
+							<td><h5	class="" > <a class="text-dark" th:text="' N° ' + ${cmd.id}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5></td>
+							<td>									
+								<h5	class="" > <a class="text-dark"  th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
+								<h6	class="" ><a class="text-dark" th:text="${cmd.infoComp}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+								<h6	class="" ><a class="text-dark" th:text="${cmd.msgCommercant}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+							</td>
+							<td >
+								<div th:if="${cmd.calculeTotalReductionAll()>0}">
+									<h4 th:text="${#numbers.formatDecimal(cmd.totalSansPromo, 1, 2, 'COMMA')} + '€'"></h4>
+								</div>		
+							</td>						
+														
+							<td >	
+								<div th:if="${cmd.calculeTotalReductionAll()>0}">
+									<h4 th:text="'-' + ${#numbers.formatDecimal(cmd.calculeTotalReductionAll(), 1, 2, 'COMMA')} + '€'"></h4>	
+								</div>							
+							</td>
+							<td><h4 th:text="${#numbers.formatDecimal(cmd.totalFinal, 1, 2, 'COMMA')} + '€'"></h4>	</td>
+							<td>
+								<div class="pt-2">
+									<h6 th:class="${cmd.getCssClassStatut()}"><a style="color: inherit;" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+								</div>	
+							</td>							
+							<td>
+								<div class="">
+									<a th:href="@{viewCommande(id=${cmd.id})}"><i th:class="${cmd.allowEdit()}? 'fa fa-pencil-square-o text-dark' : 'fa fa-eye text-warning'" aria-hidden="true" ></i></a>									
+								</div>											      
+								<div  th:if="${cmd.allowDelete()}"  class="">
+									<a th:href="@{deleteCommandeRequest(id=${cmd.id})}"><i class="fa fa-trash text-danger" aria-hidden="true" ></i></a>									
+								</div>
+							</td>
+						</tr>
+				</tbody>
+			</table>	
+		</div>
+	</div>	
+	
+	<div th:replace="fragments/general.html :: footerContact"></div>
+    <div th:replace="fragments/general.html :: assets"></div>
+	<script>
+		
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#liCompte');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');  
+        	
+        	let $liBisTag =  $('#liHome');   //
+        	$liBisTag.siblings('.active').removeClass('active');
+        	$liBisTag.removeClass('active');          	
+      	})
+    </script>	
+</body>
+<footer th:replace="fragments/general.html :: footerTrade"></footer>
+</html>

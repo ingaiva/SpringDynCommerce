@@ -18,6 +18,11 @@
 		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
 	</div>
 	
+	<div th:if="${newCmdAlertRequest!=null and newCmd !=null}">
+		<div th:if="${newCmdAlertRequest!=null and newCmd !=null}" th:replace="fragments/cmdFragments.html :: newCmdConfirm(${newCmd})"></div>	
+	</div>
+	
+	
 	<div class="slogan text-center px-5 mx-5 my-3 d-flex">
 		<i class="fa fa-quote-left" aria-hidden="true"></i>
 		<label class="font-italic font-weight-bold text-center" style="white-space: pre-line;" th:text="${session.paramMP.texteAccueil}" ></label>
@@ -91,7 +96,12 @@
         	}
         	
        		$liTag.siblings('.active').removeClass('active');
-        	$liTag.addClass('active');        
+        	$liTag.addClass('active'); 
+        	
+        	let $Tag =  $('#newCmdConfirmModal'); 
+        	if ( $Tag !=null){
+	        	$('#newCmdConfirmModal').modal('show');        		
+        	}
       	})
     </script>
 </body>	

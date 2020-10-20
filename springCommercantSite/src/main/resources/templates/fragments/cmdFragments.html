@@ -1,0 +1,128 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+
+	<div th:fragment="viewCmd(cmd)" >
+		<div class="text-center">
+			<div th:if="${cmd.id != null}">
+				<h4 th:text="'Votre commande N° ' + ${cmd.id}"></h4>	
+			</div>
+			<div th:unless="${cmd.id != null}">
+				<h4>Votre commande</h4>	
+			</div>
+			<div>
+				<h6 th:class="${cmd.getCssClassStatut()}" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>				
+			</div>	
+			<input type="hidden" th:field="*{id}" />
+			
+			<div th:if="${cmd.id != null}">				
+				<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>				
+				<h6 th:text="${cmd.msgCommercant}" ></h6>	
+			</div>
+			
+			<div class="my-4 input-group">
+				<label for="infoComp" class="font-weight-bold mx-3">Information complementaire : </label>					
+				<textarea th:field="*{infoComp}" class="font-italic form-control mx-3 textWithCrLf"></textarea>	
+			</div>										
+			<input type="hidden" th:field="*{msgCommercant}" />
+			<input type="hidden" th:field="*{date}" />				
+			<input type="hidden" th:field="*{statut}" />	
+		</div>
+		<table class="table">					
+			<tbody>
+				<tr class="itemCmd" th:each="lp, itemStat :*{lignesCommandeProduit}"  th:with="p=${lp.produit}">
+					<td>
+						<a th:href="@{produit(id=${p.id})}" >
+							<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" >					
+							
+						</a>
+					</td>
+					<td>
+						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
+						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
+						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.prix}" />	
+						
+						<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
+						<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
+						<label class="prixCmdV"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
+						<label class="prixCmd d-none" th:text="${p.prix}"></label>
+					</td>
+					<td >								
+						<div  th:if="${cmd.allowEdit()}" class="input-group mb-1" style="width:150px;" >
+							<div class="input-group-prepend">
+								<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQteCmd(this)"></i></span>
+							</div>
+							<input class="form-control qte" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" onchange="updateQuantityCmd(this);">
+							
+							<div class="input-group-append" id="button-addon-line">
+								<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQteCmd(this);"></i></span>	
+							</div>
+						</div>
+						<div  th:if="${!cmd.allowEdit()}">							
+							<input class="form-control qte" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" readonly="readonly">			
+							
+						</div>
+					</td>							
+												
+					<td >								
+						<h5	class="subtotalCmdV font-weight-bold mr-3 " th:text="${#numbers.formatDecimal(lp.calculeTotalProduit(), 1, 2, 'COMMA')} + '€'"></h5>
+						<label class="subtotalCmd d-none" th:text="${lp.calculeTotalProduit()}"></label>
+					</td>							
+					<td>
+						<span th:if="${cmd.allowEdit()}" class="input-group-text justify-content-center" style="width:30px;" > <i class="fa fa-trash text-danger" aria-hidden="true" onclick="supprimerProdCmd(this)"></i></span>														
+						
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<div class="d-flex justify-content-end mx-4">
+			<div>
+				<h6 th:class="${cmd.getCssClassStatut()}" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>				
+			</div>				
+		</div>
+		<div class="d-flex justify-content-end mx-4">										
+			<h5	class="font-weight-bold mr-3 totalCmd" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(cmd.calculeTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
+		</div>
+	</div>
+
+	<div>
+		<div th:fragment="newCmdConfirm(newCmd)" class="modal fade" tabindex="-1" id="newCmdConfirmModal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Annuler">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<h3>Votre commande est enregistrée avec success</h3>
+						<h6 th:text="${#dates.format(newCmd.date, 'dd/MM/yyyy HH:mm')}"></h6>
+						<div class="d-flex justify-content-end mx-4">										
+							<h5	class="font-weight-bold mr-3" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(newCmd.calculeTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="py-0 btn btn-sm btn-outline-danger"
+							data-dismiss="modal">
+							<i class="fa fa-times" aria-hidden="true"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div th:replace="fragments/general.html :: assets"></div>		
+</body>
+</html>

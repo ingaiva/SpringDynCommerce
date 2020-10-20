@@ -80,10 +80,12 @@ public class HomeController {
 	
 	@GetMapping({ "/","/accueil","/home" })
 	public String getAcceuilFrm(Model model, HttpSession session) {	
+		
 		addStandardParams(model,session);				
 		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();	
 		model.addAttribute("lstCat", lstCat);			
-		 
+		session.removeAttribute("cmdRequest");	//pour les cas d'annulation de login ou creation du compte suite à la validation du panier
+		
 		return "viewHome";
 	}
 	
@@ -135,7 +137,8 @@ public class HomeController {
 				session.setAttribute("connectedCli", cltInDb);
 				
 				if (session.getAttribute("cmdRequest") != null && session.getAttribute("cmdRequest").equals("1")) {					
-					return "redirect:/panier";
+					session.removeAttribute("cmdRequest");
+					return "redirect:/creerCommande";
 				} else
 					return "redirect:/accueil";
 			}
@@ -202,7 +205,8 @@ public class HomeController {
 
 		session.setAttribute("connectedCli", user);
 		if (session.getAttribute("cmdRequest") != null && session.getAttribute("cmdRequest").equals("1")) {		
-			return "redirect:/panier";	// redirection vers le panier pour finaliser la commande
+			session.removeAttribute("cmdRequest");
+			return "redirect:/creerCommande";	// redirection vers le panier pour finaliser la commande
 		} else
 			return "redirect:/accueil";
 

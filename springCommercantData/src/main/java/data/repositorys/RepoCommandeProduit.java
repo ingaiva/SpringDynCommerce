@@ -1,7 +1,6 @@
 package data.repositorys;
 
-import java.util.List;
-import java.util.Set;
+import java.util.ArrayList;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,19 +14,14 @@ import data.entitys.*;
 
 @CrossOrigin("*")
 @RepositoryRestResource
-public interface RepoCommande   extends JpaRepository<Commande, Long>  {
-
-	@Query("select cmd from Commande cmd where cmd.user.id=:x")
-	public List<Commande> getCommandesUser(@Param("x") Long idUser);
+public interface RepoCommandeProduit  extends JpaRepository<CommandeProduit, Long>   {
+	@Transactional
+	@Modifying
+	@Query("delete from CommandeProduit cp where cp.commande.id=:x")
+	public void deleteByCommande(@Param("x") Long id);
 	
 	@Transactional
 	@Modifying
-	@Query("delete from Commande cmd where cmd.user.id=:x")
-	public void deleteCommandesByUser(@Param("x") Long idUser);
-
-	@Transactional
-	@Modifying
-	@Query("delete from CommandeProduit cp where cp.commande.user.id=:x")
-	public void deleteCommandeProduitByUser(@Param("x") Long idClient);
-
+	@Query("delete from CommandeProduit cp where cp.commande.id=:x and cp.id NOT IN (:y)")
+	public void deleteNotIncluded(@Param("x") Long id,@Param("y") ArrayList<Long> lstToExclude);
 }

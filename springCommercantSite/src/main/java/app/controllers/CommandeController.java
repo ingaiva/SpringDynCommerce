@@ -1,6 +1,7 @@
 package app.controllers;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,7 @@ import data.entitys.PanierWrapper;
 import data.entitys.ParamMainPage;
 import data.entitys.Produit;
 import data.entitys.User;
+import data.entitys.Commande.StatutCommande;
 
 @Controller
 public class CommandeController {
@@ -33,6 +36,9 @@ public class CommandeController {
 	
 	@Autowired
 	data.repositorys.RepoCommande cmdR;
+	
+	@Autowired
+	data.repositorys.RepoCommandeProduit lignesCmdR;
 	
 	@Autowired
 	data.repositorys.RepoProduit prodR;
@@ -84,17 +90,12 @@ public class CommandeController {
 		}
 		return null;
 	}
+		
 	
-	/*
-	 * public String validerPanier(Model model, @ModelAttribute("panier")
-	 * PanierWrapper panierFromPage, HttpSession session) {
-	 */
-	//@PostMapping("/valPanier")
 	public void validerPanier(PanierWrapper panierFromPage, HttpSession session) {	
 		
 		List<Produit> lstToRemoveFromPage = new ArrayList<Produit>();
-		for (Produit elt : panierFromPage.getProduits()) {
-			System.out.println(elt);
+		for (Produit elt : panierFromPage.getProduits()) {			
 			if (elt.getId() == null || elt.getQte() == 0)
 				lstToRemoveFromPage.add(elt);
 		}
@@ -122,53 +123,67 @@ public class CommandeController {
 			}
 		}
 
-		session.setAttribute("panier", sessionPanier);
-
-		//return "redirect:/accueil";
+		session.setAttribute("panier", sessionPanier);		
 	}
 
-	/*
-	 * @PostMapping("/addProd") public String ajouterProduitPanier(Model
-	 * model, @RequestParam(name = "qteToAdd") Float qte,
-	 * 
-	 * @ModelAttribute("produit") @Valid Produit produitToAdd, BindingResult
-	 * bindingRes, HttpSession session,RedirectAttributes ra) {
-	 * 
-	 * System.out.println("dans post addProd " + qte);
-	 * System.out.println(model.asMap()); System.out.println(produitToAdd);
-	 * 
-	 * PanierWrapper wpanier = (PanierWrapper) session.getAttribute("panier"); if
-	 * (wpanier == null) wpanier = new PanierWrapper();
-	 * 
-	 * boolean hasError = false; if (qte <= 0) { hasError = true;
-	 * model.addAttribute("msgErr",
-	 * "La quantité du produit doit être supérieure à zéro"); }
-	 * model.addAttribute("qte", qte);
-	 * 
-	 * if (produitToAdd != null && !hasError) {
-	 * 
-	 * Long idProduit = produitToAdd.getId();
-	 * 
-	 * Produit curProduit = prodR.getOne(idProduit); if (curProduit != null) { if
-	 * (curProduit.getStock() == null) curProduit.setStock(0f);
-	 * 
-	 * Float stock = curProduit.getStock() - qte;
-	 * 
-	 * if (stock <= 0) { hasError = true; model.addAttribute("msgErr",
-	 * "Le stock insuffisant"); } else { boolean isExist = false; for (Produit elt :
-	 * wpanier.getProduits()) { if (elt.getId().equals(idProduit)) { isExist = true;
-	 * Float previousQte = elt.getQte(); elt.setQte(previousQte + qte); } }
-	 * 
-	 * if (!isExist) { curProduit.setQte(qte);
-	 * wpanier.getProduits().add(curProduit); }
-	 * 
-	 * session.setAttribute("panier", wpanier); } } }
-	 * 
-	 * ra.addAttribute("id",produitToAdd.getId()); return "redirect:/produit";
-	 * //return getViewProduit(model, produitToAdd.getId(), session);
-	 * 
-	 * }
-	 */
+	@GetMapping("/deleteCommandeRequest")
+	public String deleteCommandeFrm(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session) {
+		addStandardParams(model,session);
+		Commande cmd= cmdR.getOne(idCommande);		
+		model.addAttribute("cmd", cmd);
+		model.addAttribute("deleteRequest", true);
+		return "viewCommande";	
+	}
+	
+	@GetMapping("/deleteCommande")
+	public String deleteCommande(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session) {
+		Commande cmd= cmdR.getOne(idCommande);		
+		if (cmd!=null) {
+			if (cmd.allowDelete()) {
+				lignesCmdR.deleteByCommande(idCommande);
+				cmdR.deleteById(idCommande);
+			}
+			else if(cmd.allowCancel()) {
+				cmd.setStatutCmd(StatutCommande.Annule);
+				cmdR.save(cmd);
+			}
+		}
+		return "redirect:/listCmd";	
+	}
+	
+	@GetMapping("/viewCommande")
+	public String getViewCommandeFrm(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session) {
+		addStandardParams(model,session);
+		Commande cmd= cmdR.getOne(idCommande);		
+		model.addAttribute("cmd", cmd);		
+		return "viewCommande";	
+	}
+	
+	@GetMapping("/creerCommande")
+	public String getCreationCommandeFrm(Model model, HttpSession session) {
+		
+		addStandardParams(model,session);				
+		
+		User connectedCli=(User) session.getAttribute("connectedCli");			
+		
+		if (connectedCli!=null) {
+			
+			Commande cmd=new Commande();
+			cmd.setUser(connectedCli);
+			cmd.setStatutCmd(Commande.StatutCommande.EnAttente);
+			cmd.setDate(new Date());
+			PanierWrapper sessionPanier = (PanierWrapper) session.getAttribute("panier");
+			for (Produit elt : sessionPanier.getProduits()) {
+				cmd.getLignesCommandeProduit().add(new CommandeProduit(elt));		
+			}
+			model.addAttribute("cmd", cmd);
+			return "viewCommande";	
+		}
+		else {			
+			return "redirect:/accueil";	
+		}			
+		
+	}
 	
 	@PostMapping("/creerCommande")
 	public String creerCommandeFrm(@RequestParam(name="action",required = false) String action,Model model, @ModelAttribute("panier") PanierWrapper panierFromPage,
@@ -181,32 +196,101 @@ public class CommandeController {
 			validerPanier(panierFromPage,session);
 			User connectedCli=(User) session.getAttribute("connectedCli");			
 			
-			if (connectedCli!=null) {
-				//
-				Commande cmd=new Commande();
-				cmd.setUser(connectedCli);
-				cmd.setStatut(Commande.StatutCommande.EnAttente);
-				PanierWrapper sessionPanier = (PanierWrapper) session.getAttribute("panier");
-				for (Produit elt : sessionPanier.getProduits()) {
-					cmd.getLignesCommandeProduit().add(new CommandeProduit(elt));		
-				}				
-				addStandardParams(model,session);
-				model.addAttribute("cmd", cmd);
-				return "viewCommande";	
+			if (connectedCli!=null) {				
+				return getCreationCommandeFrm(model,session);				
 			}
-			else
+			else {
+				session.setAttribute("cmdRequest", "1");
 				return "redirect:/login";	
-			
+			}			
 		}
 		
 		return "redirect:/accueil";
 	}
-	
-	@GetMapping("/creerCommande")
-	public String getCreationCommandeFrm(Model model, HttpSession session) {
-		addStandardParams(model,session);				
+
+	@PostMapping("/saveCommande")
+	public String saveCommande(Model model, @RequestParam(name="action",required = false) String action,
+			@ModelAttribute("cmd") @Valid Commande cmd, BindingResult bindingRes, HttpSession session, RedirectAttributes ra) {
 		
-		return "";
+		
+		User connectedCli=(User) session.getAttribute("connectedCli");	
+		if (connectedCli==null) 
+			return "redirect:/login";	
+		
+		boolean isCmdExistante=false;
+		boolean deleteProduitRequest=false;
+		
+		if (cmd!=null && connectedCli!=null) {
+			if (bindingRes.hasErrors()) {
+				String msgErr = "";
+				for (ObjectError elt : bindingRes.getAllErrors()) {
+					msgErr += elt.toString();
+				}
+				System.out.println(" les erreurs dans la saisie: " + msgErr);				
+				return "viewCommande";
+			}
+			isCmdExistante=(cmd.getId()!=null);
+			cmd.setUser(connectedCli);	
+			
+			ArrayList<Long> lstToExclude = new ArrayList<Long>();
+			
+			
+			if (cmd.getLignesCommandeProduit().size()==0) {
+				deleteProduitRequest=true;
+			}
+			for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {				
+				
+				if (cp.getQte()!=null && cp.getQte() > 0 && cp.getProduit()!=null && cp.getProduit().getId()!=null) {
+					cp.setCommande(cmd);
+					cp.calculeTotaux();	
+					if(cp.getId()!=null)
+						lstToExclude.add(cp.getId());
+				}
+				else
+					deleteProduitRequest=true;
+				
+			}
+			cmd.calculeTotaux();
+			cmdR.save(cmd);
+			for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {
+				if (cp.getQte()!=null && cp.getQte() > 0 && cp.getProduit()!=null && cp.getProduit().getId()!=null) {
+					lignesCmdR.save(cp);					
+				}				
+			}
+			if(isCmdExistante && deleteProduitRequest ) {
+				if (lstToExclude.size()>0) {
+					lignesCmdR.deleteNotIncluded(cmd.getId(), lstToExclude);
+				}
+				else
+					lignesCmdR.deleteByCommande(cmd.getId());
+			}
+			
+			session.removeAttribute("panier");		
+		}
+		if(isCmdExistante)
+			return "redirect:/listCmd";	
+		else
+		{			
+			addStandardParams(model,session);	
+			model.addAttribute("newCmdAlertRequest", true);
+			model.addAttribute("newCmd", cmd);
+			//return "redirect:/accueil";			
+			session.removeAttribute("cmdRequest");				
+			return "viewHome";
+		}
+	}
+	
+	@GetMapping("/listCmd")
+	public String getViewCmdFrm(Model model, HttpSession session) {
+		
+		addStandardParams(model,session);		
+		
+		User connectedCli=(User) session.getAttribute("connectedCli");	
+		if (connectedCli==null) 
+			return "redirect:/login";	
+		connectedCli.setCommandes(cmdR.getCommandesUser(connectedCli.getId()));		
+		model.addAttribute("connectedCli", connectedCli);
+		return "viewLstCommande";
 	}
 	
 }

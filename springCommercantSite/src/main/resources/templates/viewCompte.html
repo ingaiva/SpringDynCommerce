@@ -23,82 +23,13 @@
 	
 	<div class="p-4 m-2" style="margin-left: auto; margin-right: auto; text-align: center;">
 		<form class="" method="post" th:action="@{saveCompte}" th:object="${user}">
-			<div th:replace="fragments/general.html :: infoCompte"></div>
-			<!-- <div th:if="${user.id==null}">
-				<h3>Nouveau compte</h3>
-			</div>
-			<div th:unless="${user.id==null}">
-				<h3>Informations personnelles</h3>
-				<input type="hidden" th:field="*{id}" />
-				<input type="hidden" th:field="*{dateCreation}" />
-			</div>			
-			
-			<small id="msg" class="text-danger" th:text="${msg}"></small>
-			<div class="row bg-info">
-				<div class=" col form-group text-left">
-					<label for="nom">Nom</label> 
-					<input type="text"	class="form-control" placeholder="Votre nom" th:field="*{nom}"  required> 
-				</div>
-				<div class=" col form-group text-left">
-					<label for="prenom">Prénom</label> 
-					<input type="text"	class="form-control" placeholder="Votre prénom"	th:field="*{prenom}" > 					
-				</div>			
-			</div>
-			<div class="row  bg-info">
-				<div class="col-7 form-group text-left">
-					<label>E-mail</label> 
-					<input type="email"	class="form-control" placeholder="Votre mail" th:field="*{mail}" required>
-				</div>	
-				<div class="col form-group text-left ">
-					<label for="password">Mot de passe</label> 
-					<input type="password"	class="form-control"  placeholder="Mot de passe" th:field="*{password}" required>
-				</div>				
-			</div>
-			
-			<div class="row">
-				<div class="col form-group text-left">
-					<label>Votre n° de téléphone portable</label> 
-					<input type="text"	class="form-control" placeholder="Votre n° de téléphone portable" th:field="*{tel1}" >
-				</div>	
-				<div class="col form-group text-left ">
-					<label for="tel2">Votre n° de téléphone</label> 
-					<input type="text"	class="form-control"  placeholder="Votre n° de téléphone" th:field="*{tel2}" >
-				</div>				
-			</div>
-			
-			<div  class="bg-warning p-3 text-left">			
-				<div class="form-group">
-					<label for="nomVoie">Adresse</label> 
-					<textarea type="text" class="form-control textWithCrLf" th:field="*{nomVoie}"></textarea>
-				</div>
-				<div class="form-group">
-					<label for="inputAddress2">Complement d'adresse</label> 
-					<input type="text"class="form-control" th:field="*{complNomVoie}" >
-				</div>
-				<div class="form-row">
-					<div class="form-group col-md-2">
-						<label for="cp">Code postal</label> 
-						<input type="text"	class="form-control" th:field="*{cp}" >
-					</div>
-					<div class="form-group col-md-6">
-						<label for="ville">Ville</label> 
-						<input type="text"	class="form-control" th:field="*{ville}" >
-					</div>
-					<div class="form-group col-md-4">
-						<label for="pays">Pays</label> 
-						<input type="text"	class="form-control" th:field="*{pays}" >
-					</div>
-				</div>
-			</div> -->
-		
-
+			<div th:replace="fragments/general.html :: infoCompte"></div>	
 			<div class="d-flex text-center py-2">
 				<button type="submit" class="btn btn-outline-success mx-1">Valider</button>
 				<a th:href="@{accueil}" class="mx-1 btn btn-outline-danger">Annuler</a>
 			</div>
 		</form>
 	</div>	
-	
 	
 		
 	<div th:replace="fragments/general.html :: footerContact"></div>
