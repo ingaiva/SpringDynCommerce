@@ -3,9 +3,7 @@ package data.entitys;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -75,4 +74,51 @@ public class User implements Serializable {
 	@OneToMany (mappedBy = "user",fetch = FetchType.LAZY)
 	List<Commande> commandes = new ArrayList<Commande>();	//List<Commande> commandes = new ArrayList<Commande>();
 
+	public String getAdresseComplete() {
+		String retVal="";
+		
+		if (this.nomVoie!=null) {
+			retVal +=this.nomVoie;
+		}
+		if (this.complNomVoie!=null) {
+			if(!retVal.isBlank())
+				retVal+=" ";
+			retVal+=this.complNomVoie;
+		}
+		if (this.cp!=null) {
+			if(!retVal.isBlank())
+				retVal+=" ";
+			retVal+=this.cp;
+		}
+		if (this.ville!=null) {
+			if(!retVal.isBlank())
+				retVal+=" ";
+			retVal+=this.ville;
+		}
+		if (this.pays!=null) {
+			if(!retVal.isBlank())
+				retVal+=" ";
+			retVal+=this.pays;
+		}
+		return retVal;
+	}
+	
+	public String getAdresse() {
+		String retVal="";
+		if (this.nomVoie!=null) {
+			retVal +=this.nomVoie;
+		}
+		if (this.complNomVoie!=null) {
+			if(!retVal.isBlank())
+				retVal+=" ";
+			retVal+=this.complNomVoie;
+		}
+		
+		return retVal;
+	}
+	
+	@Transient
+	private Integer nbCmd;
+	@Transient
+	private Float totalCmd;
 }

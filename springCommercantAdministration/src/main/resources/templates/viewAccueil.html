@@ -26,16 +26,16 @@
 			<div class="card border-info mb-3"  th:each="c:${lstCat}">
 				
 				<div class="card text-white bg-info  "> 				
-					<div  class="card-header row text-left mx-0">
-						<!-- <div class="col-1" th:text="${c.id}">
-						</div> -->
-						<div class="col card-title d-flex ">
-							<img th:if="${c.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${c.defPhotoData()}"	class="border p-1 mr-2" width="auto" height="auto" style="max-width: 100%;">
-							<h4  th:text="${c.titre}"></h4>
+					<div  class="card-header row text-left mx-0">						
+						<div class="col-md card-title d-flex ">
+							<a class="mx-2 text-white"  th:href="@{modifierCat(id=${c.id})}" >
+								<img th:if="${c.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${c.defPhotoData()}"	class="border p-1 mr-2" width="auto" height="auto" style="max-width: 100%;">
+							</a>
+							<h4><a  th:text="${c.titre}" class="mx-2 text-white"  th:href="@{modifierCat(id=${c.id})}" ></a></h4>
 						</div>
 							
 									
-						<div class="col-4"  >
+						<div class="col-md-4"  >
 							<div>
 								<a class="mx-2 text-white"  th:href="@{modifierCat(id=${c.id})}" ><i class="fa fa-2x mx-2 fa-pencil-square-o text-white" aria-hidden="true"></i>Modifier</a>
 							</div>
@@ -55,94 +55,13 @@
 				</div>
 				
 				<div class="text-danger" th:if="${c.produits.size()==0}">Aucun produit dans cette catégorie</div>
-				
-				<div th:if="${c.produits.size() > 0}">
-					<table class="table">
-						<thead class="thead ">
-							<tr>
-								<!-- <th class="bg-white" scope="col">id</th> -->
-								<th class="bg-white" scope="col" style="min-width: 250px;">Libelle</th>
-								<th class="bg-white" scope="col">Description</th>
-								<th class="bg-white" scope="col">Conditionnement</th>							
-								<th class="bg-white" scope="col">prix</th>
-								<th class="bg-white" scope="col">Stock</th>
-								<th class="bg-white" scope="col">Status</th>
-								<th class="bg-white" scope="col" style="width: 250px;">..</th>							
-							</tr>
-						</thead>
-						<tbody>
-								<tr th:each="p:${c.produits}">
-									<!-- <td th:text="${p.id}"></td> -->
-									<td><!-- <td th:text="${p.libelle}"> -->
-										<div class="col card-title d-flex ">
-											<img th:if="${p.photos.size() > 0 }"
-											th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"
-											class="border p-1 mr-2" width="auto" height="auto"
-											style="max-width: 100%;">
-											<p th:text="${p.libelle}"></p>
-										</div>
-									</td>
-									<td th:text="${p.description}"></td>
-									<td th:text="${p.conditionnement}"></td>
-									<td th:text="${p.prix} + '€'"></td>
-									<td th:text="${p.stock}"></td>
-									<td th:text="${p.statut}"></td>
-									<td >								
-										<span class="text-left">
-											<div><a class="mx-3 text-dark" th:href="@{modifierProd(id=${p.id})}" ><i class="fa  mx-2 fa-pencil-square-o" aria-hidden="true"></i>Modifier</a>
-											</div>
-											<div><a class="mx-3 text-dark" th:href="@{effacerCatProd(id=${p.id})}" ><i class="fa  mx-2 fa-eraser" aria-hidden="true"></i>Retirer de cette cat.</a>
-											</div>
-											<div><a class="mx-3 text-dark" th:href="@{supprimerProd(id=${p.id})}" ><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer	</a>
-											</div>																					
-										</span>										
-									</td>
-								</tr>	
-						</tbody>
-					</table>
-				</div>
-				
+				<div th:replace="fragments/general.html :: productList(${c.produits})"></div>					
 			</div>			
 		</div>
 
 		<div th:if="${lstProdSansCat.size() > 0}">
-			<h4 >Produits sans catégorie</h4>
-			<table class="table">
-				<thead class="thead-light ">
-					<tr>
-						<!-- <th class="bg-warning" scope="col">id</th> -->
-						<th class="bg-warning" scope="col" style="min-width: 250px;">Libelle</th>
-						<th class="bg-warning" scope="col">Description</th>
-						<th class="bg-warning" scope="col">Conditionnement</th>
-						<th class="bg-warning" scope="col">prix</th>
-						<th class="bg-warning" scope="col">Stock</th>
-						<th class="bg-warning" scope="col">Status</th>
-						<th class="bg-warning" scope="col">..</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr th:each="p:${lstProdSansCat}">
-						<!-- <td th:text="${p.id}"></td> -->
-						<td><!--  th:text="${p.libelle}" -->
-							<div class="d-flex ">
-								<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2" width="auto" height="auto" style="max-width: 100%;">
-								<p th:text="${p.libelle}"></p>
-							</div>
-
-						</td>
-						<td th:text="${p.description}"></td>
-						<td th:text="${p.conditionnement}"></td>
-						<td th:text="${p.prix} + '€'"></td>
-						<td th:text="${p.stock}"></td>
-						<td th:text="${p.statut}"></td>
-						<td><span class="d-flex flex-column text-left"> 
-								<a class="mx-2 text-dark"  name="btnModifP" th:href="@{modifierProd(id=${p.id})}"><i class="fa  mx-2 fa-pencil-square-o" aria-hidden="true"></i>Modifier</a>
-								<a class="mx-2 text-dark"  name="btnSupprP"	th:href="@{supprimerProd(id=${p.id})}"><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer </a>
-							</span> 
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<h4 class="bg-warning py-2">Produits sans catégorie</h4>
+			<div th:replace="fragments/general.html :: productList(${lstProdSansCat})"></div>
 		</div>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

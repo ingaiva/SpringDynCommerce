@@ -1,0 +1,82 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Liste des clients</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarDynamique">	
+	</div>	
+</header>
+	
+	<div>
+		<h3 class="text-center">Liste des clients</h3>
+			
+		
+		<h4 th:if="${lstUsr.size()==0}">Aucun client n'existe encore</h4>
+		<div th:if="${lstUsr.size() > 0}" class="table-responsive">	
+			
+			<table class="table">					
+					<tbody>
+						<tr class="rowCmd" th:each="u, itemStat :${lstUsr}">						
+							
+							<td>
+								<h4><a th:text="${u.nom} + ' ' + ${u.prenom} " class="text-dark" th:href="@{viewUser(id=${u.id})}"></a></h4>
+							</td>
+							<td>									
+								<h6><a class="text-dark" th:text="${u.tel1}" th:href="@{viewUser(id=${u.id})}"></a></h6>								
+								<h6><a class="text-dark" th:text="${u.tel2}" th:href="@{viewUser(id=${u.id})}"></a></h6>
+							</td>
+							<td >
+								<h6> <a class="text-dark"  th:text="${u.mail}" th:href="@{viewUser(id=${u.id})}"></a></h6>										
+							</td>
+							<td >
+								<h6> <a class="text-dark"  th:text="${u.getAdresseComplete()}" th:href="@{viewUser(id=${u.id})}"></a></h6>										
+							</td>
+							
+							<td >
+								<h5> <a class="text-dark"  th:text="${#dates.format(u.dateCreation, 'dd/MM/yyyy HH:mm')}" th:href="@{viewUser(id=${u.id})}"></a></h5>										
+							</td>					
+							<td>
+								<h6 th:if="${u.nbCmd!=null}" th:text="${u.nbCmd} + ' commande(s)'"></h6>
+								<h6 th:if="${u.totalCmd !=null}" th:text="${#numbers.formatDecimal(u.totalCmd, 1, 2, 'COMMA')} + '€'"></h6>
+								
+							</td>						
+														
+							<td>
+								<div class="">
+									<a th:href="@{viewUser(id=${u.id})}"><i class="fa fa-eye text-dark" aria-hidden="true" ></i></a>									
+								</div>	
+							</td>
+						</tr>
+				</tbody>
+			</table>	
+		</div>
+	</div>	
+	
+	
+    <div th:replace="fragments/general.html :: assets"></div>
+	<script>
+		
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#liUsr');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');   
+      	})
+      	
+      	
+    </script>	
+</body>
+</html>

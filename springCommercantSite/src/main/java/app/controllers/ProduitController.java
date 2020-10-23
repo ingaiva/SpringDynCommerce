@@ -131,12 +131,11 @@ public class ProduitController {
 
 			Produit curProduit = prodR.getOne(idProduit);
 			if (curProduit != null) {
-				if (curProduit.getStock() == null)
-					curProduit.setStock(0f);
+				Float stock = null;
+				if (!curProduit.isSurCommande() && !curProduit.isEpuise() && curProduit.getStock() != null)/* curProduit.setStock(0f); */
+					stock = curProduit.getStock() - qte;
 
-				Float stock = curProduit.getStock() - qte;
-
-				if (stock <= 0) {
+				if (stock!=null &&  stock < 0) {
 					hasError = true;
 					model.addAttribute("msgErr", "Le stock insuffisant");
 				} else {
@@ -158,9 +157,9 @@ public class ProduitController {
 				}
 			}
 		}
-		
-		//ra.addAttribute("id",produitToAdd.getId());
-		//return "redirect:/produit";
+
+		// ra.addAttribute("id",produitToAdd.getId());
+		// return "redirect:/produit";
 		return getViewProduit(model, produitToAdd.getId(), session);
 
 	}

@@ -15,5 +15,11 @@ public interface RepoUser   extends JpaRepository<User, Long> {
 	
 	@Query("select u from User u where u.mail =:x and u.id !=:y")
 	public Set<User> getUserByMail(@Param("x") String mail,@Param("y") Long idUserToExclude);
-	 	
+	
+	@Query("select u, count(cmd.id) as nbCmd , SUM(cmd.totalFinal) as totalCmd from User u LEFT JOIN u.commandes cmd where cmd.statut in (:y) GROUP BY u.id")
+	public List getUsersStatisticsFiltered(@Param("y") List<String> statutValues);
+	
+	@Query("select count(*) from Commande cmd where cmd.user.id=:x and cmd.statut in (:y)")
+	public Integer getCountByUserFiltered(@Param("x") Long idUser, @Param("y") List<String> statutValues);
+	
 }

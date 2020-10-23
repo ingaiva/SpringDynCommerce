@@ -1,0 +1,129 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Liste des commandes</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarDynamique">	
+	</div>	
+</header>
+	
+	<div>
+		<h3 class="text-center">Liste des commandes</h3>
+		
+		<div class="d-flex justify-content-end mx-3">
+				<form th:action="@{listCmd}" method="post" id="frmStatutFilter">
+					<div class="form-group text-left ">	
+						<div class="d-flex align-items-center">
+							<label class="col-form-label">Filtrer les commandes</label>						
+
+							<div class="mx-2 my-0" th:if="${statutSelectedValues!=null} and ${#lists.isEmpty(statutSelectedValues)==false}">
+								<button type="submit" class="px-2 py-0 btn btn-sm btn-outline-secondary" name="action"
+									value="effacerFilters" id="effacerFilters">
+									<i class="fa fa-undo mr-1" aria-hidden="true"></i>Effacer les filtres
+								</button>
+							</div>
+						</div>
+						
+						<div class="d-flex flex-lg-row flex-md-column justify-content-between card border-info px-2 " id="divStatutFilter">
+							<div class="mx-2" th:each="st, iter  : ${statutValues}">								
+								<input type="checkbox" name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${#lists.contains(statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
+								<!-- onchange="submit();" -->
+								<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
+							</div>
+						</div>
+					</div>					
+				</form>
+			</div>
+		
+			<div th:with="showUser='true'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${lstCmd}, showUser)"></div>
+			
+		<!-- <h4 th:if="${lstCmd.size()==0}">Aucune commande n'existe encore</h4>
+		<div th:if="${lstCmd.size() > 0}">	
+			
+			<table class="table">					
+					<tbody>
+						<tr class="rowCmd" th:each="cmd, itemStat :${lstCmd}">						
+							<td><h5	class="" > <a class="text-dark" th:text="' N° ' + ${cmd.id}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5></td>
+							<td>
+								<form th:action="@{viewUser}" method="get" id="frmStatutFilter" class="d-flex align-items-center">
+									<h4 th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom} ">
+										<a class="text-dark" th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom} " th:href="@{viewUser(id=${cmd.user.id})}"></a>
+									</h4>
+									<input type="hidden" th:value="${cmd.user.id}" name="id">
+									<button type="submit" class="btn btn-sm text-dark m3-2" name="action" value="viewUserFromCommande" id="viewUserFromCommande">
+										<i class="fa fa-eye text-dark" aria-hidden="true" ></i>
+									</button>
+								</form>
+							</td>
+							<td>									
+								<h5	class="" > <a class="text-dark"  th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
+								<h6	class="" ><a class="text-success" th:text="${cmd.infoComp}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+								<h6	class="" ><a class="text-dark" th:text="${cmd.msgCommercant}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+							</td>
+							<td >
+								<div th:if="${cmd.calculeTotalReductionAll()>0}">
+									<h4 th:text="${#numbers.formatDecimal(cmd.totalSansPromo, 1, 2, 'COMMA')} + '€'"></h4>
+								</div>		
+							</td>						
+														
+							<td >	
+								<div th:if="${cmd.calculeTotalReductionAll()>0}">
+									<h4 th:text="'-' + ${#numbers.formatDecimal(cmd.calculeTotalReductionAll(), 1, 2, 'COMMA')} + '€'"></h4>	
+								</div>							
+							</td>
+							<td><h4 th:text="${#numbers.formatDecimal(cmd.totalFinal, 1, 2, 'COMMA')} + '€'"></h4>	</td>
+							<td>
+								<div class="pt-2">
+									<h6 th:class="${cmd.getCssClassStatut()}"><a style="color: inherit;" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+								</div>	
+							</td>							
+							<td>
+								<div class="">
+									<a th:href="@{viewCommande(id=${cmd.id})}"><i class="fa fa-pencil-square-o text-dark" aria-hidden="true" ></i></a>									
+								</div>											      
+								<div class="">
+									<a th:href="@{deleteCommandeRequest(id=${cmd.id})}"><i class="fa fa-trash text-danger" aria-hidden="true" ></i></a>									
+								</div>
+							</td>
+						</tr>
+				</tbody>
+			</table>	
+		</div> -->
+	</div>	
+	
+	
+    <div th:replace="fragments/general.html :: assets"></div>
+	<script>
+		
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#liCmd');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');   
+      	})
+      	
+      	function checkFilter(chkInput){ 			
+ 			 var checkboxes = $('input[name=statutFilter]:checked').length ;
+ 			 if(checkboxes==0){
+ 				document.getElementById('effacerFilters').click();	  
+ 			 } 	
+ 			 else {
+ 				$( "#frmStatutFilter" ).submit();
+ 			 }
+ 		}
+    </script>	
+</body>
+</html>

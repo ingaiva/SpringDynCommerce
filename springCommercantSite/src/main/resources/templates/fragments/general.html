@@ -13,8 +13,16 @@
 </head>
 
 <body>
+	<header th:fragment="headerFragment" class="fixed-top">
+		<div th:insert="fragments/general.html :: navbarUser"></div>
+		<div th:replace="fragments/general.html :: logoSite"></div>
+		<div class="my-1">
+			<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>
+		</div>
+	</header>
 
-	<nav th:fragment="navbarUser" class="navbar navbar-expand-md navbar-dark bg-dark">		
+
+	<nav th:fragment="navbarUser" class="navbar navbar-expand-md navbar-dark bg-dark py-0 ">		
 		<button class="navbar-toggler" type="button" data-toggle="collapse"	data-target="#navbarNavDropdownU" aria-controls="navbarNavDropdownU" aria-expanded="false" aria-label="Navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
@@ -22,123 +30,46 @@
 			<ul class="navbar-nav ml-auto">
 				<li id="liPanier" class="nav-item">	
 					<a class="nav-link"  th:if="${panier==null || panier.produits==null || panier.produits.size()==0}" data-toggle="modal" data-target="#panierVide">
-						<i class="fa fa-shopping-cart" aria-hidden="true"></i>
-						Panier</a>						
-					<!-- <a class="nav-link"  th:href="@{panier}" th:unless="${panier==null || panier.size()==0}" th:text="'Panier (' + ${panier.size()} + ')'">
-						<i class="fa fa-shopping-cart" aria-hidden="true"></i>
-						Panier</a> -->
-					<a class="nav-link"  th:unless="${panier==null || panier.produits==null || panier.produits.size()==0}" th:text="'Panier (' + ${panier.produits.size()} + ')'" data-toggle="modal" data-target="#panierModal">
-						<i class="fa fa-shopping-cart" aria-hidden="true"></i>
+						<i class="fa fa-shopping-cart mr-1" aria-hidden="true"></i>
 						Panier</a>
+					<a class="nav-link"  th:unless="${panier==null || panier.produits==null || panier.produits.size()==0}"  data-toggle="modal" data-target="#panierModal">
+						<i class="fa fa-shopping-cart mr-1" aria-hidden="true"></i>
+						<span th:text="'Panier (' + ${panier.produits.size()} + ')'">
+						</span>
+					</a>
 				</li>
 							
 				<li id="liConnect" class="nav-item" th:if="${connectedCli==null}">
-					<a class="nav-link" th:href="@{login}">Se connecter</a>
+					<a class="nav-link" th:href="@{login}"><i class="fa fa-sign-in mr-1" aria-hidden="true"></i>Se connecter</a>
 				</li>
 				<li id="liCompte"  class="nav-item dropdown" th:if="${connectedCli!=null}">
+										
 					<a class="nav-link dropdown-toggle"  id="navbarDropdownMenuLink" data-toggle="dropdown"
-						aria-haspopup="true" aria-expanded="false" th:text=" 'Espace client '+ ${connectedCli.nom} + ' ' +${connectedCli.prenom} "> Votre compte	</a>
+						aria-haspopup="true" aria-expanded="false">
+						<i class="fa fa-user-o mr-1" aria-hidden="true"></i> 
+						<span th:text=" 'Espace client '+ ${connectedCli.nom} + ' ' +${connectedCli.prenom} "></span>							
+					</a>
 					<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-						<a class="dropdown-item" th:href="@{listCmd}">Vos commandes</a> 
-						<!-- <a class="dropdown-item" th:href="@{panier}">Commander</a> -->
-						<a	class="dropdown-item" th:href="@{modifierCompte}">Votre compte</a> 
-						<a class="dropdown-item" th:href="@{deconnexion}">Se deconnecter</a> 
-						<a class="dropdown-item" th:href="@{supprimerCompte}">Supprimer votre compte </a>
-					</div>
-				</li>				
+						<!-- <a class="dropdown-item" th:href="@{listCmd}">Vos commandes</a>  -->						
+						<a	class="dropdown-item" th:href="@{modifierCompte}"><i class="fa fa-address-card-o mr-1" aria-hidden="true"></i>
+						Vos informations</a> 
+						<!-- <a class="dropdown-item" th:href="@{deconnexion}">Se deconnecter</a> --> 
+						<a class="dropdown-item" th:href="@{supprimerCompte}"><i class="fa fa-user-times mr-1" aria-hidden="true"></i>
+						Supprimer votre compte </a>
+					</div>					
+				</li>	
+				<li id="liListCmd" class="nav-item"  th:if="${connectedCli!=null}">
+					<a class="nav-link" th:href="@{listCmd}"><i class="fa fa-list mr-1" aria-hidden="true"></i>Vos commandes</a>
+				</li>
+				<li id="liDeconnexion" class="nav-item"  th:if="${connectedCli!=null}">
+					<a  class="nav-link" th:href="@{deconnexion}"><i class="fa fa-sign-out mr-1" aria-hidden="true"></i>Se deconnecter</a>
+				</li>			
 			</ul>
-		</div>
-		
-		<div th:if="${panier!=null && panier.produits!=null && panier.produits.size()>0}" th:replace="fragments/general.html :: viewPanier"></div>
+		</div>	
 	</nav>
 	
-	<div  th:fragment="viewPanier" class="modal fade" tabindex="-1"  id="panierVide" >
-	  <div class="modal-dialog">
-	    <div class="modal-content">
-	      <div class="modal-header">				        
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
-	          <span aria-hidden="true">&times;</span>
-	        </button>
-	      </div>
-	      <div class="modal-body">	 			      
-	       <h3>Votre panier est vide</h3>	        
-	      </div>
-	      <div class="modal-footer">
-	        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>	        
-	      </div>
-	    </div>
-	  </div>
-	</div>
-				
-	<form th:fragment="viewPanier"  method="post"	th:action="@{creerCommande}" th:object="${panier}" >
-		<div class="modal fade " tabindex="-1"  id="panierModal" th:if="${panier!=null && panier.produits!=null && panier.produits.size()>0}">
-		  <div class="modal-dialog modal-lg">
-		    <div class="modal-content">
-		      <div class="modal-header">	        
-		        <h4 class="modal-title" >Panier</h4>	
-		        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
-		          <span aria-hidden="true">&times;</span>
-		        </button>
-		      </div>
-		      <div class="modal-body">	
-		      	<!-- <h3 th:text="${session.monTest.libelle}"></h3> -->
-		       	<table class="table">					
-					<tbody>
-						<tr class="item" th:each="p, itemStat :*{produits}">
-							<td>
-								<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" >								
-							</td>
-							<td>
-								<input type="hidden" th:field="*{produits[__${itemStat.index}__].id}" />								
-								<input type="hidden" th:field="*{produits[__${itemStat.index}__].libelle}" />
-								<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
-								<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
-								<label class="prixV" th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
-								<label class="prix d-none" th:text="${p.prix}"></label>
-							</td>
-							<td >								
-								<div class="input-group mb-1">
-									<div class="input-group-prepend">
-										<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQte(this)"></i>
-										</span>
-									</div>
-									<input style="width:60px;" class="form-control qte" type="number" th:field="*{produits[__${itemStat.index}__].qte}" onchange="updateQuantity(this);">
-									
-									<div class="input-group-append" id="button-addon-line">
-										<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQte(this);"></i>
-										</span>	
-									</div>
-								</div>
-							</td>							
-														
-							<td >
-								<h5	class="subtotalV font-weight-bold mr-3"  th:text="${#numbers.formatDecimal(p.getTotalProduit(), 1, 2, 'COMMA')} + '€'"></h5>
-								<label class="subtotal d-none" th:text="${p.getTotalProduit()}"></label>
-							</td>							
-							<td>
-								<span class="input-group-text"> <i class="fa fa-trash text-danger" aria-hidden="true" onclick="supprimerProd(this)"></i>
-								</span>																	
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				
-				<div>
-					<h5	class="font-weight-bold mr-3 totalPanier" id="totalPanier" th:text=" 'Total : ' + ${#numbers.formatDecimal(panier.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
-				</div>		        
-		      </div>
-		      <div class="modal-footer">
-		      	<button type="submit" class="py-0 btn btn-sm btn-outline-danger" name="action" value="valPanier" id="submitPanier"><i class="fa fa-times" aria-hidden="true"></i></button>	      	
-		      
-<!-- 		        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button> -->
-		        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="cmd" id="submitPanier">Passer la commande</button>
-		      </div>
-		    </div>
-		  </div>
-		</div>
-	</form>
 	
-	<nav th:fragment="navbarSiteCommercant" class="navbar navbar-expand-md navbar-light border">
+	<nav th:fragment="navbarSiteCommercant" class="navbar navbar-expand-md navbar-light bg-warning border py-0 text-dark">
 		<a class="navbar-brand " th:href="@{accueil}">									 
 		</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse"	data-target="#navbarNavDropdownS" aria-controls="navbarNavDropdownS" aria-expanded="false" aria-label="Toggle navigation">
@@ -147,14 +78,14 @@
 		<div class="collapse navbar-collapse" id="navbarNavDropdownS">
 			<ul class="navbar-nav mx-auto">
 				<li id="liHome" class="nav-item mx-2">
-					<a class="nav-link"  th:href="@{accueil}"> 
-					<i class="fa fa-home text-warning" aria-hidden="true" style="margin-right: 5px;"></i>
+					<a class="nav-link text-dark"  th:href="@{accueil}"> 
+					<i class="fa fa-home text-dark" aria-hidden="true" style="margin-right: 5px;"></i>
 						Accueil 
 					</a>
 				</li>
 				
 				<li th:if="${lstCat.size()<5}" id="listProd" class="nav-item mx-2">
-					<a class="nav-link" th:href="@{listProd}" >Tous les produits</a> 
+					<a class="nav-link text-dark" th:href="@{listProd}" >Tous les produits</a> 
 				</li>
 				<li th:if="${lstCat.size()<5}" th:each="c : ${lstCat}" th:id="'liCatProd' + ${c.id}" class="nav-item">
 					<a class="nav-link"  th:text="${c.titre}" th:href="@{listProdByCat(idCat=${c.id})}"></a>
@@ -168,7 +99,7 @@
 						</a>											
 					</div>
 				</li>
-				<li id="liContact" class="nav-item mx-2">
+				<li id="liContact" class="nav-item mx-2 d-none">
 					<a class="nav-link" > Contact </a>
 				</li>				
 			</ul>
@@ -183,8 +114,7 @@
 			</div>
 		</div>
 	</div>		
-	
-	
+		
 	
 	
 	<div th:fragment="productList(lstProd)" th:if="${lstProd.size() > 0}" class="divProduitMd mt-1 justify-content-start">	
@@ -193,7 +123,7 @@
 				<a th:href="@{produit(id=${p.id})}" >
 					<img th:if="${p.photos.size() > 0 }" th:src="${p.defPhotoDataMd()}"	class="border p-1 imgAutoSize">
 				</a>
-				<p th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquette"></p>							
+				<p th:if="${!p.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquette"></p>							
 				<h4 class="font-weight-bold capitale">
 					<a class="text-dark"  th:text="${p.libelle}" th:href="@{produit(id=${p.id})}"></a>
 				</h4>
@@ -233,6 +163,8 @@
 		</div>
 	</div>
 	
+	
+	
 	<div th:fragment="infoCompte">
 		<div th:if="${user.id==null}">
 			<h3>Nouveau compte</h3>
@@ -255,11 +187,11 @@
 			</div>			
 		</div>
 		<div class="row  bg-info">
-			<div class="col-7 form-group text-left">
+			<div class="col-6 form-group text-left">
 				<label>E-mail</label> 
 				<input type="email"	class="form-control" placeholder="Votre mail" th:field="*{mail}" required>
 			</div>	
-			<div class="col form-group text-left ">
+			<div th:if="${suppressionCompteRequest==null}" class="col form-group text-left ">
 				<label for="password">Mot de passe</label> 
 				<input type="password"	class="form-control"  placeholder="Mot de passe" th:field="*{password}" required>
 			</div>				
@@ -302,6 +234,8 @@
 		</div>
 	</div>
 	
+	
+	
 	<div th:fragment="footerContact" >
 		<hr>	
 		<div style="padding: 10px 20px; display: flex; justify-content: space-between; flex-wrap: wrap;">
@@ -313,15 +247,17 @@
 						<h5 class=" my-2" th:text="${session.paramMP.contactTitre!=null && session.paramMP.contactTitre.length()>0} ? ${session.paramMP.contactTitre} : 'Contact'"></h5>
 					</div>				
 	            	<div th:if="${session.paramMP.contactTel1 !=null && session.paramMP.contactTel1.length()>0}">
-		            	<i class="fa fa-phone" aria-hidden="true"></i>
+		            	<i class="fa fa-phone mr-2" aria-hidden="true"></i>
 						<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.contactTel1}" ></label>            	
 	            	</div>
 	            	<div th:if="${session.paramMP.contactTel2!=null && session.paramMP.contactTel2.length()>0}">
-		            	<i class="fa fa-phone" aria-hidden="true"></i>
+		            	<i class="fa fa-phone mr-2" aria-hidden="true"></i>
 						<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.contactTel2}" ></label>            	
 	            	</div>
 	            	<div th:if="${session.paramMP.contactMail !=null && session.paramMP.contactMail.length()>0}">
-		            	<i class="fa fa-envelope-o" aria-hidden="true"></i>
+		            	<a th:href="@{'mailto:' + ${session.paramMP.contactMail}}" class="text-dark ">
+			            	<i class="fa fa-envelope-o mr-2" aria-hidden="true"></i>
+		            	</a>
 						<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.contactMail}" ></label>            	
 	            	</div>
 	            </div> 
@@ -345,12 +281,113 @@
 		 </div>
 	</footer>
 	
+	
 	<div th:fragment="assets" th:remove="tag">
+		<div  th:fragment="viewPanierVide" class="modal fade" tabindex="-1"  id="panierVide" >
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">				        
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">	 			      
+		       <h3>Votre panier est vide</h3>	        
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>	        
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	
+	
+		<form th:fragment="viewPanier"  method="post"	th:action="@{creerCommande}" th:object="${panier}" >
+			<div class="modal fade " tabindex="-1"  id="panierModal" th:if="${panier!=null && panier.produits!=null && panier.produits.size()>0}">
+			  <div class="modal-dialog modal-lg">
+			    <div class="modal-content">
+			      <div class="modal-header">	        
+			        <h4 class="modal-title" >Panier</h4>	
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">	
+			      	<!-- <h3 th:text="${session.monTest.libelle}"></h3> -->
+			       	<table class="table">					
+						<tbody>
+							<tr class="item" th:each="p, itemStat :*{produits}">
+								
+								<td>
+									<div class="d-lg-flex">
+										<div class="mr-3"><img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" ></div>
+										<div>
+											<input type="hidden" th:field="*{produits[__${itemStat.index}__].id}" />								
+											<input type="hidden" th:field="*{produits[__${itemStat.index}__].libelle}" />
+											<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
+											<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
+											<label class="prixV" th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
+											<label class="prix d-none" th:text="${p.prix}"></label>
+										</div>
+									</div>									
+								</td>
+								<td >								
+									<div class="input-group mb-1" style="width:150px;">
+										<div class="input-group-prepend">
+											<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQte(this)"></i>
+											</span>
+										</div>
+										<input style="width:60px;" class="form-control qte" type="number" th:field="*{produits[__${itemStat.index}__].qte}" onchange="updateQuantity(this);">
+										
+										<div class="input-group-append" id="button-addon-line">
+											<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQte(this);"></i>
+											</span>	
+										</div>
+									</div>
+								</td>							
+															
+								<td >
+									<h5	class="subtotalV font-weight-bold mr-3"  th:text="${#numbers.formatDecimal(p.getTotalProduit(), 1, 2, 'COMMA')} + '€'"></h5>
+									<label class="subtotal d-none" th:text="${p.getTotalProduit()}"></label>
+								</td>							
+								<td>
+									<span class="input-group-text"> <i class="fa fa-trash text-danger" aria-hidden="true" onclick="supprimerProd(this)"></i>
+									</span>																	
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					
+					<div>
+						<h5	class="font-weight-bold mr-3 totalPanier" id="totalPanier" th:text=" 'Total : ' + ${#numbers.formatDecimal(panier.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
+					</div>		        
+			      </div>
+			      <div class="modal-footer">
+			      	<button type="submit" class="py-0 btn btn-sm btn-outline-danger" name="action" value="valPanier" id="submitPanier"><i class="fa fa-times" aria-hidden="true"></i></button>	      	
+			      
+	<!-- 		        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button> -->
+			        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="cmd" id="submitPanier">Passer la commande</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+		</form>
+	
+	
 	    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 		<script	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"	crossorigin="anonymous"></script>
 		<script	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>	
 		<script type="text/javascript" th:inline="javascript">
-		
+			
+		function adjustBody() {
+			var h = $('header').height();
+ 			if($('header').hasClass( "fixed-top" )){ 				
+	 		   $('body').css("padding-top", h);
+ 			}
+ 			else{
+ 				 $('body').removeClass("padding-top");
+ 			} 	
+		}
 			
 			function addQte(btn) {
 				let parent = btn.parentElement.parentElement.parentElement;

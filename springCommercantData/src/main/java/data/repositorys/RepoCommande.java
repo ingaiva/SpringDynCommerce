@@ -17,8 +17,23 @@ import data.entitys.*;
 @RepositoryRestResource
 public interface RepoCommande   extends JpaRepository<Commande, Long>  {
 
-	@Query("select cmd from Commande cmd where cmd.user.id=:x")
+	@Query("select cmd from Commande cmd where cmd.user.id=:x  ORDER BY cmd.date DESC")
 	public List<Commande> getCommandesUser(@Param("x") Long idUser);
+	
+	@Query("select SUM(cmd.totalFinal) from Commande cmd where cmd.user.id=:x and cmd.statut in (:y)")
+	public Float getTotalByUserFiltered(@Param("x") Long idUser, @Param("y") List<String> statutValues);
+	
+	@Query("select count(*) from Commande cmd where cmd.user.id=:x and cmd.statut in (:y)")
+	public Integer getCountByUserFiltered(@Param("x") Long idUser, @Param("y") List<String> statutValues);
+	
+	@Query("select cmd from Commande cmd where cmd.user.id=:x and cmd.statut in (:y) ORDER BY cmd.date DESC")
+	public List<Commande> getCommandesUserFiltered(@Param("x") Long idUser, @Param("y") List<String> statutValues);
+	
+	@Query("select cmd from Commande cmd where cmd.statut in (:y) ORDER BY cmd.date DESC")
+	public List<Commande> getCommandesFiltered(@Param("y") List<String> statutValues);
+	
+	@Query("select cmd from Commande cmd ORDER BY cmd.date DESC")
+	public List<Commande> getCommandesOrdered();
 	
 	@Transactional
 	@Modifying
@@ -27,7 +42,20 @@ public interface RepoCommande   extends JpaRepository<Commande, Long>  {
 
 	@Transactional
 	@Modifying
-	@Query("delete from CommandeProduit cp where cp.commande.user.id=:x")
-	public void deleteCommandeProduitByUser(@Param("x") Long idClient);
+	@Query("update Commande c "
+			+ "set c.infoComp = :infoComp, c.msgCommercant=:msgCommercant, c.statut=:statut"
+			+ ",c.totalSansPromo=:totalSansPromo, c.totalReductionStandard=:totalReductionStandard, c.reductionSpeciale=:reductionSpeciale, c.totalFinal=:totalFinal where c.id =:id")
+	int updateInfo( @Param("id") Long idCommande, 
+			@Param("infoComp") String infoComp, 
+			@Param("msgCommercant") String msgCommercant, @Param("statut") String statut
+			, @Param("totalSansPromo") Float totalSansPromo , @Param("totalReductionStandard") Float totalReductionStandard,
+			@Param("reductionSpeciale") Float reductionSpeciale, @Param("totalFinal") Float totalFinal);
+	
+	
+	@Transactional
+	@Modifying
+	@Query("update Commande c set c.statut=:statut where c.id =:id")
+	int updateStatut( @Param("id") Long idCommande, @Param("statut") String statut);
+	
 
 }

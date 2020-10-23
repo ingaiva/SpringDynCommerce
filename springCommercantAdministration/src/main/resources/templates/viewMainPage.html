@@ -3,322 +3,417 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<title>Page d'accueil du site</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="stylesheet" th:href="@{css/style.css}">
-	<link rel="stylesheet"
-		href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-		crossorigin="anonymous">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<title>Page d'accueil du site</title>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" th:href="@{css/style.css}">
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+	crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 </head>
 
 <body>
 	<!-- <div class="mb-1" th:insert="fragments/general.html :: navbarDynamique">	
 	</div>	 -->
-	<h4 class="my-3 text-center"> Paramétrage de la page principale </h4>
-	
-	<div class="divCenterContainer" >		
-		
-		<form id="frm" enctype="multipart/form-data"  method="post" th:action="@{saveParam}" th:object="${paramP}">
-<!-- 				<div class=" border d-flex flex-lg-row flex-md-column justify-content-between bg-dark text-white"> -->
-				<div class=" d-flex justify-content-between bg-dark text-white">
-					
-					<div class="divChkParam  pt-2">
-						<div class="form-check form-check-inline px-2 ">
-							<input class="form-check-input" type="checkbox"	th:field="*{showCategories}"> 
-							<label class="form-check-label" th:for="${#ids.prev('showCategories')}">Afficher les catégories</label>
-						</div>
-						<div class="form-check form-check-inline px-2 ">
-							<input class="form-check-input" type="checkbox"	th:field="*{showPromo}"> 
-							<label	class="form-check-label" th:for="${#ids.prev('showPromo')}">Afficher les actualités</label>
-						</div>
+	<h4 class="my-3 text-center">Paramétrage de la page principale</h4>
+
+	<div class="divCenterContainer">
+
+		<form id="frm" enctype="multipart/form-data" method="post"
+			th:action="@{saveParam}" th:object="${paramP}">
+
+			<div class=" d-flex justify-content-between bg-dark text-white">
+
+				<div class="divChkParam  pt-2">
+					<div class="form-check form-check-inline px-2 ">
+						<input class="form-check-input" type="checkbox"
+							th:field="*{showCategories}"> <label
+							class="form-check-label" th:for="${#ids.prev('showCategories')}">Afficher
+							les catégories</label>
 					</div>
-					
-					<div class="d-flex">
-						<button type="submit" class="btn btn-success col px-1 mr-2" >Enregistrer</button>
-						<a th:href="@{accueil}" class="col px-1  btn btn-danger">Annuler</a>
+					<div class="form-check form-check-inline px-2 ">
+						<input class="form-check-input" type="checkbox"
+							th:field="*{showPromo}"> <label class="form-check-label"
+							th:for="${#ids.prev('showPromo')}">Afficher les
+							actualités</label>
 					</div>
-				</div>			
-				
-				
-				<input type="hidden" th:field="*{id}"> 	
-				<input type="hidden" th:field="*{logoPosition}"> 
-				<input type="hidden"  th:if="${! paramP.hasLogo()}" th:field="*{logoTitre}">				
-				<input type="hidden" th:field="*{statutPromoToShow}"> 
-				
-								
-				<div class="logo text-center py-2 ">			
+				</div>
+
+				<div class="d-flex">
+					<button type="submit" class="btn btn-success px-1 mr-2">Enregistrer</button>
+					<a th:href="@{accueil}" class="px-1  btn btn-danger">Revenir à
+						la page d'accueil</a>
+				</div>
+			</div>
+
+			<div class="mainPageContent border border-dark p-3 mx-3 mt-3">
+				<div th:insert="fragments/general.html :: navbarUser"></div>
+
+				<input type="hidden" th:field="*{id}"> <input type="hidden"
+					th:field="*{logoPosition}"> <input type="hidden"
+					th:if="${! paramP.hasLogo()}" th:field="*{logoTitre}"> <input
+					type="hidden" th:field="*{statutPromoToShow}">
+
+
+				<div class="logo text-center py-2 ">
 					<div class="d-flex mx-auto" style="width: 400px;">
 						<h4 class=" my-2">Votre logo</h4>
-						<input type="button" class="mx-2 py-0 btn btn-sm btn-outline-success "	onclick="getfileLogo()" value="Ajouter" th:value="${paramP.hasLogo()} ? 'Modifier' : 'Ajouter'"/>
+						<input type="button"
+							class="mx-2 py-0 btn btn-sm btn-outline-success "
+							onclick="getfileLogo()" value="Ajouter"
+							th:value="${paramP.hasLogo()} ? 'Modifier' : 'Ajouter'" />
 						<div class="btn-group" role="group" aria-label="">
-							<button type="submit" name="action"  class="btn" value="logoPositionLeft"><i class="fa fa-align-left" aria-hidden="true"></i>
+							<button type="submit" name="action" class="btn"
+								value="logoPositionLeft">
+								<i class="fa fa-align-left" aria-hidden="true"></i>
 							</button>
-							<button type="submit" name="action"  class="btn" value="logoPositionCenter"><i class="fa fa-align-center" aria-hidden="true"></i>
+							<button type="submit" name="action" class="btn"
+								value="logoPositionCenter">
+								<i class="fa fa-align-center" aria-hidden="true"></i>
 							</button>
-							<button type="submit" name="action"  class="btn" value="logoPositionRight"><i class="fa fa-align-right" aria-hidden="true"></i>
+							<button type="submit" name="action" class="btn"
+								value="logoPositionRight">
+								<i class="fa fa-align-right" aria-hidden="true"></i>
 							</button>
 						</div>
 						<div class="d-none">
-							<input type="file" accept="image/*" name="choixLogo" id="choixLogo"
-								onchange="readUrlLogo(this);" />
-							<button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="addLogo" id="submitLogo"	>Valider</button>
-							
+							<input type="file" accept="image/*" name="choixLogo"
+								id="choixLogo" onchange="readUrlLogo(this);" />
+							<button type="submit"
+								class="mx-2 py-0 btn btn-sm btn-outline-success " name="action"
+								value="addLogo" id="submitLogo">Valider</button>
+
 						</div>
-					</div>									
-				
- 					<div th:class="${paramP.logoPositionClass()}"> 					
-						<div th:if="${paramP.hasLogo()}"  class="border border-info rounded p-2 my-2  divLogo " style="min-width: 100px; max-width: 200px;">
-										
-							<img  th:src="${paramP.getLogoStr()}" 	id="logoData" width="auto" height="auto"	style="max-width: 100%;">
-			
-							<div class="input-group  mt-1">								
+					</div>
+
+					<div th:class="${paramP.logoPositionClass()}">
+						<div th:if="${paramP.hasLogo()}"
+							class="border border-info rounded p-2 my-2  divLogo "
+							style="min-width: 100px; max-width: 200px;">
+
+							<img th:src="${paramP.getLogoStr()}" id="logoData" width="auto"
+								height="auto" style="max-width: 100%;">
+
+							<div class="input-group  mt-1">
 								<div class="input-group-prepend">
-									<span class="input-group-text"> 
-										<i class="fa fa-commenting-o text-info" aria-hidden="true"></i>
+									<span class="input-group-text"> <i
+										class="fa fa-commenting-o text-info" aria-hidden="true"></i>
 									</span>
 								</div>
-								
-								<input type="text" class="form-control text-info font-italic" th:field="*{logoTitre}" placeholder="Titre" aria-label="Texte">
-								
-								<div class="input-group-append" id="button-addon-line">	
+
+								<input type="text" class="form-control text-info font-italic"
+									th:field="*{logoTitre}" placeholder="Titre" aria-label="Texte">
+
+								<div class="input-group-append" id="button-addon-line">
 									<div class="text-left">
-										<a	th:href="@{supprimerLogo}"	class=" px-2 ml-1 btn btn-outline-danger" data-toggle="tooltip"	data-placement="top" title="Supprimer logo">
-											<i class="fa fa-trash text-danger" aria-hidden="true"></i>											
+										<a th:href="@{supprimerLogo}"
+											class=" px-2 ml-1 btn btn-outline-danger"
+											data-toggle="tooltip" data-placement="top"
+											title="Supprimer logo"> <i
+											class="fa fa-trash text-danger" aria-hidden="true"></i>
 										</a>
 									</div>
 								</div>
 							</div>
 						</div>
- 					</div>	
-				
-			</div>
-			
-			<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>					
-		
-			
-			<div class="slogan text-center px-4 my-3">
-				<div class="form-group input-group-lg">
-					<textarea class="form-control text-info font-italic font-weight-bold text-center" th:field="*{texteAccueil}" placeholder="Votre texte d'accueil" aria-label="Votre texte d'accueil"></textarea>						
+					</div>
+
 				</div>
-			</div>
-	
-			<div class="galerie mx-auto my-3 py-2 bg-light " style="width: 80%;">			
-				
-				<div class="d-flex mx-auto justify-content-center" >
-					<h4 class=" my-2">Vos images</h4>
-					<input type="button" class="mx-2 py-0 btn btn-sm btn-outline-success "	onclick="getFileGalerie()" value="Ajouter des images" />
-					<div class="d-none">
-						<input type="file" accept="image/*" name="choixImg" id="choixImg" onchange="readUrlImg(this);" />		
-						<button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="addImg" id="submitImg"	>Valider</button>
-									
+
+				<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>
+
+
+				<div class="slogan text-center px-4 my-3">
+					<div class="form-group input-group-lg">
+						<textarea
+							class="form-control text-info font-italic font-weight-bold text-center"
+							th:field="*{texteAccueil}" placeholder="Votre texte d'accueil"
+							aria-label="Votre texte d'accueil"></textarea>
 					</div>
 				</div>
-				
-				<div th:if="${paramP.photos.size() > 0}" id="carouselCaptions" class="carousel slide " data-ride="carousel">
-				  <!-- th:if="${param.photos.size() > 0}"  -->
-				  <ol class="carousel-indicators"  >
-				    <li data-target="#carouselCaptions" th:each="ph, iter : *{photos}" th:attr="data-slide-to= ${iter.index}" th:class="${iter.index==0} ? 'active'"></li>				    
-				  </ol>
-				  <div class="carousel-inner text-center">
-				    <div th:each="ph, iter : *{photos}"  th:class="${iter.index==0} ? 'carousel-item active ' : 'carousel-item '" style="min-height: 200px;">
-				      	<img class="d-block border mx-auto my-2" width="auto" height="auto"	style="max-width: 100%;" alt="image..." th:src="'data:image/png;base64,'+ ${ph.getImageStr()}">
-						<div class="carousel-caption d-none d-md-block" >	
-							<a	th:href="@{supprimerImgParam(id=${ph.id})}"	class="px-2 ml-1 btn btn-outline-danger bg-white mt-3"  data-toggle="tooltip"	data-placement="top" title="Supprimer image"> 
-								<i class="fa fa-trash text-danger" aria-hidden="true"></i>
-							</a>
-						</div>
-					</div>	
-				  </div>
-				  <a class="carousel-control-prev " href="#carouselCaptions" role="button" data-slide="prev">
-				    <span class="carousel-control-prev-icon bg-dark" aria-hidden="true"></span>
-				    <span class="sr-only">Previous</span>
-				  </a>
-				  <a class="carousel-control-next " href="#carouselCaptions" role="button" data-slide="next">
-				    <span class="carousel-control-next-icon bg-dark" aria-hidden="true"></span>
-				    <span class="sr-only">Next</span>
-				  </a>
-				</div>
-			</div>			
-			
-			<div class="modal fade" tabindex="-1"  id="contactModal" >
-			  <div class="modal-dialog">
-			    <div class="modal-content">
-			      <div class="modal-header">
-			        <input class="form-control modal-title" placeholder="Titre pour le contact" th:field="*{contactTitre}" />	
-			        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
-			          <span aria-hidden="true">&times;</span>
-			        </button>
-			      </div>
-			      <div class="modal-body">	 			      
-			        <div class="input-group mb-1">
-						<div class="input-group-prepend">
-							<span class="input-group-text">
-								<i class="fa fa-phone" aria-hidden="true"></i>
-							</span>
-						</div>
-						<input class="form-control" placeholder="Numéro de téléphone" th:field="*{contactTel1}"  />				
-					</div>	       
-					<div class="input-group mb-1">
-						<div class="input-group-prepend">
-							<span class="input-group-text">
-								<i class="fa fa-phone" aria-hidden="true"></i>
-							</span>
-						</div>
-						<input class="form-control" placeholder="Numéro de téléphone mobile" th:field="*{contactTel2}"  />				
-					</div>
-					
-					<div class="input-group mb-1">
-						<div class="input-group-prepend">
-							<span class="input-group-text">
-								<i class="fa fa-envelope-o" aria-hidden="true"></i>
-							</span>
-						</div>
-						<input class="form-control" placeholder="Mail" th:field="*{contactMail}" />				
-					</div>
-			        
-			      </div>
-			      <div class="modal-footer">
-			        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button>
-			        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="addContact" id="submitContact">Valider</button>
-			      </div>
-			    </div>
-			  </div>
-			</div>
-			
-			<div class="modal fade" tabindex="-1"  id="horairesModal" >
-			  <div class="modal-dialog">
-			    <div class="modal-content">
-			      <div class="modal-header">
-			        <input class="form-control modal-title" placeholder="Titre" th:field="*{horairesTitre}" />	
-			        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
-			          <span aria-hidden="true">&times;</span>
-			        </button>
-			      </div>
-			      <div class="modal-body">	 			      
-			        <div class="input-group mb-1">
-						<div class="input-group-prepend">
-							<span class="input-group-text">
-								<i class="fa fa-calendar" aria-hidden="true"></i>
-							</span>
-						</div>
-						<textarea  class="form-control" placeholder="Vos horaires" th:field="*{horairesText}"></textarea>				
-					</div>
-			      </div>
-			      <div class="modal-footer">
-			        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button>
-			        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="addHoraires" id="submitContact">Valider</button>
-			      </div>
-			    </div>
-			  </div>
-			</div>
-			
-			<!-- -------------- -->
-			<div th:if="${paramP.showCategories}" class="divCategoriesMP mt-3">
-				<div class="border d-flex align-items-center justify-content-center" th:each="c : ${lstCat}" >
-					<div class="">
-						<img th:if="${c.photos.size() > 0 }" th:src="${c.defPhotoDataMd()}"	class="border p-1" width="auto" height="auto" style="max-width: 100%;">
-						<h4 class="my-2" th:text="${c.titre}"></h4>		
-					</div>
-				</div>
-			</div>	
-			
-			<div th:if="${paramP.showPromo}" class="mt-3">	
-				<div class="d-flex align-items-center justify-content-center" >            		
-					<h5 class=" my-1" th:text="${paramP.promoTitre!=null && paramP.promoTitre.length()>0} ? ${paramP.promoTitre} : 'Nos produits du moment'"></h5>
-					<input type="button" class="mx-2 py-0 btn btn-sm btn-outline-success "	value="Modifier" data-toggle="modal" data-target="#titrePromoModal" />					
-				</div>
-				
-				<div  class="divPromoMP mt-2">				
-					<div class="d-flex align-items-center justify-content-center" th:each="p : ${lstPromo}" >					
-						<div class="">					
-							<h4 class="my-2" ></h4>		
+
+				<div class="galerie mx-auto my-3 py-2 bg-light " style="width: 80%;">
+
+					<div class="d-flex mx-auto justify-content-center">
+						<h4 class=" my-2">Vos images</h4>
+						<input type="button"
+							class="mx-2 py-0 btn btn-sm btn-outline-success "
+							onclick="getFileGalerie()" value="Ajouter des images" />
+						<div class="d-none">
+							<input type="file" accept="image/*" name="choixImg" id="choixImg"
+								onchange="readUrlImg(this);" />
+							<button type="submit"
+								class="mx-2 py-0 btn btn-sm btn-outline-success " name="action"
+								value="addImg" id="submitImg">Valider</button>
+
 						</div>
 					</div>
-				</div>
-				
-				<div class="modal fade" tabindex="-1"  id="titrePromoModal" >
-				  <div class="modal-dialog">
-				    <div class="modal-content">
-				      <div class="modal-header">				        
-				        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
-				          <span aria-hidden="true">&times;</span>
-				        </button>
-				      </div>
-				      <div class="modal-body">	 			      
-				        <div class="input-group mb-1">
-							<div class="input-group-prepend">
-								<span class="input-group-text">
-									<i class="fa fa-paragraph" aria-hidden="true"></i>
-								</span>
+
+					<div th:if="${paramP.photos.size() > 0}" id="carouselCaptions"
+						class="carousel slide " data-ride="carousel">
+						<!-- th:if="${param.photos.size() > 0}"  -->
+						<ol class="carousel-indicators">
+							<li data-target="#carouselCaptions"
+								th:each="ph, iter : *{photos}"
+								th:attr="data-slide-to= ${iter.index}"
+								th:class="${iter.index==0} ? 'active'"></li>
+						</ol>
+						<div class="carousel-inner text-center">
+							<div th:each="ph, iter : *{photos}"
+								th:class="${iter.index==0} ? 'carousel-item active ' : 'carousel-item '"
+								style="min-height: 200px;">
+								<img class="d-block border mx-auto my-2" width="auto"
+									height="auto" style="max-width: 100%;" alt="image..."
+									th:src="'data:image/png;base64,'+ ${ph.getImageStr()}">
+								<div class="carousel-caption d-none d-md-block">
+									<a th:href="@{supprimerImgParam(id=${ph.id})}"
+										class="px-2 ml-1 btn btn-outline-danger bg-white mt-3"
+										data-toggle="tooltip" data-placement="top"
+										title="Supprimer image"> <i
+										class="fa fa-trash text-danger" aria-hidden="true"></i>
+									</a>
+								</div>
 							</div>
-							<input class="form-control modal-title" placeholder="Titre" th:field="*{promoTitre}" />
-<!-- 							<textarea  class="form-control" placeholder="Titre" th:field="*{promoTitre}"></textarea>				 -->
 						</div>
-				      </div>
-				      <div class="modal-footer">
-				        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button>
-				        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="editTitrePromo" id="submitContact">Valider</button>
-				      </div>
-				    </div>
-				  </div>
+						<a class="carousel-control-prev " href="#carouselCaptions"
+							role="button" data-slide="prev"> <span
+							class="carousel-control-prev-icon bg-dark" aria-hidden="true"></span>
+							<span class="sr-only">Previous</span>
+						</a> <a class="carousel-control-next " href="#carouselCaptions"
+							role="button" data-slide="next"> <span
+							class="carousel-control-next-icon bg-dark" aria-hidden="true"></span>
+							<span class="sr-only">Next</span>
+						</a>
+					</div>
 				</div>
-			
+
+				<div class="modal fade" tabindex="-1" id="contactModal">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<input class="form-control modal-title"
+									placeholder="Titre pour le contact" th:field="*{contactTitre}" />
+								<button type="button" class="close" data-dismiss="modal"
+									aria-label="Annuler">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<span class="input-group-text"> <i class="fa fa-phone"
+											aria-hidden="true"></i>
+										</span>
+									</div>
+									<input class="form-control" placeholder="Numéro de téléphone"
+										th:field="*{contactTel1}" />
+								</div>
+								<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<span class="input-group-text"> <i class="fa fa-phone"
+											aria-hidden="true"></i>
+										</span>
+									</div>
+									<input class="form-control"
+										placeholder="Numéro de téléphone mobile"
+										th:field="*{contactTel2}" />
+								</div>
+
+								<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<span class="input-group-text"> <i
+											class="fa fa-envelope-o" aria-hidden="true"></i>
+										</span>
+									</div>
+									<input class="form-control" placeholder="Mail"
+										th:field="*{contactMail}" />
+								</div>
+
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="py-0 btn btn-sm btn-outline-danger"
+									data-dismiss="modal">Annuler</button>
+								<button type="submit"
+									class="mx-2 py-0 btn btn-sm btn-outline-success " name="action"
+									value="addContact" id="submitContact">Valider</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal fade" tabindex="-1" id="horairesModal">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<input class="form-control modal-title" placeholder="Titre"
+									th:field="*{horairesTitre}" />
+								<button type="button" class="close" data-dismiss="modal"
+									aria-label="Annuler">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<span class="input-group-text"> <i
+											class="fa fa-calendar" aria-hidden="true"></i>
+										</span>
+									</div>
+									<textarea class="form-control" placeholder="Vos horaires"
+										th:field="*{horairesText}"></textarea>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="py-0 btn btn-sm btn-outline-danger"
+									data-dismiss="modal">Annuler</button>
+								<button type="submit"
+									class="mx-2 py-0 btn btn-sm btn-outline-success " name="action"
+									value="addHoraires" id="submitContact">Valider</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- -------------- -->
+				<div th:if="${paramP.showCategories}" class="divCategoriesMP mt-3">
+					<div
+						class="border d-flex align-items-center justify-content-center"
+						th:each="c : ${lstCat}">
+						<div class="">
+							<img th:if="${c.photos.size() > 0 }"
+								th:src="${c.defPhotoDataMd()}" class="border p-1" width="auto"
+								height="auto" style="max-width: 100%;">
+							<h4 class="my-2" th:text="${c.titre}"></h4>
+						</div>
+					</div>
+				</div>
+
+				<div th:if="${paramP.showPromo}" class="mt-3">
+					<div class="d-flex align-items-center justify-content-center">
+						<h5 class=" my-1"
+							th:text="${paramP.promoTitre!=null && paramP.promoTitre.length()>0} ? ${paramP.promoTitre} : 'Nos produits du moment'"></h5>
+						<input type="button"
+							class="mx-2 py-0 btn btn-sm btn-outline-success "
+							value="Modifier" data-toggle="modal"
+							data-target="#titrePromoModal" />
+					</div>
+
+					<div class="divPromoMP mt-2">
+						<div class="d-flex align-items-center justify-content-center"
+							th:each="p : ${lstPromo}">
+							<div class="">
+								<h4 class="my-2"></h4>
+							</div>
+						</div>
+					</div>
+
+					<div class="modal fade" tabindex="-1" id="titrePromoModal">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal"
+										aria-label="Annuler">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="modal-body">
+									<div class="input-group mb-1">
+										<div class="input-group-prepend">
+											<span class="input-group-text"> <i
+												class="fa fa-paragraph" aria-hidden="true"></i>
+											</span>
+										</div>
+										<input class="form-control modal-title" placeholder="Titre"
+											th:field="*{promoTitre}" />
+										<!-- 							<textarea  class="form-control" placeholder="Titre" th:field="*{promoTitre}"></textarea>				 -->
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button"
+										class="py-0 btn btn-sm btn-outline-danger"
+										data-dismiss="modal">Annuler</button>
+									<button type="submit"
+										class="mx-2 py-0 btn btn-sm btn-outline-success "
+										name="action" value="editTitrePromo" id="submitContact">Valider</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
 			</div>
-			
-		</form>	
-			
+
+
+
+		</form>
+
 	</div>
-	
+
 	<hr>
-	
+
 	<div style="padding: 10px 20px; display: flex; justify-content: space-between; flex-wrap: wrap;">
 
-        <div> 	       
-            <div>            	
-            	<div class="d-flex align-items-center" >
-            		<i class="fa fa-address-card-o  my-2 mr-2" aria-hidden="true"></i>
-					<h5 class=" my-2" th:text="${paramP.contactTitre!=null && paramP.contactTitre.length()>0} ? ${paramP.contactTitre} : 'Contact'"></h5>
-					<input type="button" class="mx-2 py-0 btn btn-sm btn-outline-success "	value="Modifier" data-toggle="modal" data-target="#contactModal" />					
+		<div>
+			<div>
+				<div class="d-flex align-items-center">
+					<i class="fa fa-address-card-o  my-2 mr-2" aria-hidden="true"></i>
+					<h5 class=" my-2"
+						th:text="${paramP.contactTitre!=null && paramP.contactTitre.length()>0} ? ${paramP.contactTitre} : 'Contact'"></h5>
+					<input type="button"
+						class="mx-2 py-0 btn btn-sm btn-outline-success " value="Modifier"
+						data-toggle="modal" data-target="#contactModal" />
 				</div>
-				
-            	<div th:if="${paramP.contactTel1 !=null && paramP.contactTel1.length()>0}">
-	            	<i class="fa fa-phone" aria-hidden="true"></i>
-					<label class="font-italic " style="white-space: pre-line;" th:text="${paramP.contactTel1}" ></label>            	
-            	</div>
-            	<div th:if="${paramP.contactTel2!=null && paramP.contactTel2.length()>0}">
-	            	<i class="fa fa-phone" aria-hidden="true"></i>
-					<label class="font-italic " style="white-space: pre-line;" th:text="${paramP.contactTel2}" ></label>            	
-            	</div>
-            	<div th:if="${paramP.contactMail !=null && paramP.contactMail.length()>0}">
-	            	<i class="fa fa-envelope-o" aria-hidden="true"></i>
-					<label class="font-italic " style="white-space: pre-line;" th:text="${paramP.contactMail}" ></label>            	
-            	</div>
-            </div> 
-           
-        </div>
-        <div >
-            <div class="d-flex align-items-center" >
-				<i class="fa fa-calendar my-2 mr-2" aria-hidden="true"></i>
-				<h5 class=" my-2" th:text="${paramP.horairesTitre!=null && paramP.horairesTitre.length()>0} ? ${paramP.horairesTitre} : 'Horaires'">					
-				</h5>
-				<input type="button" class="mx-2 py-0 btn btn-sm btn-outline-success " value="Modifier" data-toggle="modal" data-target="#horairesModal" />					
+
+				<div
+					th:if="${paramP.contactTel1 !=null && paramP.contactTel1.length()>0}">
+					<i class="fa fa-phone" aria-hidden="true"></i> <label
+						class="font-italic " style="white-space: pre-line;"
+						th:text="${paramP.contactTel1}"></label>
+				</div>
+				<div
+					th:if="${paramP.contactTel2!=null && paramP.contactTel2.length()>0}">
+					<i class="fa fa-phone" aria-hidden="true"></i> <label
+						class="font-italic " style="white-space: pre-line;"
+						th:text="${paramP.contactTel2}"></label>
+				</div>
+				<div
+					th:if="${paramP.contactMail !=null && paramP.contactMail.length()>0}">
+					<i class="fa fa-envelope-o" aria-hidden="true"></i> <label
+						class="font-italic " style="white-space: pre-line;"
+						th:text="${paramP.contactMail}"></label>
+				</div>
 			</div>
-				
-            <div th:if="${paramP.horairesText !=null && paramP.horairesText.length()>0}">	            	
-				<label class="font-italic " style="white-space: pre-line;" th:text="${paramP.horairesText}" ></label>            	
-            </div>
-        </div>
-    </div>
-    
-    
-	
-	
-	
-	
+
+		</div>
+		<div>
+			<div class="d-flex align-items-center">
+				<i class="fa fa-calendar my-2 mr-2" aria-hidden="true"></i>
+				<h5 class=" my-2"
+					th:text="${paramP.horairesTitre!=null && paramP.horairesTitre.length()>0} ? ${paramP.horairesTitre} : 'Horaires'">
+				</h5>
+				<input type="button"
+					class="mx-2 py-0 btn btn-sm btn-outline-success " value="Modifier"
+					data-toggle="modal" data-target="#horairesModal" />
+			</div>
+
+			<div
+				th:if="${paramP.horairesText !=null && paramP.horairesText.length()>0}">
+				<label class="font-italic " style="white-space: pre-line;"
+					th:text="${paramP.horairesText}"></label>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
 		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
 		crossorigin="anonymous"></script>
@@ -331,52 +426,53 @@
 		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
 		crossorigin="anonymous"></script>
 	<script>
- 		$(document).ready(function() { 
-        	
-        	let $liTag =  $('#liMainPage');   //
-       
-        	if ($liTag.hasClass('active')) {         
-          		return false;
-        	}
-        	
-       		$liTag.siblings('.active').removeClass('active');
-        	$liTag.addClass('active');        
-      	})
-      	
-      	function getfileLogo(){
- 			document.getElementById('choixLogo').click();	      
-	    }		
-	   	    
+		$(document).ready(function() {
+
+			let $liTag = $('#liMainPage'); //
+
+			if ($liTag.hasClass('active')) {
+				return false;
+			}
+
+			$liTag.siblings('.active').removeClass('active');
+			$liTag.addClass('active');
+		})
+
+		function getfileLogo() {
+			document.getElementById('choixLogo').click();
+		}
+
 		function readUrlLogo(input) {
 			if (input.files && input.files[0]) {
-				document.getElementById('submitLogo').click(); 
+				document.getElementById('submitLogo').click();
 			}
 		}
-		
-		function getfileBG(){
-			document.getElementById('choixBG').click();	
+
+		function getfileBG() {
+			document.getElementById('choixBG').click();
 		}
 		function readUrlBG(input) {
 			if (input.files && input.files[0]) {
-				document.getElementById('submitBG').click();	
+				document.getElementById('submitBG').click();
 			}
 		}
-		
-		function getFileGalerie(){
-	        document.getElementById('choixImg').click();	        
-	    }		
-	   	    
+
+		function getFileGalerie() {
+			document.getElementById('choixImg').click();
+		}
+
 		function readUrlImg(input) {
 			if (input.files && input.files[0]) {
-				document.getElementById('submitImg').click();	 
+				document.getElementById('submitImg').click();
 			}
 		}
-    </script>
+	</script>
 </body>
 
-<footer> 
-	 <div class="text-center border" style="color: lightslategray; padding: 20px 10px;">© 2020 Aqualas -  ♥	        
-	 </div>
+<footer>
+	<div class="text-center border"
+		style="color: lightslategray; padding: 20px 10px;">© 2020
+		Aqualas - ♥</div>
 </footer>
 
 </html>

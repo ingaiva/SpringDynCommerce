@@ -10,49 +10,39 @@
 </head>
 
 <body>
-<header th:replace="fragments/general.html :: headerFragment" ></header>
+<header>
+	<div th:insert="fragments/general.html :: navbarDynamique">	
+	</div>	
+</header>
 	
-	<div>
+	<div class="m-3">
 		<form method="post"	th:action="@{saveCommande}" th:object="${cmd}" >
 			
 			<div th:insert="fragments/cmdFragments.html :: viewCmd(${cmd})"></div>
 			
+						
 			<div class="d-flex justify-content-end mx-4">
-				<a th:if="${cmd.id == null} " th:href="@{accueil}" class="py-1 px-2 mx-1  btn btn-danger">Annuler	</a>
- 		        <a  th:unless="${cmd.id == null} " th:href="@{listCmd}" class="py-1 px-2 mx-1  btn btn-primary text-white">Revenir à la liste des commandes</a>
- 		        				
-				<button th:if="${cmd.allowEdit()}"  type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>    	
-<!-- 				<a th:if="${ cmd.id != null && (cmd.allowDelete() or cmd.allowCancel())}"  th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir supprimer cette commande')" class="py-1 px-2 mx-1  btn btn-danger ">Supprimer</a> -->
-		    </div>
-		    <div class="d-flex justify-content-end mx-4 mt-2">
-		    	<a th:if="${ cmd.id != null && (cmd.allowDelete() or cmd.allowCancel())}"  th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir supprimer cette commande?')" class="py-1 px-2 mx-1  btn btn-danger ">Supprimer</a>
+ 		        <a th:href="@{listCmd}" class="py-1 px-2 mx-1  btn btn-primary text-white">Retour à la liste des commandes</a> 		        				
+				<button  type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>    	
+				<a th:if="${!cmd.isCanceledByAdmin()}" th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir annuler cette commande?')" class="py-1 px-2 mx-1  btn btn-danger">Annuler la commande</a>				
 		    </div>
 		</form>
 	</div>	
 		
-	<div th:replace="fragments/general.html :: footerContact"></div>
     <div th:replace="fragments/general.html :: assets"></div>
 	<script>
- 		$(document).ready(function() { 
- 			adjustBody();
-  		   
-        	let $liTag =  $('#liListCmd');   // 
-       
-        	if ($liTag.hasClass('active')) {         
-          		return false;
-        	}
-        	
-       		$liTag.siblings('.active').removeClass('active');
-        	$liTag.addClass('active');  
-        	let $liDisableTag =  $('#liPanier'); 
-        	$liDisableTag.attr('disabled', 'disabled');
-        	 
-      	})
-      	
-      	$(document).unload(function() {         	
-        	let $liTag =  $('#liPanier'); 
-        	$liTag.removeAttr('disabled');        	 
-      	})
+		$(document).ready(function() { 
+	    	
+	    	let $liTag =  $('#liCmd');   // 
+	   
+	    	if ($liTag.hasClass('active')) {         
+	      		return false;
+	    	}
+	    	
+	   		$liTag.siblings('.active').removeClass('active');
+	    	$liTag.addClass('active');   
+	  	})
+      	     
       	
       	function addQteCmd(btn) {
 				let parent = btn.parentElement.parentElement.parentElement;
@@ -118,17 +108,20 @@
 				  
 				var subtotal = 0;
 				
+				//
 				var allByClass = document.getElementsByClassName('itemCmd');
 				for (var i=0, len=allByClass.length|0; i<len; i=i+1|0) {
 					var subTotalElt = allByClass[i].querySelector(".subtotalCmd");
 					subtotal += parseFloat(subTotalElt.textContent);					
 				}
-								
+				var reducElt = document.getElementById('reductionS');	
+				var reduction=parseFloat(reducElt.value);
+				subtotal=subtotal-reduction;
+				
 				var totalElt = document.getElementById('totalCmd');
 				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€';
 
 			}
     </script>	
 </body>
-<footer th:replace="fragments/general.html :: footerTrade"></footer>
 </html>

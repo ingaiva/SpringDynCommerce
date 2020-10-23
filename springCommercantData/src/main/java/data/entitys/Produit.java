@@ -2,7 +2,6 @@ package data.entitys;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,12 +20,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import data.Utilitys;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 //@Data
 @AllArgsConstructor
@@ -102,6 +100,17 @@ public class Produit  implements Serializable  {
 		else
 			return statutValue;
 	}
+	public boolean isSurCommande() {
+		return (this.statut!=null && this.statut.equalsIgnoreCase(StatutProduit.SurCommande.toString()));
+	}
+	
+	public boolean isEpuise() {
+		return (this.statut!=null && this.statut.equalsIgnoreCase(StatutProduit.Epuise.toString()));
+	}
+	
+	public boolean isAucunStatut() {
+		return (this.statut==null || this.statut.equalsIgnoreCase(StatutProduit.NonDefini.toString()));
+	}
 	
 	public Produit(String libelle, String description, String conditionnement, Float prix, Float stock) {
 		this.libelle = libelle;
@@ -149,6 +158,18 @@ public class Produit  implements Serializable  {
 		}
 		return "";
 	}
-	
+	public String defPhotoDataSm() {
+		Photo_Produit mainPhoto=null;
+		for (Photo_Produit photo : photos) {
+			if (mainPhoto==null) 
+				mainPhoto=photo;
+			else if (mainPhoto.getOrdre()> photo.getOrdre()) 
+				mainPhoto=photo;
+			}
+		if (mainPhoto!=null) {			
+			return "data:image/png;base64," + Utilitys.getImgDataThAs64String(mainPhoto.getImgData(),150,150);
+		}
+		return "";
+	}	
 	
 }

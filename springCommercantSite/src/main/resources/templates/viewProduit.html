@@ -9,17 +9,8 @@
 </head>
 
 <body>
-<header>
-	<div th:insert="fragments/general.html :: navbarUser"></div>
-</header>
 
-	<div th:replace="fragments/general.html :: logoSite"></div>
-
-	<div class="my-1">	
-		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
-	</div>
-	
-		
+<header th:replace="fragments/general.html :: headerFragment" ></header>	
 	
 	<div class="d-flex my-2 align-items-center " th:if="${produit.categorieProduit!=null}">
 		<a th:href="@{listProdByCat(idCat=${produit.categorieProduit.id})}" th:text="${produit.categorieProduit.titre}" class="text-dark mx-2"></a>
@@ -45,10 +36,10 @@
 
 		<div class="divInfoProduit ">
 			
-			<div class="d-flex text-left align-items-end">
+			<div class="d-flex text-left align-items-center">
 				<h3 th:text="${produit.libelle}" class="font-weight-bold mr-2 capitale"></h3> 							
-				<h5 th:text="${T(data.entitys.Produit).getStatutLibelle(produit.statut)}" class="mr-3"></h5>							
-				<h5 th:if="${produit.stock!=null}" th:text="'Stock: '+${produit.stock}"></h5>
+				<h5 th:if="${produit.stock!=null and !produit.isSurCommande()  and !produit.isEpuise()}" th:text="'Stock: '+${produit.stock}"></h5>
+				<h5 th:if="${!produit.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(produit.statut)}" class="mr-3 etiquette"></h5>							
 			</div>
 			<div class="text-left align-items-end">
 				<h4	class="font-weight-bold mr-3" th:text="${produit.conditionnement}"></h4>				
@@ -113,7 +104,9 @@
 
 	<script>
  		$(document).ready(function() { 
-        	
+ 			
+ 			adjustBody();
+   		   	
         	let $liTag =  $('#listProd');   // 
        
         	if ($liTag.hasClass('active')) {         

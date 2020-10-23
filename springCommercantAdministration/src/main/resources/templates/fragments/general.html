@@ -2,19 +2,13 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-<title>Thymeleaf Fragments</title>
-<meta charset="utf-8">
-<meta name="viewport"
-	content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet"
-	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-	crossorigin="anonymous">
-<link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<head th:fragment="headWithLinks" th:remove="tag">
 
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" th:href="@{css/style.css}">
+	<link rel="stylesheet"	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"	crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
@@ -31,10 +25,7 @@
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<div class="collapse navbar-collapse" id="navbarNavDropdown">
-			<ul class="navbar-nav">
-				<!-- <li id="liAccuil" class="nav-item">
-					<a class="nav-link" th:href="@{accueil}"> Accueil </a>
-				</li> -->
+			<ul class="navbar-nav">				
 				<li id="liMainPage" class="nav-item">
 					<a class="nav-link" th:href="@{mainPage}"> Paramétrage de la page principale </a>
 				</li>
@@ -43,70 +34,156 @@
 						id="navbarDropdownMenuLink" data-toggle="dropdown"
 						aria-haspopup="true" aria-expanded="false"> Gestion des produits</a>
 					<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+						<a class="dropdown-item" th:href="@{accueil}">Liste des produits</a> 
 						<a class="dropdown-item" th:href="@{addCategorie}">Ajouter une categorie produit</a> 
-						<a class="dropdown-item" th:href="@{addProduit}">Ajouter produit</a>						
+						<a class="dropdown-item" th:href="@{addProduit}">Ajouter un produit</a>						
 					</div>
 				</li>			
 				
-				<li id="liPromo" class="nav-item" >
+				<li id="liPromo" class="nav-item d-none" >
 					<a class="nav-link" th:href="@{addPromo}">Ajouter une actualité / promotion</a>
 				</li>
 				
 				<li id="liCmd" class="nav-item" >
-					<a class="nav-link" th:href="@{viewCmd}">Gerer les commandes des clients</a>
+					<a class="nav-link" th:href="@{listCmd}">Gerer les commandes des clients</a>
+				</li>
+				<li id="liUsr" class="nav-item" >
+					<a class="nav-link" th:href="@{listUser}">Liste des clients</a>
 				</li>
 			</ul>
 		</div>
 	</nav>
 	
 	
-	<nav th:fragment="navbarSiteCommercant" class="navbar navbar-expand-md navbar-dark bg-dark">
-		<a class="navbar-brand text-white" >
-			<i class="fa fa-user-o text-warning" aria-hidden="true" style="margin-right: 5px; color: rgb(73, 192, 178);"></i>
-			Exemple de la barre de navigation			 
+	<nav th:fragment="navbarSiteCommercant" class="navbar navbar-expand-md navbar-light bg-warning border py-0 text-dark">
+		<a class="navbar-brand ">									 
 		</a>
-		<button class="navbar-toggler" type="button" data-toggle="collapse"
-			data-target="#navbarNavDropdownS" aria-controls="navbarNavDropdownS"
-			aria-expanded="false" aria-label="Toggle navigation">
+		<button class="navbar-toggler" type="button" data-toggle="collapse"	data-target="#navbarNavDropdownS" aria-controls="navbarNavDropdownS" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<div class="collapse navbar-collapse" id="navbarNavDropdownS">
-			<ul class="navbar-nav">
-				<li id="liAccuilS" class="nav-item">
-					<a class="nav-link"> Accueil </a>
-				</li>				
-				<li id="liProduitS"  class="nav-item dropdown" >
-					<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinkS" data-toggle="dropdown"	aria-haspopup="true" aria-expanded="false"> Nos produits</a>
+			<span><i class="fa fa-exclamation-triangle text-dark"  aria-hidden="true"></i>Exemple</span>
+			<ul class="navbar-nav mx-auto">
+				<li id="liHome" class="nav-item mx-2">
+					<a class="nav-link text-dark"> 
+					<i class="fa fa-home text-dark" aria-hidden="true" style="margin-right: 5px;"></i>
+						Accueil 
+					</a>
+				</li>
+				
+				<li th:if="${lstCat.size()<5}" id="listProd" class="nav-item mx-2">
+					<a class="nav-link text-dark" >Tous les produits</a> 
+				</li>
+				<li th:if="${lstCat.size()<5}" th:each="c : ${lstCat}" th:id="'liCatProd' + ${c.id}" class="nav-item">
+					<a class="nav-link text-dark"  th:text="${c.titre}"></a>
+				</li>
+								
+				<li th:if="${lstCat.size()>4}" id="listProd"  class="nav-item dropdown mx-2" >
+					<a class="nav-link dropdown-toggle text-dark" id="navbarDropdownMenuLinkS" data-toggle="dropdown"	aria-haspopup="true" aria-expanded="false"> Nos produits</a>
 					<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkS">
-						<a class="dropdown-item" >Tous les produits</a> 
-						<a class="dropdown-item" th:each="c : ${lstCat}" th:text="${c.titre}">
+						<a class="dropdown-item text-dark">Tous les produits</a> 
+						<a class="dropdown-item text-dark" th:each="c : ${lstCat}" th:text="${c.titre}">
 						</a>											
 					</div>
-				</li>			
-				
-				<li id="liPromoS" class="nav-item" >
-					<a class="nav-link" >Actualités / promotions</a>
 				</li>
-				
-				<li id="liCmdS" class="nav-item" >
-					<a class="nav-link" >Vos commandes (client connecté)</a>
-				</li>
+				<li id="liContact" class="nav-item mx-2">
+					<a class="nav-link text-dark" > Contact </a>
+				</li>				
 			</ul>
 		</div>
 	</nav>
 	
+	<nav th:fragment="navbarUser" class="navbar navbar-expand-md navbar-dark bg-dark py-0 ">		
+		<button class="navbar-toggler" type="button" data-toggle="collapse"	data-target="#navbarNavDropdownU" aria-controls="navbarNavDropdownU" aria-expanded="false" aria-label="Navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNavDropdownU">
+			<span class="text-white"><i class="fa fa-exclamation-triangle text-warning"  aria-hidden="true"></i>Exemple</span>
+			<ul class="navbar-nav ml-auto">
+				<li id="liPanier" class="nav-item">	
+					<a class="nav-link"><i class="fa fa-shopping-cart mr-1" aria-hidden="true"></i>Panier</a>					
+				</li>							
+				<li id="liConnect" class="nav-item">
+					<a class="nav-link" ><i class="fa fa-sign-in mr-1" aria-hidden="true"></i>Se connecter</a>
+				</li>
+			</ul>
+		</div>	
+	</nav>
 
-	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-		crossorigin="anonymous"></script>
-	<script
-		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-		crossorigin="anonymous"></script>
-	<script
-		src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-		crossorigin="anonymous"></script>
+	<div th:fragment="infoCompte">
+		
+		<div th:unless="${user.id==null}">			
+			<input type="hidden" th:field="*{id}" />
+			<input type="hidden" th:field="*{dateCreation}" />
+		</div>			
+		
+		<small id="msg" class="text-danger" th:text="${msg}"></small>
+		<div class="bg-warning border rounded  p-3">
+			<div  class="text-left">
+				<p th:text="'Date création du compte: ' + ${#dates.format(user.dateCreation, 'dd/MM/yyyy HH:mm')}"></p>
+			</div>
+			<div class="row">
+				<div class=" col text-left">
+					<p class="mb-2">Nom / Prénom</p> 
+					<p class="border rounded bg-white p-1" th:text="${user.nom} + ' ' + ${user.prenom}"></p>  
+					<p class="mb-2">Adresse</p> 
+					<div class="border rounded bg-white p-1" style="min-height: 34px;">
+						<p class="textWithCrLf my-0" th:text="${user.getAdresse()}"></p> 
+						<p class="textWithCrLf my-0" th:text="${user.cp} + ' ' + ${user.ville} + ' ' + ${user.pays} "></p> 
+					</div>
+				</div>			
+						
+				<div class="col text-left">
+					<div th:if="${user.mail !=null && user.mail.length()>0}">
+						<p class="mb-2">E-mail</p> 
+						<p class="border rounded bg-white p-1"  th:text="${user.mail}" ></p>
+					</div>
+					<div th:if="${user.tel1 !=null && user.tel1.length()>0}">
+						<p class="mb-2">n° de téléphone portable</p> 
+						<p class="border rounded bg-white p-1" th:text="${user.tel1}" ></p> 
+					</div>
+					<div th:if="${user.tel2 !=null && user.tel2.length()>0}">
+						<p class="mb-2">n° de téléphone</p> 
+						<p class="border rounded bg-white p-1"  th:text="${user.tel2}" ></p>  
+					</div>
+				</div>								
+			</div>
+		</div>
+	</div>
+
+
+	<div th:fragment="productList(lstProd)" th:if="${lstProd.size() > 0}" class="divProduitMd mt-1 justify-content-start">	
+		<div  class="divProduitBoxColor d-flex align-items-baseline justify-content-center p-1" th:each="p:${lstProd}" >				
+			<div class="text-center">
+				<a th:href="@{modifierProd(id=${p.id})}" >
+					<img th:if="${p.photos.size() > 0 }" th:src="${p.defPhotoDataSm()}"	class="border p-1 imgAutoSize">
+				</a>
+				<p th:if="${!p.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquette"></p>							
+				<h5 class="font-weight-bold capitale">
+					<a class="text-dark"  th:text="${p.libelle}" th:href="@{modifierProd(id=${p.id})}"></a>
+				</h5>
+				<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>				
+				<h6	class="font-weight-bold mr-3" th:text="'Prix: '+${p.prix} + '€'"></h6>		
+				
+				<div class="d-flex justify-content-center">
+					<div class="text-left">
+						<div><a class="mx-3 text-dark" th:href="@{modifierProd(id=${p.id})}" ><i class="fa  mx-2 fa-pencil-square-o" aria-hidden="true"></i>Modifier</a>
+						</div>
+						<div><a class="mx-3 text-dark" th:href="@{effacerCatProd(id=${p.id})}" ><i class="fa  mx-2 fa-eraser" aria-hidden="true"></i>Retirer de cette cat.</a>
+						</div>
+						<div><a class="mx-3 text-dark" th:href="@{supprimerProd(id=${p.id})}" ><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer</a>
+						</div>				
+					</div>									
+				</div>			
+										
+			</div>							
+		</div>
+	</div>
+
+	<div th:fragment="assets" th:remove="tag">
+	    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"	crossorigin="anonymous"></script>
+		<script	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	</div>
 </body>
-
 </html>

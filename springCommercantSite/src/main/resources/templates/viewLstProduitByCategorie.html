@@ -9,16 +9,9 @@
 </head>
 
 <body>
-<header>
-	<div th:insert="fragments/general.html :: navbarUser"></div>
-</header>
 
-	<div th:replace="fragments/general.html :: logoSite"></div>
+<header th:replace="fragments/general.html :: headerFragment" ></header>	
 
-	<div class="my-1">	
-		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
-	</div>
-	
 	
 	<div  th:class="${categorie.photos.size() > 0} ? 'divCategorie divCategorieColor mx-2' : 'divCategorieColor text-center mx-2'" >				
 		<div class="divPhotoCategorie mx-2">
@@ -53,8 +46,15 @@
 
 	<script>
  		$(document).ready(function() { 
-        	
-        	let $liTag =  $('#listProd');   // 
+ 			adjustBody();
+   		   	
+   		   	let liTagName= '#liCatProd' +[[${categorie.id}]];
+   		   	console.log(liTagName);
+   		   	
+   		   	let $liTag =  $(liTagName);   // 
+   		   	if($liTag === undefined){
+	        	$liTag =  $('#listProd');   //    		   		
+   		   	}
        
         	if ($liTag.hasClass('active')) {         
           		return false;

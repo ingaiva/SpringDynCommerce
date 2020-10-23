@@ -10,29 +10,37 @@
 </head>
 
 <body>
-<header>
-	<div th:insert="fragments/general.html :: navbarUser"></div>
-</header>
 
-	<div th:replace="fragments/general.html :: logoSite"></div>
-
-	<div class="my-1">	
-		<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>	
-	</div>
-	
+<header th:replace="fragments/general.html :: headerFragment" ></header>
 	
 	<div>
 		<h3 class="text-center">Vos commandes</h3>
+		
+		<div class="d-flex justify-content-end mx-3">
+				<form th:action="@{listCmd}" method="get">
+					<div class="form-group text-left ">	
+						<label class="col-form-label">Filtrer les commandes</label>
+						<div class="d-flex flex-lg-row flex-md-column justify-content-between card border-info px-2">
+							<div class="mx-2" th:each="st, iter  : ${statutValues}">								
+								<input type="checkbox" name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${#lists.contains(statutSelectedValues, '' + st)}" onchange="submit();" /> 
+								<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
+							</div>
+						</div>
+					</div>					
+				</form>
+			</div>
+		
 		<h4 th:if="${connectedCli.commandes.size()==0}">Aucune commande n'existe encore</h4>
-		<div th:if="${connectedCli.commandes.size() > 0}">
+		<div th:if="${connectedCli.commandes.size() > 0}">	
+			
 			<table class="table">					
 					<tbody>
 						<tr class="rowCmd" th:each="cmd, itemStat :${connectedCli.commandes}">						
 							<td><h5	class="" > <a class="text-dark" th:text="' N° ' + ${cmd.id}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5></td>
 							<td>									
 								<h5	class="" > <a class="text-dark"  th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
-								<h6	class="" ><a class="text-dark" th:text="${cmd.infoComp}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
-								<h6	class="" ><a class="text-dark" th:text="${cmd.msgCommercant}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+								<h6	class="" ><a class="text-success font-italic" th:text="${cmd.infoComp}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+								<h6	class="" ><a class="text-danger font-italic" th:text="${cmd.msgCommercant}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
 							</td>
 							<td >
 								<div th:if="${cmd.calculeTotalReductionAll()>0}">
@@ -70,8 +78,9 @@
 	<script>
 		
  		$(document).ready(function() { 
-        	
-        	let $liTag =  $('#liCompte');   // 
+ 			adjustBody();
+   		   	
+        	let $liTag =  $('#liListCmd');   // 
        
         	if ($liTag.hasClass('active')) {         
           		return false;

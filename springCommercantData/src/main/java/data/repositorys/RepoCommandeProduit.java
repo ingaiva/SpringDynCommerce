@@ -22,6 +22,11 @@ public interface RepoCommandeProduit  extends JpaRepository<CommandeProduit, Lon
 	
 	@Transactional
 	@Modifying
+	@Query("delete from CommandeProduit cp where cp.commande.id in (select DISTINCT c.id from Commande c  where c.user.id=:x)")
+	public void deleteByUser(@Param("x") Long idUser);
+	
+	@Transactional
+	@Modifying
 	@Query("delete from CommandeProduit cp where cp.commande.id=:x and cp.id NOT IN (:y)")
 	public void deleteNotIncluded(@Param("x") Long id,@Param("y") ArrayList<Long> lstToExclude);
 }

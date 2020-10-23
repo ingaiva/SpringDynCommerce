@@ -43,7 +43,7 @@ public class ProduitController {
 
 	
 	private String redirectToEditProduit(Produit produitToEdit,	RedirectAttributes ra) {
-		System.out.println("dans redirectToEditProduit " + produitToEdit);
+		/* System.out.println("dans redirectToEditProduit " + produitToEdit); */
 		ra.addAttribute("produit", produitToEdit);		
 		//ra.addFlashAttribute("produit", produitToEdit);		
 		return "redirect:/editProduit";	

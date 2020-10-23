@@ -1,0 +1,53 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Fiche client</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+
+<header>
+	<div th:insert="fragments/general.html :: navbarDynamique">	
+	</div>	
+</header>
+	
+	<div class="p-4 m-2" style="margin-left: auto; margin-right: auto; text-align: center;">
+		<form class="" method="get" th:action="@{${redirectAction}}" th:object="${user}">
+			<div th:replace="fragments/general.html :: infoCompte"></div>
+			<div class="text-left">
+				<h4 th:text="'Nombre de commandes: ' + ${user.nbCmd}"></h4>
+				<h4 th:if="${user.totalCmd!=null}" th:text="'Total général: ' + ${#numbers.formatDecimal(user.totalCmd, 1, 2, 'COMMA')} + '€'"></h4>
+			</div>	
+			<div class="d-flex text-center py-2">
+				<button type="submit" class="btn btn-success mx-1">Retour</button>				
+			</div>
+		</form>
+	</div>	
+	
+	<div th:with="showUser='false'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${user.commandes}, showUser)"></div>
+		
+	
+    <div th:replace="fragments/general.html :: assets"></div>
+	<script>
+ 		$(document).ready(function() { 
+ 			
+ 			adjustBody();
+   		   
+        	let $liTag =  $('#liUsr');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');          	
+        	
+      	})
+    </script>	
+</body>
+</html>

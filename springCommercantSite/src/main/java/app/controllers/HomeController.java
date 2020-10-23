@@ -32,6 +32,9 @@ public class HomeController {
 	data.repositorys.RepoCommande cmdR;
 	
 	@Autowired
+	data.repositorys.RepoCommandeProduit lignesCmdR;
+	
+	@Autowired
 	data.repositorys.RepoProduit prodR;
 	
 	@Autowired
@@ -220,6 +223,7 @@ public class HomeController {
 		
 		User connectedCli=(User) session.getAttribute("connectedCli");	
 		model.addAttribute("user", connectedCli);
+		model.addAttribute("suppressionCompteRequest", true);
 		if (connectedCli!=null) 
 			return "viewSuppressionCompte";
 		else
@@ -231,7 +235,7 @@ public class HomeController {
 		User connectedCli=(User) session.getAttribute("connectedCli");			
 		
 		if (connectedCli!=null) {
-			cmdR.deleteCommandeProduitByUser(connectedCli.getId());
+			lignesCmdR.deleteByUser(connectedCli.getId());			
 			cmdR.deleteCommandesByUser(connectedCli.getId());
 			usrR.delete(connectedCli);
 			return "redirect:/deconnexion";}

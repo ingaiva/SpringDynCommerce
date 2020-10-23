@@ -127,11 +127,19 @@ public class Commande  implements Serializable  {
 		return this.statut.equalsIgnoreCase(StatutCommande.Valide.toString());
 	}
 	
+	public boolean isEnAttente() {
+		return this.statut.equalsIgnoreCase(StatutCommande.EnAttente.toString());
+	}
+	
 	public boolean isCanceled() {
 		return this.statut.equalsIgnoreCase(StatutCommande.Annule.toString()) || this.statut.equalsIgnoreCase(StatutCommande.AnnuleParCommercant.toString());
 	}
-	
-	
+	public boolean isCanceledByAdmin() {
+		return this.statut.equalsIgnoreCase(StatutCommande.AnnuleParCommercant.toString());
+	}
+	public boolean isFinalise() {
+		return this.statut.equalsIgnoreCase(StatutCommande.Finalise.toString());
+	}
 	public Float calculeTotal() {
 		Float total = 0f;
 		for (CommandeProduit cp : this.getLignesCommandeProduit()) {

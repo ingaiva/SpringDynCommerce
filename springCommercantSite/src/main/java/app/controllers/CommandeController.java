@@ -279,17 +279,26 @@ public class CommandeController {
 			return "viewHome";
 		}
 	}
-	
+			
 	@GetMapping("/listCmd")
-	public String getViewCmdFrm(Model model, HttpSession session) {
+	public String getViewCmdFrm(Model model,@RequestParam(name="statutFilter",required = false) List<String> statutValues, HttpSession session) {
 		
+		if (statutValues==null) {
+			statutValues=new ArrayList<String>();
+		}
 		addStandardParams(model,session);		
 		
 		User connectedCli=(User) session.getAttribute("connectedCli");	
 		if (connectedCli==null) 
 			return "redirect:/login";	
-		connectedCli.setCommandes(cmdR.getCommandesUser(connectedCli.getId()));		
+		if (statutValues.size()==0) 
+			connectedCli.setCommandes(cmdR.getCommandesUser(connectedCli.getId()));			
+		else
+			connectedCli.setCommandes(cmdR.getCommandesUserFiltered(connectedCli.getId(),statutValues));	
+		
 		model.addAttribute("connectedCli", connectedCli);
+		model.addAttribute("statutValues", Commande.StatutCommande.values());
+		model.addAttribute("statutSelectedValues", statutValues);
 		return "viewLstCommande";
 	}
 	

@@ -38,7 +38,11 @@ public class Utilitys {
 	
 	public static String getImgDataAs64String(byte[] byteData) {
 		//Base64.getEncoder().encodeToString(fileContent)
-        return Base64.getMimeEncoder().encodeToString(byteData);
+		if (byteData!=null) {
+			return Base64.getMimeEncoder().encodeToString(byteData);			
+		}
+		else
+			return null;
     }
 	public static byte[]  getImgDataTh(MultipartFile file)  {
 		return getImgDataTh(file,100,100);
