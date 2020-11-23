@@ -1,6 +1,6 @@
-/* div{ */
-/* 	border: red solid 1px; */
-/* } */
+/* div{
+	border: red solid 1px;
+} */
 
 
 .textWithCrLf{
@@ -67,6 +67,13 @@
     padding: 10px;
     display: grid;
     grid-template-columns: 40% auto;   
+    column-gap: 10px;
+    align-items: left;
+}
+.divPtV{
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 25% auto;   
     column-gap: 10px;
     align-items: left;
 }

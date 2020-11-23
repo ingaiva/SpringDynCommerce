@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Point de vente</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>	
+	<div class=" bg-light p-3"	style="width: 100%; margin-left: auto; margin-right: auto; text-align: center;">
+		<form id="frm" class="my-1 " enctype="multipart/form-data" style="width: 100%;" method="post"
+			th:action="@{savePtV}" th:object="${ptV}">
+			<div th:if="${ptV.id==null}">
+				<h3>Nouveau point de vente</h3>
+			</div>
+			<div th:unless="${ptV.id==null}">
+				<h3>Modification du point de vente</h3>
+			</div>
+
+			<div class="divPtV" >
+				
+				<div class="m-2">
+					<div class="d-flex">
+						<h4 class=" my-2">Image</h4>
+						<input type="button" class="mx-2 py-0 btn btn-sm btn-outline-success "	onclick="getfile()" value="Ajouter"	th:value="${ptV.hasPhoto()} ? 'Modifier' : 'Ajouter'" />
+						<div class="d-none">
+							<input type="file" accept="image/*" name="choixImg" id="choixImg" onchange="readURL(this);" />
+							<button type="submit" name="action" value="addImg" id="submitImg" class=" d-none btn btn-outline-success  px-1">Valider</button>
+						</div>
+					</div>
+					
+					<div th:if="${ptV.hasPhoto()}"	class="border border-info rounded p-2 my-2 " style="min-width: 100px; max-width: 350px;">
+
+							<img th:src="${ptV.getPhotoStrMd()}" class="imgAutoSize">
+
+							<div class="input-group  mt-1">
+								<div class="input-group-prepend">
+									<span class="input-group-text"> <i	class="fa fa-commenting-o text-info" aria-hidden="true"></i>
+									</span>
+								</div>
+
+								<input type="text" class="form-control text-info font-italic" th:field="*{photoTitre}" placeholder="Titre" aria-label="Texte">
+
+								<div class="input-group-append" id="button-addon-line">
+									<div class="text-left">
+										<button type="submit" name="action" value="delImg" id="delImg" class="px-2 ml-1 btn btn-outline-danger">
+											<i class="fa fa-trash text-danger" aria-hidden="true"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>					
+				</div>
+				
+				<div class="">					
+					<div class="headden">
+						<input type="hidden" th:field="*{id}" />
+					</div>
+
+					<div class="">
+						<small style="color: red" th:text="${msgErr}"></small>						
+						<div class="form-group text-left input-group-lg">
+							<label class="font-weight-bold text-info" for="titre">Titre</label> 
+							<input	class="form-control font-weight-bold text-info" th:field="*{libelle}" required>
+						</div>
+						<div class="form-group text-left ">
+							<label for="description">Déscription</label>
+							<textarea class="form-control" th:field="*{description}"></textarea>
+						</div>
+						<div class="form-group text-left ">
+							<label for="infoComp">Information complementaire</label>
+							<textarea class="form-control" th:field="*{infoComp}"></textarea>
+						</div>
+					</div>
+					<div class="input-group mb-1">
+						<div class="input-group-prepend  col-2 px-0">
+							<span class="input-group-text  w-100"> 
+								<i class="fa fa-map-signs mr-2" aria-hidden="true"></i>
+								<label for="emplacementText">Emplacement</label>
+							</span>
+						</div>
+						<textarea class="form-control" placeholder="Emplacement" th:field="*{emplacementText}"></textarea>
+					</div>
+					<div class="input-group mb-1">
+						<div class="input-group-prepend col-2 px-0" >
+							<span class="input-group-text w-100"> 
+								<i class="fa fa-calendar mr-2" aria-hidden="true"></i>
+								<label for="horairesText">Vos horaires</label>
+							</span>
+						</div>
+						<textarea class="form-control" placeholder="Vos horaires" th:field="*{horairesText}"></textarea>
+					</div>
+										
+					<div class="d-flex justify-content-end mx-4">
+						<button type="submit" class="btn btn-success px-2">Valider</button>
+						<a th:href="@{listPointVente}" class="px-2 mx-1 btn btn-danger">Annuler</a>
+					</div>
+				</div>
+			</div>			
+			
+		</form>
+	</div>
+	
+	 <div th:replace="fragments/general.html :: assets"></div>
+	 
+	 <script>	
+		function getfile(){
+	        document.getElementById('choixImg').click();	        
+	    }		
+	   	    
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+				document.getElementById('submitImg').click();	 
+			}
+		}
+		
+	 </script>
+</body>
+</html>

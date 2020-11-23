@@ -30,7 +30,14 @@ public interface RepoCommande   extends JpaRepository<Commande, Long>  {
 	public List<Commande> getCommandesUserFiltered(@Param("x") Long idUser, @Param("y") List<String> statutValues);
 	
 	@Query("select cmd from Commande cmd where cmd.statut in (:y) ORDER BY cmd.date DESC")
-	public List<Commande> getCommandesFiltered(@Param("y") List<String> statutValues);
+	public List<Commande> getCommandesFilteredByStatut(@Param("y") List<String> statutValues);
+	
+	@Query("select cmd from Commande cmd where cmd.pointVente.id in (:ptv) and cmd.statut in (:y) ORDER BY cmd.date DESC")
+	public List<Commande> getCommandesFiltered(@Param("y") List<String> statutValues,@Param("ptv") List<Long> ptvValues);
+	
+	@Query("select cmd from Commande cmd where cmd.pointVente.id in (:ptv) ORDER BY cmd.date DESC")
+	public List<Commande> getCommandesFilteredByPtV(@Param("ptv") List<Long> ptvValues);
+	
 	
 	@Query("select cmd from Commande cmd ORDER BY cmd.date DESC")
 	public List<Commande> getCommandesOrdered();
@@ -57,5 +64,8 @@ public interface RepoCommande   extends JpaRepository<Commande, Long>  {
 	@Query("update Commande c set c.statut=:statut where c.id =:id")
 	int updateStatut( @Param("id") Long idCommande, @Param("statut") String statut);
 	
-
+	@Transactional
+	@Modifying
+	@Query("update Commande c set c.pointVente=:pt where c.id =:id")
+	int updatePointVente( @Param("id") Long idCommande, @Param("pt") PointVente pt);
 }

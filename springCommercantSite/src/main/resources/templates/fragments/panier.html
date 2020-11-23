@@ -1,0 +1,110 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" th:href="@{css/style.css}">
+	<link rel="stylesheet"	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"	crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<body>
+		
+	<div  th:fragment="viewPanierVide" class="modal fade" tabindex="-1"  id="panierVide" >
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">				        
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">	 			      
+		       <h3>Votre panier est vide</h3>	        
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>	        
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	
+	<div th:fragment="viewPanier">
+		<form id="frmPanier"   method="post"	th:action="@{creerCommande}" th:object="${panier}" >
+			<div class="modal fade " tabindex="-1"  id="dlgPanier" th:if="${panier!=null && panier.produits!=null && panier.produits.size()>0}">
+			  <div class="modal-dialog modal-lg">
+			    <div class="modal-content">
+			      <div class="modal-header">	        
+			        <h4 class="modal-title" >Panier</h4>	
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">				      			      
+			      	
+			       	<table class="table">					
+						<tbody>
+							<tr class="item" th:each="p, itemStat :*{produits}">
+								
+								<td>
+									<div class="d-lg-flex">
+										<div class="mr-3"><img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" ></div>
+										<div>	
+											<input type="hidden" class="idProd" th:field="*{produits[__${itemStat.index}__].id}" />								
+											<input type="hidden" th:field="*{produits[__${itemStat.index}__].libelle}" />
+											<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
+											<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
+											<label class="prixV" th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
+											<label class="prix d-none" th:text="${p.prix}"></label>
+										</div>
+									</div>									
+								</td>
+								<td >								
+									<div class="input-group mb-1" style="width:150px;">
+										<div class="input-group-prepend">
+											<span class="input-group-text"  onclick="dimQte(this)" style="cursor: pointer;"> <i class="fa fa-minus-square" aria-hidden="true"></i>
+											</span>
+										</div>
+
+										<input style="width:60px;" class="form-control qte" type="number" th:field="*{produits[__${itemStat.index}__].qte}" onchange="updateQuantity(this);">
+										
+										<div class="input-group-append" id="button-addon-line">
+											<span class="input-group-text border" th:onclick="javascript:addQte(this);" style="cursor: pointer;"> <i	class="fa fa-plus-square" aria-hidden="true"  ></i>
+											</span>	
+										</div>
+									</div>
+								</td>							
+															
+								<td >
+									<h5	class="subtotalV font-weight-bold mr-3"  th:text="${#numbers.formatDecimal(p.getTotalProduit(), 1, 2, 'COMMA')} + '€'"></h5>
+									<label class="subtotal d-none" th:text="${p.getTotalProduit()}"></label>
+								</td>							
+								<td>
+									<span class="input-group-text"  onclick="supprimerProd(this)" style="cursor: pointer;"> <i class="fa fa-trash text-danger" aria-hidden="true"></i>
+									</span>																	
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					
+					<div>
+						<h5	class="font-weight-bold mr-3 totalPanier" id="totalPanier" th:text=" 'Total : ' + ${#numbers.formatDecimal(panier.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
+					</div>		        
+			      </div>
+			      <div class="modal-footer">
+			      	<button type="submit" class="py-0 btn btn-sm btn-outline-danger" name="action" value="valPanier" id="submitPanier"><i class="fa fa-times" aria-hidden="true"></i></button>  
+	
+			        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="cmd" id="submitPanier">Passer la commande</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+		</form>
+	</div>		
+			
+	
+</body>
+</html>
+
+

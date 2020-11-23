@@ -21,7 +21,7 @@
 				<a th:if="${cmd.id == null} " th:href="@{accueil}" class="py-1 px-2 mx-1  btn btn-danger">Annuler	</a>
  		        <a  th:unless="${cmd.id == null} " th:href="@{listCmd}" class="py-1 px-2 mx-1  btn btn-primary text-white">Revenir à la liste des commandes</a>
  		        				
-				<button th:if="${cmd.allowEdit()}"  type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>    	
+				<button th:if="${cmd.allowEditLimited()}"  type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>    	
 <!-- 				<a th:if="${ cmd.id != null && (cmd.allowDelete() or cmd.allowCancel())}"  th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir supprimer cette commande')" class="py-1 px-2 mx-1  btn btn-danger ">Supprimer</a> -->
 		    </div>
 		    <div class="d-flex justify-content-end mx-4 mt-2">
@@ -57,7 +57,7 @@
       	function addQteCmd(btn) {
 				let parent = btn.parentElement.parentElement.parentElement;
 
-				let cible = parent.querySelector(".qte");
+				let cible = parent.querySelector(".qteCmd");
 
 				if (cible != null) {
 					let qte = cible.value;
@@ -71,7 +71,7 @@
 			}
 			function dimQteCmd(btn) {
 				let parent = btn.parentElement.parentElement.parentElement;
-				let cible = parent.querySelector(".qte");
+				let cible = parent.querySelector(".qteCmd");
 
 				if (cible != null) {
 					let qte = cible.value;
@@ -79,7 +79,7 @@
 						qte = 1;
 					}
 					if (qte > 0) {
-						cible.value = qte - 1;
+						cible.value = parseFloat(qte) - 1;
 					} else
 						cible.value = 0;
 					
@@ -102,21 +102,59 @@
 				
 				var price = parseFloat(parent.querySelector(".prixCmd").textContent);			
 				
-				var quantity = parseFloat(parent.querySelector(".qte").value);
-				var linePrice = price * quantity;			
+				var quantity = parseFloat(parent.querySelector(".qteCmd").value);
 				
-				var subTotalElt = parent.querySelector(".subtotalCmd");
-				var subTotalEltVisible = parent.querySelector(".subtotalCmdV");
-				subTotalElt.textContent = linePrice ; 				
-				subTotalEltVisible.textContent = linePrice.toFixed(2) + '€';	
-				recalculateCartCmd();
+				var id=parseInt(parent.querySelector(".idProdCmd").value);
+				
+				getProdTotalAjax(id,price,quantity, parent);
+				
+// 				var linePrice = price * quantity;			
+				
+// 				var subTotalElt = parent.querySelector(".subtotalCmd");
+// 				var subTotalEltVisible = parent.querySelector(".subtotalCmdV");
+// 				subTotalElt.textContent = linePrice ; 				
+// 				subTotalEltVisible.textContent = linePrice.toFixed(2) + '€';	
+// 				recalculateCartCmd();
 				
 			}
 
+			function getProdTotalAjax(id, prix, qte, parent) {
+				data={produit:{id : id, prix : prix}, qte: qte};
+				//data = {id : id, prix : prix, qte : qte};
+
+				urlTo = "/getTotalProduitCmd";		
+				
+				$.ajax({type : "POST",
+							contentType : "application/json",
+							url : urlTo,
+							data : JSON.stringify(data),
+							dataType : 'json',
+							async : false,
+							success : function(result, textStatus, xhr) {
+								if (xhr.status == 200) {
+
+									var result = parseFloat(result).toFixed(2);
+									var subTotalElt = parent.querySelector(".subtotalCmd");
+									var subTotalEltVisible = parent.querySelector(".subtotalCmdV");
+									subTotalElt.textContent = result;
+									subTotalEltVisible.textContent = result	+ '€';
+									recalculateCartCmd();
+
+								} else {
+									console.log('Erreur status ' + xhr.status);
+								}
+							},
+							error : function(e) {
+								console.log("ERROR: ", e);
+							}
+				});
+			}
+			
+			
 			/* Recalculate cart */
 			function recalculateCartCmd() {				  
 				  
-				var subtotal = 0;
+				/* var subtotal = 0;
 				
 				var allByClass = document.getElementsByClassName('itemCmd');
 				for (var i=0, len=allByClass.length|0; i<len; i=i+1|0) {
@@ -125,9 +163,51 @@
 				}
 								
 				var totalElt = document.getElementById('totalCmd');
-				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€';
-
+				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€'; */
+				recalculateCartCmdAjax();
 			}
+			
+			
+	function recalculateCartCmdAjax() {
+				
+				statutCmd=document.getElementById('statutCmd').value;//
+				lignesProd = [];
+				var allByClass = document.getElementsByClassName('itemCmd');
+				for (var i = 0, len = allByClass.length | 0; i < len; i = i + 1 | 0) {
+					var id = parseInt(allByClass[i].querySelector(".idProdCmd").value);
+					var price = parseFloat(allByClass[i].querySelector(".prixCmd").textContent);
+					var quantity = parseFloat(allByClass[i].querySelector(".qteCmd").value);
+					data = {produit:{id : id, prix : price}, qte: quantity};		
+					console.log(JSON.stringify(data));
+					lignesProd.push(data); 
+				}	
+				
+				var formData =  {lignesCommandeProduit : lignesProd, statut: statutCmd};								
+				urlTo = "/calculeTotalCmd";				
+			
+				$.ajax({
+					type : "POST",
+					contentType : "application/json",
+					url : urlTo,
+					data : JSON.stringify(formData),
+					dataType : 'json',
+					async : false,
+					success : function(result, textStatus, xhr) {
+						if (xhr.status == 200) {
+							var result = parseFloat(result.totalFinal).toFixed(2);							
+							var totalElt = document.getElementById('totalCmd');
+							totalElt.textContent = 'Total : ' + result + '€';
+							
+						} else {
+							console.log('Erreur status ' + xhr.status);
+						}
+					},
+					error : function(e) {
+						console.log("ERROR: ", e);
+					}
+				});
+			} 
+			
     </script>	
 </body>
 <footer th:replace="fragments/general.html :: footerTrade"></footer>

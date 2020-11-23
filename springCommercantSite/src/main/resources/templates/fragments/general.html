@@ -14,7 +14,7 @@
 
 <body>
 	<header th:fragment="headerFragment" class="fixed-top">
-		<div th:insert="fragments/general.html :: navbarUser"></div>
+		<div id="divNavbarUser" th:insert="fragments/general.html :: navbarUser"></div>
 		<div th:replace="fragments/general.html :: logoSite"></div>
 		<div class="my-1">
 			<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>
@@ -29,12 +29,15 @@
 		<div class="collapse navbar-collapse" id="navbarNavDropdownU">
 			<ul class="navbar-nav ml-auto">
 				<li id="liPanier" class="nav-item">	
-					<a class="nav-link"  th:if="${panier==null || panier.produits==null || panier.produits.size()==0}" data-toggle="modal" data-target="#panierVide">
+					<a id="linkPanierVide" class="nav-link" th:class="${session.panier==null || session.panier.produits==null || session.panier.produits.size()==0} ? 'nav-link' : 'nav-link d-none'"   style="cursor: pointer;"  data-toggle="modal" data-target="#panierVide">
+						<!-- th:if="${session.panier==null || session.panier.produits==null || session.panier.produits.size()==0}" -->
 						<i class="fa fa-shopping-cart mr-1" aria-hidden="true"></i>
 						Panier</a>
-					<a class="nav-link"  th:unless="${panier==null || panier.produits==null || panier.produits.size()==0}"  data-toggle="modal" data-target="#panierModal">
+					<a id="linkPanierPlein" class="nav-link" th:class="${session.panier!=null && session.panier.produits!=null && session.panier.produits.size()>0} ? 'nav-link' : 'nav-link d-none'" style="cursor: pointer;"  
+						onclick="retrievePanierFragment('#modalPanier')">
+						<!-- th:unless="${session.panier==null || session.panier.produits==null || session.panier.produits.size()==0}"  data-toggle="xmodal" data-target="x#panierModal" -->
 						<i class="fa fa-shopping-cart mr-1" aria-hidden="true"></i>
-						<span th:text="'Panier (' + ${panier.produits.size()} + ')'">
+						<span th:text="'Panier (' + ${session.panier.produits.size()} + ')'">
 						</span>
 					</a>
 				</li>
@@ -118,11 +121,16 @@
 	
 	
 	<div th:fragment="productList(lstProd)" th:if="${lstProd.size() > 0}" class="divProduitMd mt-1 justify-content-start">	
-		<div  class="divProduitBoxColor d-flex align-items-baseline justify-content-center p-1" th:each="p:${lstProd}" >				
+		<div  class="divProduitBoxColor d-flex align-items-baseline justify-content-center p-1" th:each="p , itemStat :${lstProd}" >				
 			<div class="text-center">
-				<a th:href="@{produit(id=${p.id})}" >
-					<img th:if="${p.photos.size() > 0 }" th:src="${p.defPhotoDataMd()}"	class="border p-1 imgAutoSize">
+				<input type="hidden" class="idProdExpress" th:name="|lstProd[${itemStat.index}].id|" th:value="${p.id}" />								
+											
+				<a th:href="@{produit(id=${p.id})}"  class="linkProduit">
+					<img th:if="${p.photos.size() > 0 }" th:src="${p.defPhotoDataMd()}"	class="border p-1 imgAutoSize ">
 				</a>
+				<div class="divAddToPanier ">
+					<button class="btn btn-success mx-1"  th:onclick="'addToPanierExpress(this,' + ${p.id} + ')'">Ajouter au panier</button>
+				</div>
 				<p th:if="${!p.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquette"></p>							
 				<h4 class="font-weight-bold capitale">
 					<a class="text-dark"  th:text="${p.libelle}" th:href="@{produit(id=${p.id})}"></a>
@@ -232,6 +240,23 @@
 				</div>
 			</div>
 		</div>
+		<div class="form-group text-left ">	
+			<div class="d-flex align-items-center justify-content-start">
+				<label class="col-form-label font-weight-bold" style="font-size: larger;">Points de vente</label>						
+
+				<div class="mx-2 my-0 d-none">
+					<button type="submit" class="px-2 py-0 btn btn-sm btn-outline-secondary" name="action" value="savePtV" id="savePtV"></button>
+				</div>
+			</div>
+			
+			<div class="d-flex flex-lg-row flex-md-column justify-content-start card border-info px-2 " id="divPtV">
+				<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
+					<input type="checkbox" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${pointsVselected!=null} and ${#lists.isEmpty(pointsVselected)==false} and ${#lists.contains(pointsVselected, p.id)}" onchange="savePointsVente(this);" /> 
+					
+					<label class="mx-2 font-weight-bold" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+				</div>
+			</div>
+		</div>	
 	</div>
 	
 	
@@ -301,8 +326,10 @@
 		  </div>
 		</div>
 	
+		<div id="modalPanier">
+		</div>
 	
-		<form th:fragment="viewPanier"  method="post"	th:action="@{creerCommande}" th:object="${panier}" >
+		<!-- <form id="frmPanier" th:fragment="viewPanier"  method="post"	th:action="@{creerCommande}" th:object="${panier}" >
 			<div class="modal fade " tabindex="-1"  id="panierModal" th:if="${panier!=null && panier.produits!=null && panier.produits.size()>0}">
 			  <div class="modal-dialog modal-lg">
 			    <div class="modal-content">
@@ -313,7 +340,8 @@
 			        </button>
 			      </div>
 			      <div class="modal-body">	
-			      	<!-- <h3 th:text="${session.monTest.libelle}"></h3> -->
+			      	<h3 th:text="${session.monTest.libelle}"></h3>			      
+			      	
 			       	<table class="table">					
 						<tbody>
 							<tr class="item" th:each="p, itemStat :*{produits}">
@@ -321,8 +349,10 @@
 								<td>
 									<div class="d-lg-flex">
 										<div class="mr-3"><img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" ></div>
-										<div>
-											<input type="hidden" th:field="*{produits[__${itemStat.index}__].id}" />								
+										<div>	
+											<input type="hidden" class="idProd" th:id="'session.panier.produits'+ ${itemStat.index} + '.id'" th:name="|session.panier.produits[${itemStat.index}].id|" th:value="${p.id}" />
+											<input type="hidden" th:name="|session.panier.produits[${itemStat.index}].libelle|" th:value="${p.libelle}"/> 									
+											<input type="hidden" class="idProd" th:field="*{produits[__${itemStat.index}__].id}" />								
 											<input type="hidden" th:field="*{produits[__${itemStat.index}__].libelle}" />
 											<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
 											<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
@@ -334,13 +364,14 @@
 								<td >								
 									<div class="input-group mb-1" style="width:150px;">
 										<div class="input-group-prepend">
-											<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQte(this)"></i>
+											<span class="input-group-text"  onclick="dimQte(this)" style="cursor: pointer;"> <i class="fa fa-minus-square" aria-hidden="true"></i>
 											</span>
 										</div>
+										<input style="width:60px;" class="form-control qte" type="number" th:id="'session.panier.produits'+ ${itemStat.index} + '.qte'" th:name="|session.panier.produits[${itemStat.index}].qte|" th:value="${p.qte}" onchange="updateQuantity(this);">
 										<input style="width:60px;" class="form-control qte" type="number" th:field="*{produits[__${itemStat.index}__].qte}" onchange="updateQuantity(this);">
 										
 										<div class="input-group-append" id="button-addon-line">
-											<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQte(this);"></i>
+											<span class="input-group-text border" th:onclick="javascript:addQte(this);" style="cursor: pointer;"> <i	class="fa fa-plus-square" aria-hidden="true"  ></i>
 											</span>	
 										</div>
 									</div>
@@ -351,7 +382,7 @@
 									<label class="subtotal d-none" th:text="${p.getTotalProduit()}"></label>
 								</td>							
 								<td>
-									<span class="input-group-text"> <i class="fa fa-trash text-danger" aria-hidden="true" onclick="supprimerProd(this)"></i>
+									<span class="input-group-text"  onclick="supprimerProd(this)" style="cursor: pointer;"> <i class="fa fa-trash text-danger" aria-hidden="true"></i>
 									</span>																	
 								</td>
 							</tr>
@@ -365,30 +396,31 @@
 			      <div class="modal-footer">
 			      	<button type="submit" class="py-0 btn btn-sm btn-outline-danger" name="action" value="valPanier" id="submitPanier"><i class="fa fa-times" aria-hidden="true"></i></button>	      	
 			      
-	<!-- 		        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button> -->
+			        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button>
 			        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="cmd" id="submitPanier">Passer la commande</button>
 			      </div>
 			    </div>
 			  </div>
 			</div>
-		</form>
+		</form> -->
 	
 	
-	    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<!-- 	    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
+		<script src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  crossorigin="anonymous"></script>
 		<script	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"	crossorigin="anonymous"></script>
-		<script	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>	
-		<script type="text/javascript" th:inline="javascript">
-			
-		function adjustBody() {
-			var h = $('header').height();
- 			if($('header').hasClass( "fixed-top" )){ 				
-	 		   $('body').css("padding-top", h);
- 			}
- 			else{
- 				 $('body').removeClass("padding-top");
- 			} 	
-		}
-			
+		<script	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+		<script th:src="@{/methodes.js}"></script>
+		
+		<!-- <script type="text/javascript" th:inline="javascript">
+			function adjustBody() {
+				var h = $('header').height();
+				if ($('header').hasClass("fixed-top")) {
+					$('body').css("padding-top", h);
+				} else {
+					$('body').removeClass("padding-top");
+				}
+			}
+
 			function addQte(btn) {
 				let parent = btn.parentElement.parentElement.parentElement;
 
@@ -401,6 +433,8 @@
 						qte = 1;
 					}
 					cible.value = parseFloat(qte) + 1;
+					cible.setAttribute('value', parseFloat(qte) + 1);
+					
 					updateQuantity(cible);
 				}
 			}
@@ -414,9 +448,13 @@
 						qte = 1;
 					}
 					if (qte > 0) {
-						cible.value = qte - 1;
-					} else
+						cible.value = parseFloat(qte) - 1;
+						cible.setAttribute('value', parseFloat(qte) - 1);
+					} else{
 						cible.value = 0;
+						cible.setAttribute('value', 0);
+					}
+					
 					
 					updateQuantity(cible);
 				}
@@ -426,47 +464,187 @@
 			function supprimerProd(btn) {
 				let parentTR = btn.closest("tr");
 				if (parentTR != null) {
-					parentTR.remove();
-					recalculateCart();
+					supprimerProdAjax(parentTR);
+					/* parentTR.remove();//removeProduitPanier
+					recalculateCart(); */
 				}
-			}			
+			}
+			
+			function supprimerProdAjax(parent) {
+				var id = parseInt(parent.querySelector(".idProd").value);
+				data = {id : id};
 
+				urlTo = "/removeProduitPanier";		
+				
+				$.ajax({type : "POST",
+							contentType : "application/json",
+							url : urlTo,
+							data : JSON.stringify(data),
+							dataType : 'json',
+							async : false,
+							success : function(result, textStatus, xhr) {
+								if (xhr.status == 200) {
+									parent.remove();//removeProduitPanier
+									recalculateCart();
+								} else {
+									console.log('Erreur status ' + xhr.status);
+								}
+							},
+							error : function(e) {
+								console.log("ERROR: ", e);
+							}
+				});
+			}
+			
 			function updateQuantity(quantityInput) {
-				  
+
 				var parent = quantityInput.closest("tr");
-				
-				var price = parseFloat(parent.querySelector(".prix").textContent);			
-				
+
+				var id = parseInt(parent.querySelector(".idProd").value);
+
+				var price = parseFloat(parent.querySelector(".prix").textContent);
+
 				var quantity = parseFloat(parent.querySelector(".qte").value);
-				var linePrice = price * quantity;			
-				
-				var subTotalElt = parent.querySelector(".subtotal");
+				var linePrice = getProdTotalAjax(id, price, quantity, parent); //price * quantity;			
+
+				/* var subTotalElt = parent.querySelector(".subtotal");
 				var subTotalEltVisible = parent.querySelector(".subtotalV");
-				subTotalElt.textContent = linePrice.toFixed(2) ; //+ '€';				
-				subTotalEltVisible.textContent = linePrice.toFixed(2) + '€';	
-				recalculateCart();
-				
+				subTotalElt.textContent = linePrice;//.toFixed(2) ; //+ '€';				
+				subTotalEltVisible.textContent = linePrice + '€';//.toFixed(2) + '€';	
+				recalculateCart(); */
+
 			}
 
-			/* Recalculate cart */
-			function recalculateCart() {				  
-				  
-				var subtotal = 0;
+			
+			function getProdTotalAjax(id, prix, qte, parent) {
+				data = {id : id, prix : prix, qte : qte};
+
+				urlTo = "/setProduitPanier";		
 				
+				$.ajax({type : "POST",
+							contentType : "application/json",
+							url : urlTo,
+							data : JSON.stringify(data),
+							dataType : 'json',
+							async : false,
+							success : function(result, textStatus, xhr) {
+								if (xhr.status == 200) {
+
+									var result = parseFloat(result).toFixed(2);
+									var subTotalElt = parent.querySelector(".subtotal");
+									var subTotalEltVisible = parent.querySelector(".subtotalV");
+									subTotalElt.textContent = result;
+									subTotalEltVisible.textContent = result	+ '€';
+									recalculateCart();
+
+								} else {
+									console.log('Erreur status ' + xhr.status);
+								}
+							},
+							error : function(e) {
+								console.log("ERROR: ", e);
+							}
+				});
+			}
+			
+			function recalculateCart() {
+
+// 				var subtotal = 0;
+
+// 				var allByClass = document.getElementsByClassName('item');
+// 				for (var i = 0, len = allByClass.length | 0; i < len; i = i + 1 | 0) {
+// 					var subTotalElt = allByClass[i].querySelector(".subtotal");
+// 					subtotal += parseFloat(subTotalElt.textContent);
+// 				}
+
+// 				var totalElt = document.getElementById('totalPanier');
+// 				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€';		
+				
+				recalculateCartAjax();
+			}	
+			
+			/* test AJAX*/
+			function recalculateCartAjax() {
+				
+				products = [];
 				var allByClass = document.getElementsByClassName('item');
-				for (var i=0, len=allByClass.length|0; i<len; i=i+1|0) {
-					var subTotalElt = allByClass[i].querySelector(".subtotal");
-					subtotal += parseFloat(subTotalElt.textContent);					
-				}
-								
-				var totalElt = document.getElementById('totalPanier');
-				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€';
+				for (var i = 0, len = allByClass.length | 0; i < len; i = i + 1 | 0) {
+					var id = parseInt(allByClass[i].querySelector(".idProd").value);
+					var price = parseFloat(allByClass[i].querySelector(".prix").textContent);
+					var quantity = parseFloat(allByClass[i].querySelector(".qte").value);
+					data = {id : id, prix : price, qte : quantity};					
+					products.push(data); 
+				}	
+				
+				var formData =  {produits : products};								
+				urlTo = "/getTotalPanier";				
+			
+				$.ajax({
+					type : "POST",
+					contentType : "application/json",
+					url : urlTo,
+					data : JSON.stringify(formData),
+					dataType : 'json',
+					async : false,
+					success : function(result, textStatus, xhr) {
+						if (xhr.status == 200) {
+							var result = parseFloat(result).toFixed(2);
+							//console.log('result total panier ' + result);
+							var totalElt = document.getElementById('totalPanier');
+							totalElt.textContent = 'Total : ' + result + '€';
+						} else {
+							console.log('Erreur status ' + xhr.status);
+						}
+					},
+					error : function(e) {
+						console.log("ERROR: ", e);
+					}
+				});
+			} 
+						
+			function addToPanierExpress(btn, id){
+				console.log('addToPanierExpress ' + id);
+				
+				//
+				
+				
+				data = {id : id, qte : 1};
 
+				urlTo = "/addProdExpress";		
+				
+				$.ajax({type : "POST",
+							contentType : "application/json",
+							url : urlTo,
+							data : JSON.stringify(data),
+							dataType : 'json',
+							async : false,
+							success : function(result, textStatus, xhr) {
+								if (xhr.status == 200) {
+									console.log('ok ' + xhr.status);
+
+								} else {
+									console.log('Erreur status ' + xhr.status);
+								}
+							},
+							error : function(e) {
+								console.log("ERROR: ", e);
+							}
+				});
 			}
-		</script>
+			
+			function retrievePanierFragment() {
+			    var url = '/th-spring-integration/spring/guests';
+
+			    if ($('#searchSurname').val() != '') {
+			        url = url + '/' + $('#searchSurname').val();
+			    }
+
+			    $("#resultsBlock").load(url);
+			}
+		</script> -->
 	</div>
 	
-	
 </body>
-
 </html>
+
+

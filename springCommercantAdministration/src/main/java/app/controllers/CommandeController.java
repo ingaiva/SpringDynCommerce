@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import app.utility.StatisticProduit;
 import data.entitys.CategorieProduit;
 import data.entitys.Commande;
-import data.entitys.CommandeProduit;
-import data.entitys.Produit;
-import data.entitys.User;
 import data.entitys.Commande.StatutCommande;
+import data.entitys.CommandeProduit;
+import data.entitys.PointVente;
+import data.entitys.Produit;
 
 @Controller
 public class CommandeController {
@@ -39,58 +40,131 @@ public class CommandeController {
 	@Autowired
 	data.repositorys.RepoCategorieProduit catR;
 
+	@Autowired
+	data.repositorys.RepoPointVente ptsVR;
+	
 	private void addStandardParams(Model model, HttpSession session) {
 		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();
 		model.addAttribute("lstCat", lstCat);
 	}
 	
 	@PostMapping("/listCmd")
-	public String postToViewCmdFrm(Model model, @RequestParam(name="action",required = false) String action, @RequestParam(name = "statutFilter", required = false) List<String> statutValues, HttpSession session) {
+	public String postToViewCmdFrm(Model model, 
+			@RequestParam(name="action",required = false) String action, 
+			@RequestParam(name = "statutFilter", required = false) List<String> statutValues, 
+			@RequestParam(name = "ptVFilter", required = false) List<Long> ptVFilterValues,
+			HttpSession session) {
 		
-		return getViewCmdFrm(model,action,statutValues,session);
+		if(action!=null && action.equalsIgnoreCase("effacerFilters")) {
+			ptVFilterValues = new ArrayList<Long>();
+			statutValues = new ArrayList<String>();
+		}
+//		if (ptVFilterValues == null) {			
+//			@SuppressWarnings("unchecked")
+//			List<Long> sessionPtvSelectedValues = (List<Long>) session.getAttribute("ptVFilterValuesS");
+//			if(sessionPtvSelectedValues==null)							
+//				ptVFilterValues = new ArrayList<Long>();			
+//			else
+//				ptVFilterValues=sessionPtvSelectedValues;
+//		}
+//		
+//		if (statutValues == null) {			
+//			@SuppressWarnings("unchecked")
+//			List<String> sessionSelectedValues = (List<String>) session.getAttribute("statutSelectedValuesS");
+//			if(sessionSelectedValues==null)							
+//				statutValues = new ArrayList<String>();			
+//			else
+//				statutValues=sessionSelectedValues;
+//		}
+//		session.setAttribute("statutSelectedValuesS", statutValues);
+//		session.setAttribute("ptVFilterValuesS", ptVFilterValues);		
+		return getViewCmdFrm(model,action,statutValues,ptVFilterValues,session);
 	}
 		
 	@GetMapping("/listCmd")
-	public String getViewCmdFrm(Model model, @RequestParam(name="action",required = false) String action, @RequestParam(name = "statutFilter", required = false) List<String> statutValues, HttpSession session) {
+	public String getViewCmdFrm(Model model, 
+			@RequestParam(name="action",required = false) String action, 
+			@RequestParam(name = "statutFilter", required = false) List<String> statutValues, 
+			@RequestParam(name = "ptVFilter", required = false) List<Long> ptVFilterValues,
+			HttpSession session) {
 		
-		if(action!=null && action.equalsIgnoreCase("effacerFilters")) {
+		if(ptVFilterValues==null ) 
+			ptVFilterValues = new ArrayList<Long>();			
+		
+		if(statutValues==null ) 			
 			statutValues = new ArrayList<String>();
-		}
-		if (statutValues == null) {
-			
-			List<String> sessionSelectedValues = (List<String>) session.getAttribute("statutSelectedValuesS");
-			if(sessionSelectedValues==null)
-			{				
-				statutValues = new ArrayList<String>();
-			}
-			else
-				statutValues=sessionSelectedValues;
-		}
+		
+//		if(action!=null && action.equalsIgnoreCase("effacerFilters")) {
+//			statutValues = new ArrayList<String>();
+//		}
+//		if (statutValues == null) {
+//			
+//			List<String> sessionSelectedValues = (List<String>) session.getAttribute("statutSelectedValuesS");
+//			if(sessionSelectedValues==null)
+//			{				
+//				statutValues = new ArrayList<String>();
+//			}
+//			else
+//				statutValues=sessionSelectedValues;
+//		}
+		
+		System.out.println(statutValues + "------" + ptVFilterValues);
+		
 		addStandardParams(model, session);		
-		if (statutValues.size() == 0)
+		if ((statutValues ==null || statutValues.size() == 0) && (ptVFilterValues == null || ptVFilterValues.size()==0))
 			model.addAttribute("lstCmd", cmdR.getCommandesOrdered());
+		else if (statutValues.size() > 0 &&  (ptVFilterValues == null || ptVFilterValues.size()==0))
+			model.addAttribute("lstCmd", cmdR.getCommandesFilteredByStatut(statutValues));
+		else if ((statutValues ==null || statutValues.size() == 0) && ptVFilterValues.size()>0)
+			model.addAttribute("lstCmd", cmdR.getCommandesFilteredByPtV(ptVFilterValues));
 		else
-			model.addAttribute("lstCmd", cmdR.getCommandesFiltered(statutValues));
+			model.addAttribute("lstCmd", cmdR.getCommandesFiltered(statutValues,ptVFilterValues));
 		
 		model.addAttribute("statutValues", Commande.StatutCommande.values());
 		model.addAttribute("statutSelectedValues", statutValues);
-		session.setAttribute("statutSelectedValuesS", statutValues);
+		//session.setAttribute("statutSelectedValuesS", statutValues);
+		
+		model.addAttribute("pointsV", ptsVR.findAll());
+		model.addAttribute("ptvSelectedValues", ptVFilterValues);	
+	
+		List<Commande> lstCmd =(List<Commande>) model.getAttribute("lstCmd");
+		//List<Produit> lstProduits = new ArrayList<Produit>();
+		StatisticProduit stat=new StatisticProduit();
+		for (Commande cmd : lstCmd) {
+			for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {
+				Produit curProd=cp.getProduit();
+				stat.addProduit(curProd, cp.getQte());				
+			}
+		}
+		model.addAttribute("stat", stat);	
+		
 		return "viewLstCommande";
 	}
+	
+//	private Produit findProduit(List<Produit> lstProduits, Produit curProduit) {
+//		for (Produit p : lstProduits) {
+//			if(p.getId().equals(curProduit.getId()))
+//				return p;
+//		}
+//		return null;
+//	}
 	
 	@GetMapping("/viewCommande")
 	public String getViewCommandeFrm(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session) {
 		addStandardParams(model,session);
 		Commande cmd= cmdR.getOne(idCommande);		
-		model.addAttribute("cmd", cmd);		
+		model.addAttribute("cmd", cmd);	
+		List<PointVente> pointsV = ptsVR.findAll();
+		model.addAttribute("pointsV",pointsV);	
 		return "viewCommande";	
 	}
 	
 	@PostMapping("/saveCommande")
 	public String saveCommande(Model model, @RequestParam(name="action",required = false) String action,
+			@RequestParam(name = "ptV", required = false) Long selectedPtV,
 			@ModelAttribute("cmd") @Valid Commande cmd, BindingResult bindingRes, HttpSession session, RedirectAttributes ra) {
 		
-		System.out.println(action);
+		
 		
 		boolean isCmdExistante=false;
 		boolean deleteProduitRequest=false;
@@ -129,6 +203,13 @@ public class CommandeController {
 			else {
 				
 				isCmdExistante=(cmd.getId()!=null);				
+				if(selectedPtV!=null && isCmdExistante) {
+					if(ptsVR.existsById(selectedPtV)) {
+						PointVente selectedPt=ptsVR.getOne(selectedPtV);
+						cmd.setPointVente(selectedPt);	
+						cmdR.updatePointVente(cmd.getId(), selectedPt);						
+					}
+				}	
 				
 				ArrayList<Long> lstToExclude = new ArrayList<Long>();			
 				

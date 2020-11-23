@@ -1,0 +1,86 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Vos points de vente</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarDynamique">	
+	</div>	
+</header>
+	
+	<div>
+		<h3 class="text-center">Vos points de vente</h3>
+		<div class="">
+			<div class=" m-2">				
+				<a th:href="@{addPtVente}" class="px-1 mx-1 btn btn-outline-success">Ajouter nouveau point de vente</a>
+			</div>									
+		</div>
+		<div class="mx-3">			
+			<div>		
+				<h4 th:if="${pointsV.size()==0}">Aucun point de vente n'existe encore</h4>
+				<div th:if="${pointsV.size() > 0}" class="table-responsive">	
+					
+					<table class="table">					
+							<tbody>
+								<tr class="rowP" th:each="p, itemStat :${pointsV}">						
+									<td>
+										<a class="mx-2"  th:href="@{viewPtVente(id=${p.id})}" >
+											<img th:if="${p.hasPhoto()}" th:src="${p.getPhotoStrSm()}"	class="border p-1 mr-2 imgAutoSize">
+										</a>
+									</td>								
+									<td><h5	class="" ><a class="text-dark" th:text="${p.libelle}" th:href="@{viewPtVente(id=${p.id})}"></a></h5>
+										<h6	class="" ><a class="text-dark" th:text="${p.description}" th:href="@{viewPtVente(id=${p.id})}"></a></h6>										
+										<p><a class="text-dark" th:text="${p.infoComp}" th:href="@{viewPtVente(id=${p.id})}"></a>										
+										</p>
+									</td>	
+									<td>
+										<p><a class="text-dark" th:text="${p.emplacementText}" th:href="@{viewPtVente(id=${p.id})}"></a>										
+										</p>
+										<p><a class="text-dark" th:text="${p.horairesText}" th:href="@{viewPtVente(id=${p.id})}"></a>										
+										</p>
+									</td>
+									
+																
+									<td>
+										<div class="">
+											<a th:href="@{viewPtVente(id=${p.id})}"><i class="fa fa-pencil-square-o text-dark" aria-hidden="true" ></i></a>									
+										</div>											      
+										<div class="">
+											<a th:href="@{deletePtVenteRequest(id=${p.id})}"><i class="fa fa-trash text-danger" aria-hidden="true" ></i></a>									
+										</div>
+									</td>
+								</tr>
+						</tbody>
+					</table>	
+				</div>
+				
+			</div>				
+		</div>	
+	</div>	
+	
+	
+    <div th:replace="fragments/general.html :: assets"></div>
+	<script>
+		
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#liPtV');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');   
+      	})      	
+      	
+    </script>	
+</body>
+</html>

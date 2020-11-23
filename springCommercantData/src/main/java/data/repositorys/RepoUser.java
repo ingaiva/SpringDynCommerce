@@ -22,4 +22,7 @@ public interface RepoUser   extends JpaRepository<User, Long> {
 	@Query("select count(*) from Commande cmd where cmd.user.id=:x and cmd.statut in (:y)")
 	public Integer getCountByUserFiltered(@Param("x") Long idUser, @Param("y") List<String> statutValues);
 	
+	@Query("select  DISTINCT u from User u join u.pointsVente p where p.id in (:x)")
+	List<User> findAllByListPointsVente(@Param("x") List<Long> listIdPointsVente);
+
 }

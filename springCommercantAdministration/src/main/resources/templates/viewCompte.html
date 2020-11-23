@@ -17,19 +17,39 @@
 </header>
 	
 	<div class="p-4 m-2" style="margin-left: auto; margin-right: auto; text-align: center;">
-		<form class="" method="get" th:action="@{${redirectAction}}" th:object="${user}">
+		<form class="" method="post" th:action="@{saveUser}" th:object="${user}">				
+			<input type="hidden" name="redirectAction" th:value="${redirectAction}">
 			<div th:replace="fragments/general.html :: infoCompte"></div>
+			
+			<div class="form-group text-left ">	
+				<div class="d-flex align-items-center justify-content-start">
+					<label class="col-form-label font-weight-bold" style="font-size: larger;">Points de vente</label>						
+
+					<div class="mx-2 my-0 d-none">
+						<button type="submit" class="px-2 py-0 btn btn-sm btn-outline-secondary" name="action" value="savePtV" id="savePtV"></button>
+					</div>
+				</div>
+				
+				<div class="d-flex flex-lg-row flex-md-column justify-content-start card border-info px-2 " id="divPtV">
+					<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
+						<input type="checkbox" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${#lists.contains(pointsVselected, p.id)}" onchange="savePointsVente(this);" /> 
+						
+						<label class="mx-2 font-weight-bold" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+					</div>
+				</div>
+			</div>	
+			
 			<div class="text-left">
-				<h4 th:text="'Nombre de commandes: ' + ${user.nbCmd}"></h4>
+				<h4 th:text="'Nombre de commandes finalisées: ' + ${user.nbCmd}"></h4>
 				<h4 th:if="${user.totalCmd!=null}" th:text="'Total général: ' + ${#numbers.formatDecimal(user.totalCmd, 1, 2, 'COMMA')} + '€'"></h4>
 			</div>	
-			<div class="d-flex text-center py-2">
-				<button type="submit" class="btn btn-success mx-1">Retour</button>				
+			<div class="d-flex text-center py-2">				
+				<a class="btn btn-success mx-1" th:text="Retour" th:href="@{${redirectAction}}"></a>								
 			</div>
 		</form>
 	</div>	
 	
-	<div th:with="showUser='false'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${user.commandes}, showUser)"></div>
+	<div class="mx-3" th:with="showUser='false'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${user.commandes}, showUser)"></div>
 		
 	
     <div th:replace="fragments/general.html :: assets"></div>
@@ -48,6 +68,12 @@
         	$liTag.addClass('active');          	
         	
       	})
+      	
+      	function savePointsVente(chkInput){ 			
+//  			var checkboxes = $('input[name=statutFilter]:checked').length ;
+ 			document.getElementById('savePtV').click();	
+ 			 
+ 		}
     </script>	
 </body>
 </html>

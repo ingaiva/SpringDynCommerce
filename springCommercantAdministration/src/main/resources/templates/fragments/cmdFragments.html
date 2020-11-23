@@ -17,13 +17,16 @@
 			<table class="table">					
 					<tbody>
 						<tr class="rowCmd" th:each="cmd, itemStat :${lstCmd}">						
-							<td><h5	class="" > <a class="text-dark" th:text="' N° ' + ${cmd.id}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5></td>
+							<td><h5	class="" > <a class="text-dark" th:text="' N° ' + ${cmd.id}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
+								<h6 th:text="${cmd.getPointVenteString()}"></h6>
+							</td>
 							<td th:if="${showUser!=null and showUser}">
 								<form th:action="@{viewUser}" method="get" id="frmViewUser" class="d-flex align-items-center">
 									<h4 th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom} ">
 										<!-- <a class="text-dark" th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom} " th:href="@{viewUser(id=${cmd.user.id})}"></a> -->
 									</h4>
 									<input type="hidden" th:value="${cmd.user.id}" name="id">
+									<input type="hidden" name="redirectAction" value="viewUserFromCommande">
 									<button type="submit" class="btn btn-sm text-dark m3-2" name="action" value="viewUserFromCommande" id="viewUserFromCommande">
 										<i class="fa fa-eye text-dark" aria-hidden="true" ></i>
 									</button>
@@ -91,6 +94,19 @@
 			<input type="hidden" th:field="*{id}" />
 			
 			<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>				
+			
+			<div class="form-group text-left mx-3 ">	
+				<div class="d-flex align-items-center justify-content-start">
+					<label class="col-form-label font-weight-bold" style="font-size: larger;">Point de vente</label>
+				</div>
+				<div class="d-flex flex-lg-row flex-md-column justify-content-start card border-info px-2 " id="divPtV">
+					<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
+						<input type="radio" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${cmd.getPointVente()!=null} and ${cmd.getPointVente().getId()==p.id}" onchange="savePointsVente(this);" /> 
+						<label class="mx-2 font-weight-bold" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+					</div>
+				</div>
+			</div>	
+			
 			
 			<div class="my-4 input-group">
 				<label for="msgCommercant" class="font-weight-bold mx-3 text-danger">Votre message : </label>					

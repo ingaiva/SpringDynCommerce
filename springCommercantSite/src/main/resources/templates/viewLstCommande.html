@@ -36,7 +36,9 @@
 			<table class="table">					
 					<tbody>
 						<tr class="rowCmd" th:each="cmd, itemStat :${connectedCli.commandes}">						
-							<td><h5	class="" > <a class="text-dark" th:text="' N° ' + ${cmd.id}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5></td>
+							<td><h5	class="" > <a class="text-dark" th:text="' N° ' + ${cmd.id}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
+								<h6 th:text="${cmd.getPointVenteString()}"></h6>
+							</td>
 							<td>									
 								<h5	class="" > <a class="text-dark"  th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
 								<h6	class="" ><a class="text-success font-italic" th:text="${cmd.infoComp}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>

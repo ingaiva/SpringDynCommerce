@@ -199,3 +199,20 @@ header{
     bottom: 15px;
     z-index: 2; */
 }
+
+.divAddToPanier{
+	position: relative;
+	opacity: 0;
+	top: -60px;
+	margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+    overflow:visible;
+    text-align: center;
+    transition: all 0.5s ease-in;
+}
+
+.divAddToPanier:hover, .linkProduit:hover + .divAddToPanier  {
+	opacity: 1;
+	top: -65px;
+}

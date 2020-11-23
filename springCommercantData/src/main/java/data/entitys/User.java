@@ -11,6 +11,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -74,6 +77,12 @@ public class User implements Serializable {
 	@OneToMany (mappedBy = "user",fetch = FetchType.LAZY)
 	List<Commande> commandes = new ArrayList<Commande>();	//List<Commande> commandes = new ArrayList<Commande>();
 
+	@ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable( name = "pointVente_User",
+    			joinColumns = @JoinColumn (name = "id_user"),
+                inverseJoinColumns = @JoinColumn( name = "\"id_pointVente\"" ) )
+	private List<PointVente> pointsVente = new ArrayList<PointVente>();
+	
 	public String getAdresseComplete() {
 		String retVal="";
 		
@@ -121,4 +130,24 @@ public class User implements Serializable {
 	private Integer nbCmd;
 	@Transient
 	private Float totalCmd;
+	
+	public List<Long> getLstIdPtv(){
+		List<Long> ret=new ArrayList<Long>();
+		for (PointVente pt : this.pointsVente) {
+			ret.add(pt.getId());
+		}
+		return ret;
+	}
+	public boolean hasPtv() {
+		return (this.pointsVente.size()>0);
+	}
+	public String getStringPtv(){
+		String ret="";
+		for (PointVente pt : this.pointsVente) {
+			if(ret.isBlank()==false)
+				ret+=", ";
+			ret+=pt.getLibelle();
+		}
+		return ret;
+	}
 }

@@ -15,8 +15,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -66,10 +69,17 @@ public class Commande  implements Serializable  {
 	@OneToMany (mappedBy = "commande",fetch = FetchType.LAZY)
 	List<CommandeProduit> lignesCommandeProduit = new ArrayList<CommandeProduit>();	//List<CommandeProduit> lignesCommandeProduit = new ArrayList<CommandeProduit>();
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "id_pointVente")
+	private PointVente pointVente;
+	
+	@DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+	private Date dateLivraison;
 	
 	public enum StatutCommande {
 		EnAttente, Valide, Finalise, Annule, AnnuleParCommercant;
 	}
+	@Transient
 	public String getCssClassStatut() {
 		if (this.getStatut()!=null) {
 			if (this.getStatut().equals(StatutCommande.EnAttente.toString())) 
@@ -110,33 +120,39 @@ public class Commande  implements Serializable  {
 	public void setStatutCmd(StatutCommande newStatut) {
 		this.statut=newStatut.toString();		
 	}
-	
+	@Transient
+	public boolean allowEditLimited() {
+		return this.allowEdit() || this.isValide();
+	}
+	@Transient
 	public boolean allowEdit() {
 		return this.statut.equalsIgnoreCase(StatutCommande.EnAttente.toString());
 	}
-	
+	@Transient
 	public boolean allowDelete() {
 		return this.statut.equalsIgnoreCase(StatutCommande.EnAttente.toString());
 	}
-	
+	@Transient
 	public boolean allowCancel() {
 		return this.statut.equalsIgnoreCase(StatutCommande.Valide.toString());
 	}
-	
+	@Transient
 	public boolean isValide() {
 		return this.statut.equalsIgnoreCase(StatutCommande.Valide.toString());
 	}
-	
+	@Transient
 	public boolean isEnAttente() {
 		return this.statut.equalsIgnoreCase(StatutCommande.EnAttente.toString());
 	}
-	
+	@Transient
 	public boolean isCanceled() {
 		return this.statut.equalsIgnoreCase(StatutCommande.Annule.toString()) || this.statut.equalsIgnoreCase(StatutCommande.AnnuleParCommercant.toString());
 	}
+	@Transient
 	public boolean isCanceledByAdmin() {
 		return this.statut.equalsIgnoreCase(StatutCommande.AnnuleParCommercant.toString());
 	}
+	@Transient
 	public boolean isFinalise() {
 		return this.statut.equalsIgnoreCase(StatutCommande.Finalise.toString());
 	}
@@ -170,5 +186,12 @@ public class Commande  implements Serializable  {
 		if(this.totalReductionStandard==null)
 			this.totalReductionStandard=0f;
 		return	(this.totalReductionStandard + this.reductionSpeciale);
+	}
+	@Transient
+	public String getPointVenteString() {
+		if(this.pointVente!=null) 
+			return this.pointVente.getLibelle();		
+		else
+			return "";
 	}
 }

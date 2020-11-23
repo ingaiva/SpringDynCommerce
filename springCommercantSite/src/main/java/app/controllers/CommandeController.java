@@ -3,6 +3,7 @@ package app.controllers;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import data.entitys.CategorieProduit;
@@ -25,9 +28,11 @@ import data.entitys.Commande;
 import data.entitys.CommandeProduit;
 import data.entitys.PanierWrapper;
 import data.entitys.ParamMainPage;
+import data.entitys.PointVente;
 import data.entitys.Produit;
 import data.entitys.User;
 import data.entitys.Commande.StatutCommande;
+
 
 @Controller
 public class CommandeController {
@@ -52,6 +57,9 @@ public class CommandeController {
 	@Autowired
 	data.repositorys.RepoPhoto_param phParamR;
 	
+	@Autowired
+	data.repositorys.RepoPointVente ptsVR;
+	
 	private ParamMainPage getParam(HttpSession session) {
 		ParamMainPage param =(ParamMainPage) session.getAttribute("paramMP");	
 		if (param==null) {			
@@ -74,6 +82,7 @@ public class CommandeController {
 		if (panier==null) 
 			panier=new PanierWrapper();		
 		model.addAttribute("panier", panier);
+		//session.setAttribute("panier", panier);
 		
 		User connectedCli=(User) session.getAttribute("connectedCli");		
 		model.addAttribute("connectedCli", connectedCli);	
@@ -93,6 +102,15 @@ public class CommandeController {
 		
 	
 	public void validerPanier(PanierWrapper panierFromPage, HttpSession session) {	
+//		System.out.println("-----------------");
+//		System.out.println("panierFromPage:");
+//
+//		for (Produit elt : panierFromPage.getProduits()) {			
+//			if (elt.getId() != null || elt.getQte() != 0)
+//				System.out.println(elt.getLibelle() + " : " + elt.getQte());
+//		}
+//		
+		
 		
 		List<Produit> lstToRemoveFromPage = new ArrayList<Produit>();
 		for (Produit elt : panierFromPage.getProduits()) {			
@@ -106,6 +124,13 @@ public class CommandeController {
 		PanierWrapper sessionPanier = (PanierWrapper) session.getAttribute("panier");
 		if (sessionPanier == null)
 			sessionPanier = new PanierWrapper();
+		
+//		System.out.println("panierFromSession:");
+//		for (Produit elt : sessionPanier.getProduits()) {			
+//			if (elt.getId() != null || elt.getQte() != 0)
+//				System.out.println(elt.getLibelle() + " : " + elt.getQte());
+//		}
+		
 		
 		List<Produit> lstToRemove = new ArrayList<Produit>();
 		for (Produit elt : sessionPanier.getProduits()) {
@@ -155,7 +180,9 @@ public class CommandeController {
 	public String getViewCommandeFrm(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session) {
 		addStandardParams(model,session);
 		Commande cmd= cmdR.getOne(idCommande);		
-		model.addAttribute("cmd", cmd);		
+		model.addAttribute("cmd", cmd);	
+		List<PointVente> pointsV = ptsVR.findAll();
+		model.addAttribute("pointsV",pointsV);	
 		return "viewCommande";	
 	}
 	
@@ -172,11 +199,20 @@ public class CommandeController {
 			cmd.setUser(connectedCli);
 			cmd.setStatutCmd(Commande.StatutCommande.EnAttente);
 			cmd.setDate(new Date());
+			if(connectedCli.getPointsVente().size()==1) {				
+				if(ptsVR.existsById(connectedCli.getPointsVente().get(0).getId())) 
+					cmd.setPointVente(ptsVR.getOne(connectedCli.getPointsVente().get(0).getId()));			
+			}
+				
+			
 			PanierWrapper sessionPanier = (PanierWrapper) session.getAttribute("panier");
 			for (Produit elt : sessionPanier.getProduits()) {
 				cmd.getLignesCommandeProduit().add(new CommandeProduit(elt));		
 			}
 			model.addAttribute("cmd", cmd);
+			
+			List<PointVente> pointsV = ptsVR.findAll();
+			model.addAttribute("pointsV",pointsV);			
 			return "viewCommande";	
 		}
 		else {			
@@ -186,8 +222,20 @@ public class CommandeController {
 	}
 	
 	@PostMapping("/creerCommande")
-	public String creerCommandeFrm(@RequestParam(name="action",required = false) String action,Model model, @ModelAttribute("panier") PanierWrapper panierFromPage,
+	public String creerCommandeFrm(@RequestParam(name="action",required = false) String action,
+			@RequestParam Map<String,String> allParams,
+			Model model,  @ModelAttribute("panier") PanierWrapper panierFromPage,
 			HttpSession session) {
+		//@ModelAttribute @SessionAttribute
+		System.out.println("creerCommande : ");
+		
+		System.out.println(panierFromPage.getProduits().size());
+		for (Produit elt : panierFromPage.getProduits()) {
+			System.out.println(elt.getLibelle() + " : " + elt.getQte());
+		}
+		 
+		System.out.println("Parameters are " + allParams.entrySet());
+		
 		if (action !=null && action.equalsIgnoreCase("valPanier")) {
 			validerPanier(panierFromPage,session);
 			return "redirect:/accueil";
@@ -210,6 +258,7 @@ public class CommandeController {
 
 	@PostMapping("/saveCommande")
 	public String saveCommande(Model model, @RequestParam(name="action",required = false) String action,
+			@RequestParam(name = "ptV", required = false) Long selectedPtV,
 			@ModelAttribute("cmd") @Valid Commande cmd, BindingResult bindingRes, HttpSession session, RedirectAttributes ra) {
 		
 		
@@ -231,6 +280,13 @@ public class CommandeController {
 			}
 			isCmdExistante=(cmd.getId()!=null);
 			cmd.setUser(connectedCli);	
+			
+			if(selectedPtV!=null) {
+				if(ptsVR.existsById(selectedPtV)) {
+					PointVente selectedPt=ptsVR.getOne(selectedPtV);
+					cmd.setPointVente(selectedPt);	
+				}
+			}			
 			
 			ArrayList<Long> lstToExclude = new ArrayList<Long>();
 			

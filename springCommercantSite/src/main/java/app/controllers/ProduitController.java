@@ -50,7 +50,8 @@ public class ProduitController {
 		if (panier == null)
 			panier = new PanierWrapper();
 		model.addAttribute("panier", panier);
-
+		//session.setAttribute("panier", panier);
+		
 		User connectedCli = (User) session.getAttribute("connectedCli");
 		model.addAttribute("connectedCli", connectedCli);
 
@@ -173,6 +174,11 @@ public class ProduitController {
 	 * sessionPanier.getProduits()) { System.out.println(elt.getDescription() +
 	 * " / " + elt.getStatut()); } return "redirect:/accueil"; }
 	 */
-
+	@GetMapping("/panierFragment")
+	public String showPanierFragment(Model model, HttpSession session) {
+		 System.out.println("dans panierFragment " );
+		addStandardParams(model, session);	    
+	    return "fragments/panier.html :: viewPanier";
+	}
 	
 }

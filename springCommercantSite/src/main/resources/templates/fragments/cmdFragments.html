@@ -20,13 +20,28 @@
 			</div>
 			<div>
 				<h6 th:class="${cmd.getCssClassStatut()}" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>				
-			</div>	
+			</div>
+				
 			<input type="hidden" th:field="*{id}" />
 			
 			<div th:if="${cmd.id != null}">				
 				<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>				
-<!-- 				<h6 th:text="${cmd.msgCommercant}" ></h6>	 -->
 			</div>
+			
+			<div class="form-group text-left mx-3 ">	
+				<div class="d-flex align-items-center justify-content-start">
+					<label class="col-form-label font-weight-bold" style="font-size: larger;">Point de vente</label>
+				</div>
+				<div class="d-flex flex-lg-row flex-md-column justify-content-start card border-info px-2 " id="divPtV">
+					<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
+						<input type="radio" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${cmd.getPointVente()!=null} and ${cmd.getPointVente().getId()==p.id}" onchange="savePointsVente(this);" th:required="${cmd.allowEditLimited()}" th:disabled="${!cmd.allowEditLimited()}"/> 
+						<label class="mx-2 font-weight-bold" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+					</div>
+				</div>
+			</div>	
+						
+
+			
 			<div class="d-flex align-items-center" th:if="${cmd.id != null && cmd.msgCommercant!=null && cmd.msgCommercant.length()>0}">
 				<label for="msgCommercant" class="font-weight-bold mx-3 text-danger">Message du commerçant : </label>
 				<h6 th:text="${cmd.msgCommercant}" class="font-italic mx-3 textWithCrLf text-danger"></h6>
@@ -37,8 +52,8 @@
 				<textarea th:field="*{infoComp}" th:readonly="${!cmd.allowEdit()}" class="font-italic form-control mx-3 textWithCrLf text-success"></textarea>	
 			</div>										
 			<input type="hidden" th:field="*{msgCommercant}" />
-			<input type="hidden" th:field="*{date}" />				
-			<input type="hidden" th:field="*{statut}" />	
+			<input id="dateCmd" type="hidden" th:field="*{date}" />				
+			<input id="statutCmd" type="hidden" th:field="*{statut}" />	
 		</div>
 		<table class="table">					
 			<tbody>
@@ -58,7 +73,7 @@
 							</div>
 							<div>
 								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
-								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
+								<input class="idProdCmd" type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
 								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.prix}" />	
 							
 								<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
@@ -80,12 +95,12 @@
 					<td >								
 						<div  th:if="${cmd.allowEdit()}" class="input-group mb-1" style="width:150px;" >
 							<div class="input-group-prepend">
-								<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQteCmd(this)"></i></span>
+								<span class="input-group-text"  onclick="dimQteCmd(this)" style="cursor: pointer;"> <i class="fa fa-minus-square" aria-hidden="true"></i></span>
 							</div>
-							<input class="form-control qte" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" onchange="updateQuantityCmd(this);">
+							<input class="form-control qteCmd" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" onchange="updateQuantityCmd(this);">
 							
 							<div class="input-group-append" id="button-addon-line">
-								<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQteCmd(this);"></i></span>	
+								<span class="input-group-text" style="cursor: pointer;" th:onclick="javascript:addQteCmd(this);"> <i	class="fa fa-plus-square" aria-hidden="true"  ></i></span>	
 							</div>
 						</div>
 						<div  th:if="${!cmd.allowEdit()}">							
@@ -99,7 +114,7 @@
 						<label class="subtotalCmd d-none" th:text="${lp.calculeTotalProduit()}"></label>
 					</td>							
 					<td>
-						<span th:if="${cmd.allowEdit()}" class="input-group-text justify-content-center" style="width:30px;" > <i class="fa fa-trash text-danger" aria-hidden="true" onclick="supprimerProdCmd(this)"></i></span>														
+						<span th:if="${cmd.allowEdit()}" class="input-group-text justify-content-center" style="width:30px; cursor: pointer;"  onclick="supprimerProdCmd(this)"> <i class="fa fa-trash text-danger" aria-hidden="true"></i></span>														
 						
 					</td>
 				</tr>

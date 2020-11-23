@@ -1,6 +1,8 @@
 package app.controllers;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -15,13 +17,18 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import data.entitys.CategorieProduit;
 import data.entitys.PanierWrapper;
 import data.entitys.ParamMainPage;
+import data.entitys.PointVente;
 import data.entitys.Produit;
 import data.entitys.User;
+
 
 @Controller
 public class HomeController {
@@ -49,6 +56,8 @@ public class HomeController {
 	@Autowired
 	data.repositorys.RepoPhoto_CategorieProduit phR;
 	
+	@Autowired
+	data.repositorys.RepoPointVente ptsVR;
 	//private static ParamMainPage param= null;
 	
 	private ParamMainPage getParam(HttpSession session) {
@@ -73,11 +82,13 @@ public class HomeController {
 		if (panier==null) 
 			panier=new PanierWrapper();		
 		model.addAttribute("panier", panier);
+		//session.setAttribute("panier", panier);
 		
 		User connectedCli=(User) session.getAttribute("connectedCli");		
 		model.addAttribute("connectedCli", connectedCli);	
 		getParam(session);
 		//model.addAttribute("paramP", getParam(session));	
+		//session.setAttribute("test", "Mon test");
 	
 	}
 	
@@ -136,7 +147,7 @@ public class HomeController {
 		for (User cltInDb : matches) {
 			if (cltInDb.getPassword().equals(curUser.getPassword())) {
 				isCltTrouve = true;
-				
+				cltInDb.setPointsVente(ptsVR.findAllByUsers(cltInDb));
 				session.setAttribute("connectedCli", cltInDb);
 				
 				if (session.getAttribute("cmdRequest") != null && session.getAttribute("cmdRequest").equals("1")) {					
@@ -161,6 +172,11 @@ public class HomeController {
 		addStandardParams(model,session);
 		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();	
 		model.addAttribute("lstCat", lstCat);
+		
+		List<PointVente> pointsV = ptsVR.findAll();
+		model.addAttribute("pointsV",pointsV);
+		model.addAttribute("pointsVselected",null);
+		
 		return "viewCompte";
 	}
 	@GetMapping({ "/modifierCompte" })
@@ -172,6 +188,11 @@ public class HomeController {
 		
 		User connectedCli=(User) session.getAttribute("connectedCli");	
 		model.addAttribute("user", connectedCli);
+		
+		List<PointVente> pointsV = ptsVR.findAll();
+		model.addAttribute("pointsV",pointsV);
+		model.addAttribute("pointsVselected",connectedCli.getLstIdPtv());
+		
 		if (connectedCli!=null) 
 			return "viewCompte";
 		else
@@ -180,7 +201,9 @@ public class HomeController {
 	
 	@PostMapping({ "/saveCompte" })
 	public String saveClient(@ModelAttribute("user") @Valid User user, BindingResult bindingRes,
-			RedirectAttributes ra, HttpSession session) {
+			RedirectAttributes ra,
+			@RequestParam(name = "ptV", required = false) List<Long> selectedValues, 
+			HttpSession session) {
 		
 		if (bindingRes.hasErrors()) {
 			String msgErr = "";
@@ -204,6 +227,27 @@ public class HomeController {
 			return "viewCompte";
 		}
 
+		if (selectedValues == null)
+			selectedValues = new ArrayList<Long>();
+				
+		List<PointVente> lstInDb = null;//ptsVR.findAllByUsers(user);
+		if (user.getId()!=null) 
+			lstInDb = ptsVR.findAllByUsers(user);
+		else
+			lstInDb = new ArrayList<PointVente>();
+		
+		for (Long idPtV : selectedValues) {
+			PointVente pt = ptsVR.getOne(idPtV);
+			if (lstInDb.contains(pt) == false)
+				lstInDb.add(pt);
+		}
+
+		for (PointVente ptU : new ArrayList<>(lstInDb)) {
+			if (selectedValues.contains(ptU.getId()) == false)
+				lstInDb.remove(ptU);
+		}
+		user.setPointsVente(lstInDb);	
+		
 		usrR.save(user);
 
 		session.setAttribute("connectedCli", user);
@@ -250,6 +294,13 @@ public class HomeController {
 		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();	
 		model.addAttribute("lstCat", lstCat);
 		return "redirect:/accueil";
+	}
+	
+	@GetMapping("/navbarUserFragment")
+	public String loadNavbarUserFragment(Model model, HttpSession session) {
+		session.removeAttribute("connectedCli");
+		addStandardParams(model,session);
+		return "fragments/general.html :: navbarUser";
 	}
 	
 }
