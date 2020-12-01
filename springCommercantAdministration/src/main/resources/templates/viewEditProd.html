@@ -88,7 +88,7 @@
 					<div class="mx-1 mb-3 d-flex flex-row-reverse">
 						<a th:href="@{accueil}" class="col-2 px-1 mx-1 btn btn-danger">Annuler</a>
 						<button type="submit" name="action" value="save" class="btn btn-success col-2 px-1"
-							style="width: 100%;">Valider</button>
+							style="width: 100%;">Enregistrer</button>
 					</div>
 
 					<div class="row  mb-3 ">
@@ -114,6 +114,20 @@
 								<div th:each="st : ${statutProduit}">
 									<input type="radio" th:field="*{statut}" th:value="${st}" /> <label
 										th:for="${#ids.prev('statut')}" th:text="${T(data.entitys.Produit).getStatutLibelle(st)}"></label>
+								</div>
+							</div>
+							<div class="d-flex flex-lg-row flex-md-column align-items-lg-center align-items-md-start mt-1 ml-3 etiquetteDelaisColor">
+								<div >
+									<label class="my-0 d-block" for="delai">Délai</label>
+									<small class="my-0 d-block" th:text="'(' +${T(data.entitys.Produit).getStatutSurCommandeLibelle()} + ')'"></small>
+								</div>
+								<div class="d-flex">
+									<input type="number" class="form-control form-control-sm mx-lg-2 mr-md-2" th:field="*{delai}" min="0">
+									<select class="form-control form-control-sm" th:field="*{uniteDelai}">
+										<option th:each="u : ${T(data.entitys.Produit.UniteDelaiApprovisionnnement).values()}" 
+										 	th:value="${u}" th:text="${T(data.entitys.Produit).getUniteDelaiLibelle(u)}">
+										</option>
+									</select>
 								</div>
 							</div>
 						</div>

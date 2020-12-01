@@ -49,6 +49,8 @@ public class Produit  implements Serializable  {
 	private Float prix;
 	private Float stock;
 	private String statut;//liste des statuts
+	private Integer delai;
+	private String uniteDelai;
 	
 	@Transient
 	private Float qte;
@@ -88,6 +90,46 @@ public class Produit  implements Serializable  {
 		Disponible, SurCommande, Epuise, NonDefini;
 	}
 	
+	public enum UniteDelaiApprovisionnnement {
+		H,J;
+	}
+	public static String getUniteDelaiLibelle(String unite) {
+		if (unite.equals(UniteDelaiApprovisionnnement.H.toString())) 
+			return "heures";
+		else if (unite.equals(UniteDelaiApprovisionnnement.J.toString())) 
+			return "jours";
+		else
+			return unite;
+	}
+	public Integer calculeDelaisJours() {
+		Integer ret=0;
+		if (this.isSurCommande() && this.getDelai()!=null && this.getDelai()>0) {
+			if(this.getUniteDelai()!=null) {
+				if(this.getUniteDelai().equals(UniteDelaiApprovisionnnement.J.toString())) {
+					ret=this.getDelai();
+				}
+				else if(this.getUniteDelai().equals(UniteDelaiApprovisionnnement.H.toString())) {
+					ret=Math.round(this.getDelai()/24);
+				}
+			}
+		}
+		return ret;
+	}
+	public String getDelaisSurCommande() {
+		if (this.isSurCommande() && this.getDelai()!=null && this.getDelai()>0) {
+			String ret="disponible en " + this.getDelai();
+			if(this.getUniteDelai()!=null && this.getUniteDelai().length()>0)
+				ret+=" " + getUniteDelaiLibelle(this.getUniteDelai());
+			else
+				ret+=" j/h";
+			return ret;
+		}
+		else
+			return "";
+	}
+	public static String getStatutSurCommandeLibelle() {
+		return getStatutLibelle(StatutProduit.SurCommande.toString());
+	}
 	public static String getStatutLibelle(String statutValue) {
 		if (statutValue.equals(StatutProduit.Disponible.toString())) 
 			return "Disponible";

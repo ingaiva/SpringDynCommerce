@@ -88,7 +88,9 @@ public class CommandeController {
 		model.addAttribute("connectedCli", connectedCli);	
 		getParam(session);
 		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();	
-		model.addAttribute("lstCat", lstCat);		
+		model.addAttribute("lstCat", lstCat);	
+		List<PointVente> pointsV = ptsVR.findAll();
+		model.addAttribute("pointsV",pointsV);	
 	}
 	
 	private Produit findProduit(Long id, List<Produit> lstProduit) {
@@ -102,15 +104,7 @@ public class CommandeController {
 		
 	
 	public void validerPanier(PanierWrapper panierFromPage, HttpSession session) {	
-//		System.out.println("-----------------");
-//		System.out.println("panierFromPage:");
-//
-//		for (Produit elt : panierFromPage.getProduits()) {			
-//			if (elt.getId() != null || elt.getQte() != 0)
-//				System.out.println(elt.getLibelle() + " : " + elt.getQte());
-//		}
-//		
-		
+			
 		
 		List<Produit> lstToRemoveFromPage = new ArrayList<Produit>();
 		for (Produit elt : panierFromPage.getProduits()) {			
@@ -123,13 +117,7 @@ public class CommandeController {
 
 		PanierWrapper sessionPanier = (PanierWrapper) session.getAttribute("panier");
 		if (sessionPanier == null)
-			sessionPanier = new PanierWrapper();
-		
-//		System.out.println("panierFromSession:");
-//		for (Produit elt : sessionPanier.getProduits()) {			
-//			if (elt.getId() != null || elt.getQte() != 0)
-//				System.out.println(elt.getLibelle() + " : " + elt.getQte());
-//		}
+			sessionPanier = new PanierWrapper();	
 		
 		
 		List<Produit> lstToRemove = new ArrayList<Produit>();
@@ -156,6 +144,7 @@ public class CommandeController {
 		addStandardParams(model,session);
 		Commande cmd= cmdR.getOne(idCommande);		
 		model.addAttribute("cmd", cmd);
+			
 		model.addAttribute("deleteRequest", true);
 		return "viewCommande";	
 	}
@@ -179,10 +168,13 @@ public class CommandeController {
 	@GetMapping("/viewCommande")
 	public String getViewCommandeFrm(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session) {
 		addStandardParams(model,session);
-		Commande cmd= cmdR.getOne(idCommande);		
+		Commande cmd= cmdR.getOne(idCommande);	
+		cmd.calculeTotaux();
 		model.addAttribute("cmd", cmd);	
-		List<PointVente> pointsV = ptsVR.findAll();
-		model.addAttribute("pointsV",pointsV);	
+		/*
+		 * List<PointVente> pointsV = ptsVR.findAll();
+		 * model.addAttribute("pointsV",pointsV);
+		 */
 		return "viewCommande";	
 	}
 	
@@ -209,10 +201,13 @@ public class CommandeController {
 			for (Produit elt : sessionPanier.getProduits()) {
 				cmd.getLignesCommandeProduit().add(new CommandeProduit(elt));		
 			}
+			cmd.calculeTotaux();
 			model.addAttribute("cmd", cmd);
 			
-			List<PointVente> pointsV = ptsVR.findAll();
-			model.addAttribute("pointsV",pointsV);			
+			/*
+			 * List<PointVente> pointsV = ptsVR.findAll();
+			 * model.addAttribute("pointsV",pointsV);
+			 */			
 			return "viewCommande";	
 		}
 		else {			
@@ -227,14 +222,15 @@ public class CommandeController {
 			Model model,  @ModelAttribute("panier") PanierWrapper panierFromPage,
 			HttpSession session) {
 		//@ModelAttribute @SessionAttribute
-		System.out.println("creerCommande : ");
-		
-		System.out.println(panierFromPage.getProduits().size());
-		for (Produit elt : panierFromPage.getProduits()) {
-			System.out.println(elt.getLibelle() + " : " + elt.getQte());
-		}
+		/*
+		 * System.out.println("creerCommande : ");
+		 * 
+		 * System.out.println(panierFromPage.getProduits().size()); for (Produit elt :
+		 * panierFromPage.getProduits()) { System.out.println(elt.getLibelle() + " : " +
+		 * elt.getQte()); }
+		 */
 		 
-		System.out.println("Parameters are " + allParams.entrySet());
+		/* System.out.println("Parameters are " + allParams.entrySet()); */
 		
 		if (action !=null && action.equalsIgnoreCase("valPanier")) {
 			validerPanier(panierFromPage,session);
@@ -295,6 +291,11 @@ public class CommandeController {
 				deleteProduitRequest=true;
 			}
 			for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {				
+				/*
+				 * if (cp.getProduit()!=null ) System.out.println(" lignes : " +
+				 * cp.getProduit().getId() + " : " + cp.getQte()); if (cp.getProduit()==null )
+				 * System.out.println(" lignes : pas de produit" + " : " + cp.getQte());
+				 */
 				
 				if (cp.getQte()!=null && cp.getQte() > 0 && cp.getProduit()!=null && cp.getProduit().getId()!=null) {
 					cp.setCommande(cmd);
@@ -308,20 +309,23 @@ public class CommandeController {
 			}
 			cmd.calculeTotaux();
 			cmdR.save(cmd);
+						
 			for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {
 				if (cp.getQte()!=null && cp.getQte() > 0 && cp.getProduit()!=null && cp.getProduit().getId()!=null) {
 					lignesCmdR.save(cp);					
 				}				
 			}
-			if(isCmdExistante && deleteProduitRequest ) {
+			//pour le cas de suppression d'un produit dans l'interface, impossible d'optimiser car la ligne de produit n'existe plus, on fera donc toujours cette requette....
+			if(isCmdExistante) {
 				if (lstToExclude.size()>0) {
+					
 					lignesCmdR.deleteNotIncluded(cmd.getId(), lstToExclude);
 				}
 				else
 					lignesCmdR.deleteByCommande(cmd.getId());
 			}
 			
-			session.removeAttribute("panier");		
+			if(!isCmdExistante) session.removeAttribute("panier");		
 		}
 		if(isCmdExistante)
 			return "redirect:/listCmd";	
@@ -329,8 +333,7 @@ public class CommandeController {
 		{			
 			addStandardParams(model,session);	
 			model.addAttribute("newCmdAlertRequest", true);
-			model.addAttribute("newCmd", cmd);
-			//return "redirect:/accueil";			
+			model.addAttribute("newCmd", cmd);					
 			session.removeAttribute("cmdRequest");				
 			return "viewHome";
 		}

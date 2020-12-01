@@ -1,6 +1,7 @@
 package data.repositorys;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -29,4 +30,7 @@ public interface RepoCommandeProduit  extends JpaRepository<CommandeProduit, Lon
 	@Modifying
 	@Query("delete from CommandeProduit cp where cp.commande.id=:x and cp.id NOT IN (:y)")
 	public void deleteNotIncluded(@Param("x") Long id,@Param("y") ArrayList<Long> lstToExclude);
+	
+	@Query("select cp.commande.id from CommandeProduit cp where cp.id=:x ")
+	public Long getIdCommande(@Param("x") Long idCommandeProduit);
 }

@@ -92,7 +92,7 @@
 			</div>
 			
 			<input type="hidden" th:field="*{id}" />
-			
+			<input id="statutCmd" type="hidden" th:value="*{statut}" />	
 			<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>				
 			
 			<div class="form-group text-left mx-3 ">	
@@ -102,7 +102,18 @@
 				<div class="d-flex flex-lg-row flex-md-column justify-content-start card border-info px-2 " id="divPtV">
 					<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
 						<input type="radio" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${cmd.getPointVente()!=null} and ${cmd.getPointVente().getId()==p.id}" onchange="savePointsVente(this);" /> 
-						<label class="mx-2 font-weight-bold" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+						<label class="mx-2 font-weight-bold lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
+						data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
+						<div th:id="'popoverContentPtV'+ ${iter.index}" style="display:none; ">
+							<div class="myPopoverContent bg-dark text-white">
+								<div class="d-flex align-items-start">
+									<span class="text-center mr-1"> 
+										<i class="fa fa-calendar mr-2" aria-hidden="true"></i>										
+									</span>								
+									<div class="textWithCrLf w-100" th:text="${p.getHorairesConcatString()}"></div>
+								</div>
+							</div>
+						 </div>
 					</div>
 				</div>
 			</div>	
@@ -128,12 +139,12 @@
 					<td>
 						<a th:href="@{modifierProd(id=${p.id})}" >
 							<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" >					
-							
 						</a>
 					</td>
+							
 					<td>
 						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
-						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
+						<input class="idProdCmd"  type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
 						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.prix}" />	
 						
 						<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
@@ -144,12 +155,12 @@
 					<td >								
 						<div  class="input-group mb-1" style="width:150px;" >
 							<div class="input-group-prepend">
-								<span class="input-group-text"> <i class="fa fa-minus-square" aria-hidden="true" onclick="dimQteCmd(this)"></i></span>
+								<span class="input-group-text"  onclick="dimQteCmd(this)" style="cursor: pointer;"> <i class="fa fa-minus-square" aria-hidden="true"></i></span>
 							</div>
-							<input class="form-control qte" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" onchange="updateQuantityCmd(this);">
+							<input class="form-control qteCmd" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" onchange="updateQuantityCmd(this);">
 							
 							<div class="input-group-append" id="button-addon-line">
-								<span class="input-group-text"> <i	class="fa fa-plus-square" aria-hidden="true"  th:onclick="javascript:addQteCmd(this);"></i></span>	
+								<span class="input-group-text" th:onclick="javascript:addQteCmd(this);" style="cursor: pointer;"> <i class="fa fa-plus-square" aria-hidden="true"  ></i></span>	
 							</div>
 						</div>						
 					</td>							
@@ -172,14 +183,18 @@
 				<h6 th:class="${cmd.getCssClassStatut()}" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>				
 			</div>				
 		</div>
-
+		
+		<div class="d-flex justify-content-end mx-4">
+			<h6 class="font-weight-bold mr-3 totalProdCmd" id="totalProdCmd" th:text="'Total produit : ' +${#numbers.formatDecimal(cmd.totalSansPromo, 1, 2, 'COMMA')} + '€'"></h6>			
+		</div>
+		
 		<div class="mb-1 d-flex justify-content-end mx-4">			
 			<h5 class="mx-2">Réduction spéciale</h5>
-			<input class="form-control font-weight-bold reductionS" min="0" step="0.01" style="width:80px;" id="reductionS" type="number" th:field="*{reductionSpeciale}" onchange="recalculateCartCmd();">			
+			<input class="form-control font-weight-bold reductionS" min="0" step="0.10" style="width:80px;" id="reductionS" type="number" th:field="*{reductionSpeciale}" onchange="recalculateCartCmd();">			
 		</div>
 
 		<div class="d-flex justify-content-end mx-4">										
-			<h5	class="font-weight-bold mr-3 totalCmd" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(cmd.calculeTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
+			<h5	class="font-weight-bold mr-3 totalCmd" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(cmd.totalFinal, 1, 2, 'COMMA')} + '€'"></h5>					
 		</div>
 	</div>	
 

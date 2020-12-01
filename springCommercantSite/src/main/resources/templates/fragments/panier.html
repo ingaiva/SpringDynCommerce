@@ -12,7 +12,7 @@
 
 <body>
 		
-	<div  th:fragment="viewPanierVide" class="modal fade" tabindex="-1"  id="panierVide" >
+	<!-- <div  th:fragment="viewPanierVide" class="modal fade" tabindex="-1"  id="panierVide" >
 		  <div class="modal-dialog">
 		    <div class="modal-content">
 		      <div class="modal-header">				        
@@ -28,7 +28,7 @@
 		      </div>
 		    </div>
 		  </div>
-		</div>
+		</div> -->
 	
 	<div th:fragment="viewPanier">
 		<form id="frmPanier"   method="post"	th:action="@{creerCommande}" th:object="${panier}" >
@@ -57,6 +57,8 @@
 											<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
 											<label class="prixV" th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
 											<label class="prix d-none" th:text="${p.prix}"></label>
+											<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelaisColor text-center"> </p>
+											
 										</div>
 									</div>									
 								</td>
@@ -93,7 +95,7 @@
 					</div>		        
 			      </div>
 			      <div class="modal-footer">
-			      	<button type="submit" class="py-0 btn btn-sm btn-outline-danger" name="action" value="valPanier" id="submitPanier"><i class="fa fa-times" aria-hidden="true"></i></button>  
+			      	<!-- <button type="submit" class="py-0 btn btn-sm btn-outline-danger" name="action" value="valPanier" id="submitPanier"><i class="fa fa-times" aria-hidden="true"></i></button> -->  
 	
 			        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="cmd" id="submitPanier">Passer la commande</button>
 			      </div>

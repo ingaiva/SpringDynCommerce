@@ -42,6 +42,15 @@
         	 let $liBisTag =  $('#liHome');   //
         	$liBisTag.siblings('.active').removeClass('active');
       	})
+      	
+      	 $('.lblPtV').popover({
+            html: true,
+            content: function () {
+                var elementId = $(this).attr("data-popover-content");
+                
+                return $(elementId).html();
+            }
+        });
     </script>	
 </body>
 <footer th:replace="fragments/general.html :: footerTrade"></footer>

@@ -127,8 +127,8 @@
 			</div>
 			<div class="row">
 				<div class=" col text-left">
-					<p class="mb-2">Nom / Prénom</p> 
-					<p class="border rounded bg-white p-1" th:text="${user.nom} + ' ' + ${user.prenom}"></p>  
+					<p class="mb-2 ">Nom / Prénom</p> 
+					<h4 class="border rounded bg-white p-1 font-weight-bold" th:text="${user.nom} + ' ' + ${user.prenom}"></h4>  
 					<p class="mb-2">Adresse</p> 
 					<div class="border rounded bg-white p-1" style="min-height: 34px;">
 						<p class="textWithCrLf my-0" th:text="${user.getAdresse()}"></p> 
@@ -161,7 +161,8 @@
 				<a th:href="@{modifierProd(id=${p.id})}" >
 					<img th:if="${p.photos.size() > 0 }" th:src="${p.defPhotoDataSm()}"	class="border p-1 imgAutoSize">
 				</a>
-				<p th:if="${!p.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquette"></p>							
+				<p th:if="${!p.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquette"></p>	
+				<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelais"> </p>						
 				<h5 class="font-weight-bold capitale">
 					<a class="text-dark"  th:text="${p.libelle}" th:href="@{modifierProd(id=${p.id})}"></a>
 				</h5>
@@ -184,9 +185,10 @@
 	</div>
 
 	<div th:fragment="assets" th:remove="tag">
-	    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  crossorigin="anonymous"></script>	    
 		<script	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"	crossorigin="anonymous"></script>
 		<script	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+		<script th:src="@{/methodes.js}"></script>	
 	</div>
 </body>
 </html>

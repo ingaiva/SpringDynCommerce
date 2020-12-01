@@ -68,4 +68,9 @@ public interface RepoCommande   extends JpaRepository<Commande, Long>  {
 	@Modifying
 	@Query("update Commande c set c.pointVente=:pt where c.id =:id")
 	int updatePointVente( @Param("id") Long idCommande, @Param("pt") PointVente pt);
+	
+	@Transactional
+	@Modifying
+	@Query("update Commande c set c.pointVente=null where c.pointVente.id =:id")
+	int deletePointVenteFromCommande( @Param("id") Long idPtV);
 }

@@ -16,10 +16,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import data.entitys.CategorieProduit;
@@ -87,8 +87,7 @@ public class HomeController {
 		User connectedCli=(User) session.getAttribute("connectedCli");		
 		model.addAttribute("connectedCli", connectedCli);	
 		getParam(session);
-		//model.addAttribute("paramP", getParam(session));	
-		//session.setAttribute("test", "Mon test");
+		//model.addAttribute("paramP", getParam(session));			
 	
 	}
 	
@@ -268,6 +267,11 @@ public class HomeController {
 		User connectedCli=(User) session.getAttribute("connectedCli");	
 		model.addAttribute("user", connectedCli);
 		model.addAttribute("suppressionCompteRequest", true);
+		
+		List<PointVente> pointsV = ptsVR.findAll();
+		model.addAttribute("pointsV",pointsV);
+		model.addAttribute("pointsVselected",connectedCli.getLstIdPtv());
+		
 		if (connectedCli!=null) 
 			return "viewSuppressionCompte";
 		else
@@ -303,4 +307,24 @@ public class HomeController {
 		return "fragments/general.html :: navbarUser";
 	}
 	
+	@GetMapping("/pointsVente")
+	public String getPointsVenteFrm(Model model, HttpSession session) {
+		addStandardParams(model,session);
+		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();	
+		model.addAttribute("lstCat", lstCat);
+		List<PointVente> pointsV = ptsVR.findAll();
+		model.addAttribute("pointsV",pointsV);
+		return "viewPointsVente";
+	}
+	
+	@GetMapping("/pointVenteFragment/{id}")
+	public String loadPointVenteFragment(Model model, @PathVariable("id") Long idPtV, HttpSession session) {
+		if(ptsVR.existsById(idPtV)) {
+			addStandardParams(model,session);
+			model.addAttribute("ptV", ptsVR.getOne(idPtV));
+			return "fragments/general.html :: detailPointVente";			
+		}
+		else
+			return "";
+	}
 }

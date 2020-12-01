@@ -31,20 +31,36 @@
 								</button>
 							</div>
 						</div>
-						<div class="d-flex align-items-center">
+						<div class="d-flex align-items-start">
 							<div class="mx-2">
 								<label class="mb-0">Points de vente:</label>	
-								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-center card border px-2 bg-secondary text-white" id="divUserFilter">
+								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divUserFilter">
 									<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
 										<input type="checkbox" style="transform: scale(1.5)" name="ptVFilter" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${ptvSelectedValues!=null} and ${#lists.isEmpty(ptvSelectedValues)==false} and ${#lists.contains(ptvSelectedValues,  p.id)}" onchange="checkFilter(this);" /> 
-										<label class="mx-1" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+										<label class="mx-1 lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
+										data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
+	
+	
+										<div th:id="'popoverContentPtV'+ ${iter.index}"
+											style="display: none;">
+											<div class="myPopoverContent bg-dark text-white">
+												<div class="d-flex align-items-start">
+													<span class="text-center mr-1"> <i
+														class="fa fa-calendar mr-2" aria-hidden="true"></i>
+													</span>
+													<div class="textWithCrLf w-100"
+														th:text="${p.getHorairesConcatString()}"></div>
+												</div>
+											</div>
+										</div>
+	
 									</div>
 								</div>
 							</div>
 										
 							<div class="mx-2">
 								<label class="mb-0">Statut:</label>	
-								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-center card border px-2 bg-secondary text-white" id="divStatutFilter">
+								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divStatutFilter">
 									<div class="mx-2  pt-2" th:each="st, iter  : ${statutValues}">								
 										<input type="checkbox" style="transform: scale(1.5)" name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${statutSelectedValues!=null} and ${#lists.contains(statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
 										<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>

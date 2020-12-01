@@ -34,7 +34,17 @@
 					<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
 						<input type="checkbox" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${#lists.contains(pointsVselected, p.id)}" onchange="savePointsVente(this);" /> 
 						
-						<label class="mx-2 font-weight-bold" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+						<label class="mx-2 font-weight-bold lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
+						data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
+						<div th:id="'popoverContentPtV'+ ${iter.index}"	style="display: none;">
+							<div class="myPopoverContent bg-dark text-white">
+								<div class="d-flex align-items-start">
+									<span class="text-center mr-1"> <i class="fa fa-calendar mr-2" aria-hidden="true"></i>
+									</span>
+									<div class="textWithCrLf w-100"	th:text="${p.getHorairesConcatString()}"></div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>	
@@ -54,10 +64,8 @@
 	
     <div th:replace="fragments/general.html :: assets"></div>
 	<script>
- 		$(document).ready(function() { 
- 			
- 			adjustBody();
-   		   
+ 		$(document).ready(function() { 			
+ 			   		   
         	let $liTag =  $('#liUsr');   // 
        
         	if ($liTag.hasClass('active')) {         

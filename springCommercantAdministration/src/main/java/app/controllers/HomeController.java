@@ -1,7 +1,6 @@
 package app.controllers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +22,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import data.Utilitys;
 import data.entitys.CategorieProduit;
 import data.entitys.Commande;
-import data.entitys.Photo_CategorieProduit;
 import data.entitys.PointVente;
 import data.entitys.Produit;
 import data.entitys.User;
@@ -224,6 +222,23 @@ public class HomeController {
 		}		
 	}
 	
+	private void updatePointVenteSansPhoto(PointVente pointVenteToEdit) {
+		
+		ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(), pointVenteToEdit.getDescription(), 
+				pointVenteToEdit.getEmplacementText(), pointVenteToEdit.getHorairesText(), 
+				pointVenteToEdit.getInfoComp(), pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
+		
+		ptsVR.updateHoraires(pointVenteToEdit.getId(), 
+				pointVenteToEdit.isLundi(), pointVenteToEdit.getHorairesLundi(), 
+				pointVenteToEdit.isMardi(), pointVenteToEdit.getHorairesMardi(), 
+				pointVenteToEdit.isMercredi(), pointVenteToEdit.getHorairesMercredi(), 
+				pointVenteToEdit.isJeudi(), pointVenteToEdit.getHorairesJeudi(), 
+				pointVenteToEdit.isVendredi(), pointVenteToEdit.getHorairesVendredi(), 
+				pointVenteToEdit.isSamedi(), pointVenteToEdit.getHorairesSamedi(), 
+				pointVenteToEdit.isDimanche(), pointVenteToEdit.getHorairesDimanche());
+		//updateHoraires
+	}
+	
 	@PostMapping("/savePtV")
 	public String savePointVente(Model model, @RequestParam(name="action",required = false) String action, 
 			@RequestParam(name="choixImg",required = false) MultipartFile file,			
@@ -245,10 +260,14 @@ public class HomeController {
 			if (action!=null && action.equalsIgnoreCase("addImg") && file!=null) {
 				if(pointVenteToEdit.getId()==null) {
 					ptsVR.save(pointVenteToEdit);	
-				}				
-				ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(), pointVenteToEdit.getDescription(), 
-						pointVenteToEdit.getEmplacementText(), pointVenteToEdit.getHorairesText(), 
-						pointVenteToEdit.getInfoComp(), pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
+				}	
+				updatePointVenteSansPhoto(pointVenteToEdit);
+				/*
+				 * ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(),
+				 * pointVenteToEdit.getDescription(), pointVenteToEdit.getEmplacementText(),
+				 * pointVenteToEdit.getHorairesText(), pointVenteToEdit.getInfoComp(),
+				 * pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
+				 */
 				ptsVR.updatePhoto(pointVenteToEdit.getId(), Utilitys.getImageData(file));
 				return getPointVenteFrm(model,pointVenteToEdit.getId());	
 			}		
@@ -256,24 +275,52 @@ public class HomeController {
 				if(pointVenteToEdit.getId()==null) {
 					ptsVR.save(pointVenteToEdit);	
 				}	
-				ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(), pointVenteToEdit.getDescription(), 
-						pointVenteToEdit.getEmplacementText(), pointVenteToEdit.getHorairesText(), 
-						pointVenteToEdit.getInfoComp(), pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
-				
+				updatePointVenteSansPhoto(pointVenteToEdit);
+				/*
+				 * ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(),
+				 * pointVenteToEdit.getDescription(), pointVenteToEdit.getEmplacementText(),
+				 * pointVenteToEdit.getHorairesText(), pointVenteToEdit.getInfoComp(),
+				 * pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
+				 */
 				ptsVR.deletePhoto(pointVenteToEdit.getId());				
 				return getPointVenteFrm(model,pointVenteToEdit.getId());	
 			}
 			else
 				if(pointVenteToEdit.getId()==null) {
 					ptsVR.save(pointVenteToEdit);	
-				}	
-				ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(), pointVenteToEdit.getDescription(), 
-						pointVenteToEdit.getEmplacementText(), pointVenteToEdit.getHorairesText(), 
-						pointVenteToEdit.getInfoComp(), pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
+				}
+				updatePointVenteSansPhoto(pointVenteToEdit);
+				/*
+				 * ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(),
+				 * pointVenteToEdit.getDescription(), pointVenteToEdit.getEmplacementText(),
+				 * pointVenteToEdit.getHorairesText(), pointVenteToEdit.getInfoComp(),
+				 * pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
+				 */
 					
 		}
 		
 		return "redirect:/listPointVente";	
 	}
+	@PostMapping("/deletePtVente")
+	public String deletePtVente(Model model,@ModelAttribute("ptV") PointVente pointVenteToDelete) {
+		PointVente pointVenteDb =ptsVR.getOne(pointVenteToDelete.getId());
+		pointVenteDb.setUsers(new ArrayList<User>());
+		cmdR.deletePointVenteFromCommande(pointVenteToDelete.getId());
+		pointVenteDb.setCommandes(null);
+		ptsVR.save(pointVenteDb);
+		ptsVR.delete(pointVenteDb);
+		return "redirect:/listPointVente";	
+	}
 	
+	@GetMapping("/deletePtVenteRequest")
+	public String deletePtVenteFrm(Model model, @RequestParam(name="id") Long id) {
+		
+		if (! ptsVR.existsById(id)) 
+			return "redirect:/accueil";		
+		else {	
+			PointVente pointVenteToEdit =ptsVR.getOne(id);
+			model.addAttribute("ptV", pointVenteToEdit);
+			return "viewSuppressionPointVente";
+		}	
+	}
 }

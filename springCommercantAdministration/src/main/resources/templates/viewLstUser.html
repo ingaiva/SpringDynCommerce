@@ -34,7 +34,18 @@
 						<div class="mx-2" th:each="p, iter  : ${pointsV}">								
 							<input type="checkbox" name="ptVFilter" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${ptvSelectedValues!=null} and ${#lists.isEmpty(ptvSelectedValues)==false} and ${#lists.contains(ptvSelectedValues,  p.id)}" onchange="checkFilter(this);" /> 
 							
-							<label class="mx-1" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+							<label class="mx-1 lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
+							data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
+							
+							<div th:id="'popoverContentPtV'+ ${iter.index}"	style="display: none;">
+								<div class="myPopoverContent bg-dark text-white">
+									<div class="d-flex align-items-start">
+										<span class="text-center mr-1"> <i class="fa fa-calendar mr-2" aria-hidden="true"></i>
+										</span>
+										<div class="textWithCrLf w-100"	th:text="${p.getHorairesConcatString()}"></div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>					

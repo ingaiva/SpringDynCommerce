@@ -236,7 +236,7 @@ public class CommandeController {
 						lignesCmdR.save(cp);					
 					}				
 				}
-				if(isCmdExistante && deleteProduitRequest ) {
+				if(isCmdExistante ) {
 					if (lstToExclude.size()>0) {
 						lignesCmdR.deleteNotIncluded(cmd.getId(), lstToExclude);
 					}

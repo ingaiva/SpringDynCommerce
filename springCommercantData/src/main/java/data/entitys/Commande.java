@@ -73,8 +73,12 @@ public class Commande  implements Serializable  {
 	@JoinColumn(name = "id_pointVente")
 	private PointVente pointVente;
 	
-	@DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+	@DateTimeFormat(pattern = "dd/MM/yyyy")
 	private Date dateLivraison;
+	
+//	@DateTimeFormat(pattern = "dd/MM/yyyy")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date dateChoixLivraison;
 	
 	public enum StatutCommande {
 		EnAttente, Valide, Finalise, Annule, AnnuleParCommercant;
@@ -156,7 +160,7 @@ public class Commande  implements Serializable  {
 	public boolean isFinalise() {
 		return this.statut.equalsIgnoreCase(StatutCommande.Finalise.toString());
 	}
-	public Float calculeTotal() {
+	public Float calculeTotalProduits() {
 		Float total = 0f;
 		for (CommandeProduit cp : this.getLignesCommandeProduit()) {
 			total += cp.calculeTotalProduit();
@@ -172,7 +176,7 @@ public class Commande  implements Serializable  {
 		return total;
 	}
 	public void calculeTotaux() {
-		this.setTotalSansPromo(this.calculeTotal());
+		this.setTotalSansPromo(this.calculeTotalProduits());
 		this.setTotalReductionStandard(this.calculeTotalReductionStandard());
 		if(this.reductionSpeciale==null)
 			this.reductionSpeciale=0f;

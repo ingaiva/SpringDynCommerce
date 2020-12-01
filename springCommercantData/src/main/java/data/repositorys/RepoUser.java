@@ -25,4 +25,5 @@ public interface RepoUser   extends JpaRepository<User, Long> {
 	@Query("select  DISTINCT u from User u join u.pointsVente p where p.id in (:x)")
 	List<User> findAllByListPointsVente(@Param("x") List<Long> listIdPointsVente);
 
+	List<User> findAllByPointsVente(@Param("x") PointVente pt);
 }

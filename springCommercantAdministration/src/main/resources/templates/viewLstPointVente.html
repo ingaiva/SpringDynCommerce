@@ -43,7 +43,7 @@
 									<td>
 										<p><a class="text-dark" th:text="${p.emplacementText}" th:href="@{viewPtVente(id=${p.id})}"></a>										
 										</p>
-										<p><a class="text-dark" th:text="${p.horairesText}" th:href="@{viewPtVente(id=${p.id})}"></a>										
+										<p><a class="text-dark textWithCrLf" th:text="${p.getHorairesConcatString()}" th:href="@{viewPtVente(id=${p.id})}"></a>										
 										</p>
 									</td>
 									

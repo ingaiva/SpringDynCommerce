@@ -110,11 +110,7 @@ public class ProduitController {
 	public String ajouterProduitPanier(Model model, @RequestParam(name = "qteToAdd") Float qte,
 			@ModelAttribute("produit") @Valid Produit produitToAdd, BindingResult bindingRes, HttpSession session) {
 		//,RedirectAttributes ra
-		/*
-		 * System.out.println("dans post addProd " + qte);
-		 * System.out.println(model.asMap()); System.out.println(produitToAdd);
-		 */
-
+		
 		PanierWrapper wpanier = (PanierWrapper) session.getAttribute("panier");
 		if (wpanier == null)
 			wpanier = new PanierWrapper();
@@ -164,19 +160,10 @@ public class ProduitController {
 		return getViewProduit(model, produitToAdd.getId(), session);
 
 	}
-	/*
-	 * @PostMapping("/valPanier") public String validerPanier(Model model,
-	 * HttpSession session) { PanierWrapper sessionPanier = (PanierWrapper)
-	 * session.getAttribute("panier"); if (sessionPanier == null) sessionPanier =
-	 * new PanierWrapper();
-	 * 
-	 * System.out.println("dans le session"); for (Produit elt :
-	 * sessionPanier.getProduits()) { System.out.println(elt.getDescription() +
-	 * " / " + elt.getStatut()); } return "redirect:/accueil"; }
-	 */
+	
 	@GetMapping("/panierFragment")
 	public String showPanierFragment(Model model, HttpSession session) {
-		 System.out.println("dans panierFragment " );
+		
 		addStandardParams(model, session);	    
 	    return "fragments/panier.html :: viewPanier";
 	}

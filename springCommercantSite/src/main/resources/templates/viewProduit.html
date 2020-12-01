@@ -39,8 +39,13 @@
 			<div class="d-flex text-left align-items-center">
 				<h3 th:text="${produit.libelle}" class="font-weight-bold mr-2 capitale"></h3> 							
 				<h5 th:if="${produit.stock!=null and !produit.isSurCommande()  and !produit.isEpuise()}" th:text="'Stock: '+${produit.stock}"></h5>
-				<h5 th:if="${!produit.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(produit.statut)}" class="mr-3 etiquette"></h5>							
+				<div class="mr-3 etiquette" th:if="${!produit.isAucunStatut()}">
+					<h5 th:if="${!produit.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(produit.statut)}" class="_mr-3 _etiquette"></h5>							
+					
+					<p th:if="${produit.getDelaisSurCommande().length()>0}" th:text="${produit.getDelaisSurCommande()}" class="etiquetteDelaisColor"> </p>
+				</div>
 			</div>
+			
 			<div class="text-left align-items-end">
 				<h4	class="font-weight-bold mr-3" th:text="${produit.conditionnement}"></h4>				
 				<h4	class="font-weight-bold mr-3" th:text="'Prix: '+${produit.prix} + '€'"></h4>

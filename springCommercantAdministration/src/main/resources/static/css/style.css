@@ -2,7 +2,11 @@
 	border: red solid 1px;
 } */
 
-
+::placeholder {
+  color: #c0c0c0;
+  font-size: 0.8em;
+  font-style: italic;
+}
 .textWithCrLf{
 	white-space: pre-line;
 }
@@ -150,7 +154,19 @@
 	background-color:#f4f4f4;
 	box-shadow: 0 2px 2px 2px rgb(236, 236, 236);
 }
-
+.etiquetteDelaisColor{
+	background-color: #ceffce;
+}
+.etiquetteDelais{
+	background-color: #ceffce;
+	padding: 2px 2px;
+	margin-bottom:0px;
+	margin-top:0px;
+    text-align: center;
+    position: relative;
+    bottom: 15px;
+    z-index: 2;
+}
 .etiquette {
     background-color: yellow;
     border: solid 1px yellow;
@@ -228,4 +244,13 @@
    /*  position: relative;
     bottom: 15px;
     z-index: 2; */
+}
+
+
+.myPopoverContent {
+    padding: 10px;
+    /* margin: 5px; */
+    /* width: 400px; */
+    border-radius: 5px;
+    
 }

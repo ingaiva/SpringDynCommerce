@@ -13,10 +13,11 @@
 </head>
 
 <body>
-	<header th:fragment="headerFragment" class="fixed-top">
+	<header th:fragment="headerFragment" class="fixed-top __sticky-top">
 		<div id="divNavbarUser" th:insert="fragments/general.html :: navbarUser"></div>
-		<div th:replace="fragments/general.html :: logoSite"></div>
-		<div class="my-1">
+		<!-- <div id="divLogoSite" th:replace="fragments/general.html :: logoSite"></div> -->
+		<div id="divLogoSite" class="mb-1" th:insert="fragments/general.html :: logoSite"></div>
+		<div id="divNavbarSiteCommercant" class="mb-1">
 			<div th:insert="fragments/general.html :: navbarSiteCommercant"></div>
 		</div>
 	</header>
@@ -30,14 +31,13 @@
 			<ul class="navbar-nav ml-auto">
 				<li id="liPanier" class="nav-item">	
 					<a id="linkPanierVide" class="nav-link" th:class="${session.panier==null || session.panier.produits==null || session.panier.produits.size()==0} ? 'nav-link' : 'nav-link d-none'"   style="cursor: pointer;"  data-toggle="modal" data-target="#panierVide">
-						<!-- th:if="${session.panier==null || session.panier.produits==null || session.panier.produits.size()==0}" -->
 						<i class="fa fa-shopping-cart mr-1" aria-hidden="true"></i>
 						Panier</a>
+						
 					<a id="linkPanierPlein" class="nav-link" th:class="${session.panier!=null && session.panier.produits!=null && session.panier.produits.size()>0} ? 'nav-link' : 'nav-link d-none'" style="cursor: pointer;"  
-						onclick="retrievePanierFragment('#modalPanier')">
-						<!-- th:unless="${session.panier==null || session.panier.produits==null || session.panier.produits.size()==0}"  data-toggle="xmodal" data-target="x#panierModal" -->
+						onclick="retrievePanierFragment('#viewPanierPlein')">						
 						<i class="fa fa-shopping-cart mr-1" aria-hidden="true"></i>
-						<span th:text="'Panier (' + ${session.panier.produits.size()} + ')'">
+						<span th:text="${session.panier!=null && session.panier.produits!=null && session.panier.produits.size()>0} ? 'Panier (' + ${session.panier.produits.size()} + ')' : 'Panier (0)' ">
 						</span>
 					</a>
 				</li>
@@ -102,16 +102,19 @@
 						</a>											
 					</div>
 				</li>
-				<li id="liContact" class="nav-item mx-2 d-none">
-					<a class="nav-link" > Contact </a>
+				<li id="liContact" class="nav-item mx-2 ">
+					<a class="nav-link"  th:href="@{pointsVente}"> Points de vente </a>
 				</li>				
 			</ul>
 		</div>
 	</nav>
 	
-	<div th:fragment="logoSite" th:if="${session.paramMP.hasLogo()}" th:class="${session.paramMP.logoPositionClass()}">
+	<div  th:fragment="logoSite" th:if="${session.paramMP.hasLogo()}" th:class="${session.paramMP.logoPositionClass()}">
 		<div th:if="${session.paramMP.hasLogo()}" class="text-center px-2 divLogo" style="min-width: 100px; max-width: 200px;">
-			<img th:src="${session.paramMP.getLogoStr()}" id="logoData" width="auto"	height="auto" style="max-width: 100%;">
+			<a th:href="@{accueil}"> 
+				<img th:src="${session.paramMP.getLogoStr()}" id="logoData" width="auto"	height="auto" style="max-width: 100%;">
+			</a>
+					 
 			<div class="input-group  mt-1">	
 				<label class="" th:text="${session.paramMP.logoTitre}"></label>
 			</div>
@@ -132,6 +135,7 @@
 					<button class="btn btn-success mx-1"  th:onclick="'addToPanierExpress(this,' + ${p.id} + ')'">Ajouter au panier</button>
 				</div>
 				<p th:if="${!p.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquette"></p>							
+				<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelais"> </p>
 				<h4 class="font-weight-bold capitale">
 					<a class="text-dark"  th:text="${p.libelle}" th:href="@{produit(id=${p.id})}"></a>
 				</h4>
@@ -253,12 +257,85 @@
 				<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
 					<input type="checkbox" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${pointsVselected!=null} and ${#lists.isEmpty(pointsVselected)==false} and ${#lists.contains(pointsVselected, p.id)}" onchange="savePointsVente(this);" /> 
 					
-					<label class="mx-2 font-weight-bold" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"></label>
+					<label class="mx-2 font-weight-bold lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
+					data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
+				
+					<div th:id="'popoverContentPtV'+ ${iter.index}" style="display:none; ">
+						<div class="myPopoverContent bg-dark text-white">
+							<div class="d-flex align-items-start">
+								<span class="text-center mr-1"> 
+									<i class="fa fa-calendar mr-2" aria-hidden="true"></i>										
+								</span>								
+								<div class="textWithCrLf w-100" th:text="${p.getHorairesConcatString()}"></div>
+							</div>
+						</div>
+					 </div>
+					 
 				</div>
+			
 			</div>
+			
 		</div>	
 	</div>
 	
+	<div th:fragment="detailPointVente" class="modal fade" tabindex="-1"  id="dlgPointVente" >
+		  <div class="modal-dialog">
+		    <div class="modal-content" th:object = "${ptV}" >
+		      <div class="modal-header">
+		        <h4	class="font-weight-bold " th:text="*{libelle}"></h4>
+		      				        
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+					<div class="divPtV" >				
+						<div class="m-2">						
+							<div th:if="${ptV.hasPhoto()}"	class="border border-info rounded p-2 my-2 text-center" style="min-width: 100px; max-width: 450px;">
+								<img th:src="${ptV.getPhotoStrLg()}" class="imgAutoSize">
+								<div class="  mt-1">	
+									<label class="font-italic text-center" th:text="*{photoTitre}"></label>	
+								</div>
+							</div>					
+						</div>
+						
+						<div class="">					
+							<div>
+								<input type="hidden" th:field="*{id}" />
+							</div>
+		
+							<div class="">
+								<div class="form-group text-left ">									
+									<h5 class="font-italic font-weight-bold textWithCrLf" th:text="*{description}"></h5>
+								</div>
+								<div class="form-group text-left ">									
+									<label class="font-italic textWithCrLf" th:text="*{infoComp}"></label>
+								</div>
+							</div>
+							<div class="mb-1 pointVenteInfoTexte  d-flex align-items-start" th:if="${ptV.emplacementText !=null && ptV.emplacementText.length()>0}">
+								<span class="_w-100 text-center mr-1"> 
+									<i class="fa fa-map-signs mr-2" aria-hidden="true"></i>										
+								</span>	
+								<label class="textWithCrLf" th:text="*{emplacementText}"></label>
+							</div>
+							<div class="mb-1 pointVenteInfoTexte d-flex align-items-start" th:if="${ptV.getHorairesConcatString() !=null && ptV.getHorairesConcatString().length()>0}">
+								<span class="_w-100  text-center mr-1"> 
+									<i class="fa fa-calendar mr-2" aria-hidden="true"></i>										
+								</span>								
+								<label class="textWithCrLf" th:text="*{getHorairesConcatString()}"></label>
+							</div>
+						</div>
+					</div>	
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>	        
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+
+	        
 	
 	
 	<div th:fragment="footerContact" >
@@ -301,6 +378,9 @@
 	    </div>
 	</div>
 	
+	
+	
+	
 	<footer th:fragment="footerTrade"> 
 		 <div class="text-center border" style="color: lightslategray; padding: 20px 10px;">© 2020 Aqualas -  ♥	        
 		 </div>
@@ -326,322 +406,15 @@
 		  </div>
 		</div>
 	
-		<div id="modalPanier">
+		<div id="viewPanierPlein">
 		</div>
 	
-		<!-- <form id="frmPanier" th:fragment="viewPanier"  method="post"	th:action="@{creerCommande}" th:object="${panier}" >
-			<div class="modal fade " tabindex="-1"  id="panierModal" th:if="${panier!=null && panier.produits!=null && panier.produits.size()>0}">
-			  <div class="modal-dialog modal-lg">
-			    <div class="modal-content">
-			      <div class="modal-header">	        
-			        <h4 class="modal-title" >Panier</h4>	
-			        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
-			          <span aria-hidden="true">&times;</span>
-			        </button>
-			      </div>
-			      <div class="modal-body">	
-			      	<h3 th:text="${session.monTest.libelle}"></h3>			      
-			      	
-			       	<table class="table">					
-						<tbody>
-							<tr class="item" th:each="p, itemStat :*{produits}">
-								
-								<td>
-									<div class="d-lg-flex">
-										<div class="mr-3"><img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" ></div>
-										<div>	
-											<input type="hidden" class="idProd" th:id="'session.panier.produits'+ ${itemStat.index} + '.id'" th:name="|session.panier.produits[${itemStat.index}].id|" th:value="${p.id}" />
-											<input type="hidden" th:name="|session.panier.produits[${itemStat.index}].libelle|" th:value="${p.libelle}"/> 									
-											<input type="hidden" class="idProd" th:field="*{produits[__${itemStat.index}__].id}" />								
-											<input type="hidden" th:field="*{produits[__${itemStat.index}__].libelle}" />
-											<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
-											<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
-											<label class="prixV" th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
-											<label class="prix d-none" th:text="${p.prix}"></label>
-										</div>
-									</div>									
-								</td>
-								<td >								
-									<div class="input-group mb-1" style="width:150px;">
-										<div class="input-group-prepend">
-											<span class="input-group-text"  onclick="dimQte(this)" style="cursor: pointer;"> <i class="fa fa-minus-square" aria-hidden="true"></i>
-											</span>
-										</div>
-										<input style="width:60px;" class="form-control qte" type="number" th:id="'session.panier.produits'+ ${itemStat.index} + '.qte'" th:name="|session.panier.produits[${itemStat.index}].qte|" th:value="${p.qte}" onchange="updateQuantity(this);">
-										<input style="width:60px;" class="form-control qte" type="number" th:field="*{produits[__${itemStat.index}__].qte}" onchange="updateQuantity(this);">
-										
-										<div class="input-group-append" id="button-addon-line">
-											<span class="input-group-text border" th:onclick="javascript:addQte(this);" style="cursor: pointer;"> <i	class="fa fa-plus-square" aria-hidden="true"  ></i>
-											</span>	
-										</div>
-									</div>
-								</td>							
-															
-								<td >
-									<h5	class="subtotalV font-weight-bold mr-3"  th:text="${#numbers.formatDecimal(p.getTotalProduit(), 1, 2, 'COMMA')} + '€'"></h5>
-									<label class="subtotal d-none" th:text="${p.getTotalProduit()}"></label>
-								</td>							
-								<td>
-									<span class="input-group-text"  onclick="supprimerProd(this)" style="cursor: pointer;"> <i class="fa fa-trash text-danger" aria-hidden="true"></i>
-									</span>																	
-								</td>
-							</tr>
-						</tbody>
-					</table>
-					
-					<div>
-						<h5	class="font-weight-bold mr-3 totalPanier" id="totalPanier" th:text=" 'Total : ' + ${#numbers.formatDecimal(panier.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
-					</div>		        
-			      </div>
-			      <div class="modal-footer">
-			      	<button type="submit" class="py-0 btn btn-sm btn-outline-danger" name="action" value="valPanier" id="submitPanier"><i class="fa fa-times" aria-hidden="true"></i></button>	      	
-			      
-			        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal">Annuler</button>
-			        <button type="submit" class="mx-2 py-0 btn btn-sm btn-outline-success " name="action" value="cmd" id="submitPanier">Passer la commande</button>
-			      </div>
-			    </div>
-			  </div>
-			</div>
-		</form> -->
-	
-	
-<!-- 	    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
+
 		<script src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  crossorigin="anonymous"></script>
 		<script	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"	crossorigin="anonymous"></script>
 		<script	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-		<script th:src="@{/methodes.js}"></script>
+		<script th:src="@{/methodes.js}"></script>	
 		
-		<!-- <script type="text/javascript" th:inline="javascript">
-			function adjustBody() {
-				var h = $('header').height();
-				if ($('header').hasClass("fixed-top")) {
-					$('body').css("padding-top", h);
-				} else {
-					$('body').removeClass("padding-top");
-				}
-			}
-
-			function addQte(btn) {
-				let parent = btn.parentElement.parentElement.parentElement;
-
-				let cible = parent.querySelector(".qte");
-
-				if (cible != null) {
-					let qte = cible.value;
-
-					if (qte == null) {
-						qte = 1;
-					}
-					cible.value = parseFloat(qte) + 1;
-					cible.setAttribute('value', parseFloat(qte) + 1);
-					
-					updateQuantity(cible);
-				}
-			}
-			function dimQte(btn) {
-				let parent = btn.parentElement.parentElement.parentElement;
-				let cible = parent.querySelector(".qte");
-
-				if (cible != null) {
-					let qte = cible.value;
-					if (qte == null) {
-						qte = 1;
-					}
-					if (qte > 0) {
-						cible.value = parseFloat(qte) - 1;
-						cible.setAttribute('value', parseFloat(qte) - 1);
-					} else{
-						cible.value = 0;
-						cible.setAttribute('value', 0);
-					}
-					
-					
-					updateQuantity(cible);
-				}
-
-			}
-
-			function supprimerProd(btn) {
-				let parentTR = btn.closest("tr");
-				if (parentTR != null) {
-					supprimerProdAjax(parentTR);
-					/* parentTR.remove();//removeProduitPanier
-					recalculateCart(); */
-				}
-			}
-			
-			function supprimerProdAjax(parent) {
-				var id = parseInt(parent.querySelector(".idProd").value);
-				data = {id : id};
-
-				urlTo = "/removeProduitPanier";		
-				
-				$.ajax({type : "POST",
-							contentType : "application/json",
-							url : urlTo,
-							data : JSON.stringify(data),
-							dataType : 'json',
-							async : false,
-							success : function(result, textStatus, xhr) {
-								if (xhr.status == 200) {
-									parent.remove();//removeProduitPanier
-									recalculateCart();
-								} else {
-									console.log('Erreur status ' + xhr.status);
-								}
-							},
-							error : function(e) {
-								console.log("ERROR: ", e);
-							}
-				});
-			}
-			
-			function updateQuantity(quantityInput) {
-
-				var parent = quantityInput.closest("tr");
-
-				var id = parseInt(parent.querySelector(".idProd").value);
-
-				var price = parseFloat(parent.querySelector(".prix").textContent);
-
-				var quantity = parseFloat(parent.querySelector(".qte").value);
-				var linePrice = getProdTotalAjax(id, price, quantity, parent); //price * quantity;			
-
-				/* var subTotalElt = parent.querySelector(".subtotal");
-				var subTotalEltVisible = parent.querySelector(".subtotalV");
-				subTotalElt.textContent = linePrice;//.toFixed(2) ; //+ '€';				
-				subTotalEltVisible.textContent = linePrice + '€';//.toFixed(2) + '€';	
-				recalculateCart(); */
-
-			}
-
-			
-			function getProdTotalAjax(id, prix, qte, parent) {
-				data = {id : id, prix : prix, qte : qte};
-
-				urlTo = "/setProduitPanier";		
-				
-				$.ajax({type : "POST",
-							contentType : "application/json",
-							url : urlTo,
-							data : JSON.stringify(data),
-							dataType : 'json',
-							async : false,
-							success : function(result, textStatus, xhr) {
-								if (xhr.status == 200) {
-
-									var result = parseFloat(result).toFixed(2);
-									var subTotalElt = parent.querySelector(".subtotal");
-									var subTotalEltVisible = parent.querySelector(".subtotalV");
-									subTotalElt.textContent = result;
-									subTotalEltVisible.textContent = result	+ '€';
-									recalculateCart();
-
-								} else {
-									console.log('Erreur status ' + xhr.status);
-								}
-							},
-							error : function(e) {
-								console.log("ERROR: ", e);
-							}
-				});
-			}
-			
-			function recalculateCart() {
-
-// 				var subtotal = 0;
-
-// 				var allByClass = document.getElementsByClassName('item');
-// 				for (var i = 0, len = allByClass.length | 0; i < len; i = i + 1 | 0) {
-// 					var subTotalElt = allByClass[i].querySelector(".subtotal");
-// 					subtotal += parseFloat(subTotalElt.textContent);
-// 				}
-
-// 				var totalElt = document.getElementById('totalPanier');
-// 				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€';		
-				
-				recalculateCartAjax();
-			}	
-			
-			/* test AJAX*/
-			function recalculateCartAjax() {
-				
-				products = [];
-				var allByClass = document.getElementsByClassName('item');
-				for (var i = 0, len = allByClass.length | 0; i < len; i = i + 1 | 0) {
-					var id = parseInt(allByClass[i].querySelector(".idProd").value);
-					var price = parseFloat(allByClass[i].querySelector(".prix").textContent);
-					var quantity = parseFloat(allByClass[i].querySelector(".qte").value);
-					data = {id : id, prix : price, qte : quantity};					
-					products.push(data); 
-				}	
-				
-				var formData =  {produits : products};								
-				urlTo = "/getTotalPanier";				
-			
-				$.ajax({
-					type : "POST",
-					contentType : "application/json",
-					url : urlTo,
-					data : JSON.stringify(formData),
-					dataType : 'json',
-					async : false,
-					success : function(result, textStatus, xhr) {
-						if (xhr.status == 200) {
-							var result = parseFloat(result).toFixed(2);
-							//console.log('result total panier ' + result);
-							var totalElt = document.getElementById('totalPanier');
-							totalElt.textContent = 'Total : ' + result + '€';
-						} else {
-							console.log('Erreur status ' + xhr.status);
-						}
-					},
-					error : function(e) {
-						console.log("ERROR: ", e);
-					}
-				});
-			} 
-						
-			function addToPanierExpress(btn, id){
-				console.log('addToPanierExpress ' + id);
-				
-				//
-				
-				
-				data = {id : id, qte : 1};
-
-				urlTo = "/addProdExpress";		
-				
-				$.ajax({type : "POST",
-							contentType : "application/json",
-							url : urlTo,
-							data : JSON.stringify(data),
-							dataType : 'json',
-							async : false,
-							success : function(result, textStatus, xhr) {
-								if (xhr.status == 200) {
-									console.log('ok ' + xhr.status);
-
-								} else {
-									console.log('Erreur status ' + xhr.status);
-								}
-							},
-							error : function(e) {
-								console.log("ERROR: ", e);
-							}
-				});
-			}
-			
-			function retrievePanierFragment() {
-			    var url = '/th-spring-integration/spring/guests';
-
-			    if ($('#searchSurname').val() != '') {
-			        url = url + '/' + $('#searchSurname').val();
-			    }
-
-			    $("#resultsBlock").load(url);
-			}
-		</script> -->
 	</div>
 	
 </body>

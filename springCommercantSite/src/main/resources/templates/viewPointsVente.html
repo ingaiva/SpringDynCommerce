@@ -1,0 +1,71 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Points de vente</title>	
+	<link th:insert="fragments/general.html :: headWithLinks"> 
+</head>
+
+<body>
+<header th:replace="fragments/general.html :: headerFragment" ></header>
+	
+	<div>
+		<h3 class="text-center">Points de vente</h3>		
+		<div class="mx-3">			
+			<div>		
+				<h4 th:if="${pointsV.size()==0}">Aucun point de vente n'existe encore</h4>
+				<div th:if="${pointsV.size() > 0}" class="table-responsive">	
+					
+					<table class="table">					
+							<tbody>
+								<tr class="rowP" th:each="p, itemStat :${pointsV}">						
+									<td>
+										<input type="hidden" class="idPTV" th:value="${p.id}" />
+										<a style=" cursor: pointer;"  class="mx-2"  onclick="retrievePointVenteFragment(this,'#viewDetailPointVente')" >
+											<img th:if="${p.hasPhoto()}" th:src="${p.getPhotoStrSm()}"	class="border p-1 mr-2 imgAutoSize">
+										</a>
+									</td>								
+									<td><h5	style=" cursor: pointer;" class="" th:text="${p.libelle}" onclick="retrievePointVenteFragment(this,'#viewDetailPointVente')"></h5>
+										<h6 style=" cursor: pointer;"	class="" th:text="${p.description}" onclick="retrievePointVenteFragment(this,'#viewDetailPointVente')"></h6>										
+										<p style=" cursor: pointer;" th:text="${p.infoComp}" onclick="retrievePointVenteFragment(this,'#viewDetailPointVente')"></p>
+									</td>	
+									<td>
+										<div class="pointVenteInfoTexte" th:if="${p.emplacementText !=null && p.emplacementText.length()>0}">
+											<i class="fa fa-map-signs mr-2" aria-hidden="true"></i><span th:text="${p.emplacementText}"></span>
+										</div>
+										<div class="pointVenteInfoTexte" th:if="${p.getHorairesConcatString() !=null && p.getHorairesConcatString().length()>0}">
+											<i class="fa fa-calendar mr-2" aria-hidden="true"></i><span class="textWithCrLf" th:text="${p.getHorairesConcatString()}" ></span>
+										</div>
+									</td>
+								</tr>
+						</tbody>
+					</table>	
+				</div>				
+			</div>				
+		</div>	
+	</div>
+		
+	<div id="viewDetailPointVente">
+	</div>		
+	
+    <div th:replace="fragments/general.html :: assets"></div>   
+
+	<script>
+ 		$(document).ready(function() {  			
+ 			adjustBody();
+ 		   
+        	let $liTag =  $('#liContact');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active'); 
+      	})      	
+
+    </script>
+</body>	
+<footer th:replace="fragments/general.html :: footerTrade"></footer>
+</html>
