@@ -8,7 +8,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 
@@ -155,6 +158,32 @@ public class Utilitys {
 	        e.printStackTrace();
 	    }
 	    return imageString;
+	}
+	
+	public static String getDateStr(Date dt) {
+		if (dt!=null) {
+			Calendar cal = Calendar.getInstance();	
+			cal.setTime(dt);
+			Integer dw=cal.get(Calendar.DAY_OF_WEEK);
+			String dwStr="";
+			if (dw.equals(Calendar.MONDAY))
+				dwStr="lundi";
+			else if (dw.equals(Calendar.TUESDAY))
+				dwStr="mardi";
+			else if (dw.equals(Calendar.WEDNESDAY))
+				dwStr="mercredi";
+			else if (dw.equals(Calendar.THURSDAY))
+				dwStr="jeudi";
+			else if (dw.equals(Calendar.FRIDAY))
+				dwStr="vendredi";
+			else if (dw.equals(Calendar.SATURDAY))
+				dwStr="samedi";
+			else if (dw.equals(Calendar.SUNDAY))
+				dwStr="dimanche";
+			SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy");			
+		    return dwStr + " " + formater.format(dt);
+		}
+		return "";
 	}
 }
 

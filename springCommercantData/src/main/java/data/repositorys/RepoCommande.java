@@ -1,5 +1,6 @@
 package data.repositorys;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -63,6 +64,11 @@ public interface RepoCommande   extends JpaRepository<Commande, Long>  {
 	@Modifying
 	@Query("update Commande c set c.statut=:statut where c.id =:id")
 	int updateStatut( @Param("id") Long idCommande, @Param("statut") String statut);
+	
+	@Transactional
+	@Modifying
+	@Query("update Commande c set c.dateLivraison=:d where c.id =:id")
+	int updateDateLivraison( @Param("id") Long idCommande, @Param("d") Date dateLivraison);
 	
 	@Transactional
 	@Modifying

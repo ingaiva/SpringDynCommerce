@@ -1,7 +1,9 @@
 package data.entitys;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +23,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import data.Utilitys;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -73,8 +76,14 @@ public class Commande  implements Serializable  {
 	@JoinColumn(name = "id_pointVente")
 	private PointVente pointVente;
 	
-	@DateTimeFormat(pattern = "dd/MM/yyyy")
+	/* @DateTimeFormat(pattern = "dd/MM/yyyy") */
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateLivraison;
+	
+	/*
+	 * @Column(columnDefinition = "tinyint(1) NOT NULL DEFAULT '0'") private boolean
+	 * hasDateLivraisonDefault;
+	 */
 	
 //	@DateTimeFormat(pattern = "dd/MM/yyyy")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -197,5 +206,54 @@ public class Commande  implements Serializable  {
 			return this.pointVente.getLibelle();		
 		else
 			return "";
+	}
+	
+	@Transient
+	public Date getDateValidationSouhaitee() {
+		if(this.dateChoixLivraison!=null)
+			return this.dateChoixLivraison;
+		else {
+			if(this.getPointVente()!=null) {
+				return this.getPointVente().getNextDateValidation(this);
+			}
+			else
+				return null;
+		}
+	}
+	
+	@Transient
+	public String getDateValidationSouhaiteeStr() {
+		Date dt=getDateValidationSouhaitee();
+		if (dt!=null) {
+			Calendar cal = Calendar.getInstance();	
+			cal.setTime(dt);
+			Integer dw=cal.get(Calendar.DAY_OF_WEEK);
+			String dwStr="";
+			if (dw.equals(Calendar.MONDAY))
+				dwStr="lundi";
+			else if (dw.equals(Calendar.TUESDAY))
+				dwStr="mardi";
+			else if (dw.equals(Calendar.WEDNESDAY))
+				dwStr="mercredi";
+			else if (dw.equals(Calendar.THURSDAY))
+				dwStr="jeudi";
+			else if (dw.equals(Calendar.FRIDAY))
+				dwStr="vendredi";
+			else if (dw.equals(Calendar.SATURDAY))
+				dwStr="samedi";
+			else if (dw.equals(Calendar.SUNDAY))
+				dwStr="dimanche";
+			SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy");
+			String auto="";
+			if(this.dateChoixLivraison==null)
+				auto="(par défaut) ";
+		    return auto +dwStr + " " + formater.format(dt);
+		}
+		else
+			return "non-définie";
+	}
+	
+	public String getDateLivraisonStr() {
+		return Utilitys.getDateStr(this.getDateLivraison());		
 	}
 }

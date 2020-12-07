@@ -294,15 +294,12 @@ public class PointVente  implements Serializable  {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(curDate);
 			int curDW =getDayOfWeekFr( cal.get(Calendar.DAY_OF_WEEK));
-//			System.out.println(" date defini pour la boucle " + cal.getTime());
-//			System.out.println(" jour courant " + curDW);
+
 
 			ArrayList<Integer> dw = convertOpeningDays();
 			for (Integer day : dw) {
-//				System.out.println("boucle day --> " + day);
-				if (getDayOfWeekFr(day) > curDW ){
-						//|| (day==Calendar.SUNDAY && curDW != Calendar.SUNDAY)) {
-//					System.out.println("boucle day > curDW || (day==Calendar.SUNDAY && curDW != Calendar.SATURDAY) --> " + day);
+
+				if (getDayOfWeekFr(day) > curDW ){						
 					return day;
 				}
 			}
@@ -381,7 +378,6 @@ public class PointVente  implements Serializable  {
 			if(cp.getProduit().calculeDelaisJours()>delais)
 				delais=cp.getProduit().calculeDelaisJours();
 		}
-//		System.out.println("pt: " + this.getLibelle());	
 		
 		if(countOpeningDaysOfWeek()>0 || delais > 0) {
 			Calendar cal = Calendar.getInstance();	
@@ -389,7 +385,6 @@ public class PointVente  implements Serializable  {
 			if(delais>0) {
 				cal.add(Calendar.DATE,delais);
 				dtCmd=cal.getTime();
-//				System.out.println("date avec + delais: " + dtCmd);
 			}
 			cal.setTime(dtCmd);
 			
@@ -397,23 +392,12 @@ public class PointVente  implements Serializable  {
 			if(nextDW!=null) {				
 				
 				cal.set(Calendar.DAY_OF_WEEK,nextDW);				
-				Date retDate=cal.getTime();
-				
-//				System.out.println("jour recherché: " + nextDW);
-//				System.out.println("date estimée: " + retDate);
-				
-//				cal.setTime(dtCmd);
-//				System.out.println("date cmd du calendar:" + cal.getTime());
+				Date retDate=cal.getTime();				
 
-//				int curDW=cal.get(Calendar.DAY_OF_WEEK);
-				if(retDate.compareTo(dtCmd)<=0){
-					//if(retDate.before(dtCmd)){
-					//(curDW >= nextDW) {
+				if(retDate.compareTo(dtCmd)<=0){					
 					cal.setTime(retDate);
 					cal.add(Calendar.DATE,7);
 					retDate=cal.getTime();
-//					System.out.println("date estimée modifée :" + retDate);
-
 				}
 				return retDate;
 			}

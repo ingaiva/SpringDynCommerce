@@ -159,6 +159,9 @@
 }
 .etiquetteDelais{
 	background-color: #ceffce;
+	max-width:200px;
+	margin-left: auto;
+    margin-right: auto;
 	padding: 2px 2px;
 	margin-bottom:0px;
 	margin-top:0px;

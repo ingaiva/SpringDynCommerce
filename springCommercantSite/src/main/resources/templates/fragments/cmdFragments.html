@@ -14,19 +14,24 @@
 		<div class="text-center">
 			<div th:if="${cmd.id != null}">
 				<h4 th:text="'Votre commande N° ' + ${cmd.id}"></h4>	
+				<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>
 			</div>
 			<div th:unless="${cmd.id != null}">
 				<h4>Votre commande</h4>	
 			</div>
 			<div>
 				<h6 th:class="${cmd.getCssClassStatut()}" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>				
+				<div class="text-center font-weight-bold" th:if="${!cmd.isEnAttente() && cmd.dateLivraison!=null}">
+					<div><i class="fa fa-calendar mr-2" aria-hidden="true"></i>Date de retrait </div>					
+					<h5 class="text-danger" th:text="${cmd.getDateLivraisonStr()}"></h5>	
+				</div>
 			</div>
 				
 			<input type="hidden" th:field="*{id}" />
 			
-			<div th:if="${cmd.id != null}">				
+			<!-- <div th:if="${cmd.id != null}">				
 				<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>				
-			</div>
+			</div> -->
 			
 			
 			<div class="form-group text-left mx-3 ">	

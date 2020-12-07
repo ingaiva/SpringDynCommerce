@@ -95,6 +95,7 @@
 	}
 	
 	
+	
 	function recalculateCartCmdAjax() {
 			//Methode differente du site commercial!!!
 			statutCmd=document.getElementById('statutCmd').value;//
@@ -151,3 +152,54 @@
                 return $(elementId).html();
             }
         });
+        
+        function getDateFromInput(idInputTag){
+        	if($(idInputTag).val()){
+				var weekdays = new Array();
+				weekdays[0] = "dimanche";	
+				weekdays[1] = "lundi";	
+				weekdays[2] = "mardi";	
+				weekdays[3] = "mercredi";	
+				weekdays[4] = "jeudi";	
+				weekdays[5] = "vendredi";	
+				weekdays[6] = "samedi";
+				
+				var d = new Date($(idInputTag).val());
+				var jour = d.getDate();
+				var mois = d.getMonth();
+				var annee = d.getFullYear();
+				var ww = d.getDay();
+				
+				mois++;		
+			    if (jour < 10) jour = '0' + jour;
+				if (mois < 10) mois = '0' + mois;
+				
+				var retVal=weekdays[ww] + " " + jour + '/' + mois + "/" + annee;
+				//console.log(retVal);
+				return  retVal;
+        	
+        	}
+		}
+		
+		
+		
+		function getApercuCmdFragment(tag , idLoadTag){
+		 	var parent = tag.closest("tr");
+	        var id = parseInt(parent.querySelector('[name="idCmd"]').value);
+	        
+			var url = '/apercuCmdFragment' + '/' + id;
+			
+			//console.log(url);
+			
+			$(idLoadTag).empty();
+	        $(idLoadTag).load(url, 
+	                  function() {                  
+	                
+	              $(idLoadTag).find('.modal').modal('show');  
+		});
+		
+		
+		
+		
+	}		
+		

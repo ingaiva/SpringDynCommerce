@@ -41,6 +41,11 @@
 							</td>
 							<td>									
 								<h5	class="" > <a class="text-dark"  th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
+								<div class="text-left font-weight-bold" th:if="${!cmd.isEnAttente() && cmd.dateLivraison!=null}">
+									<div><i class="fa fa-calendar mr-2" aria-hidden="true"></i>Date de retrait</div>					
+									<h5 class="text-danger" th:text="${cmd.getDateLivraisonStr()}"></h5>	
+								</div>								
+								
 								<h6	class="" ><a class="text-success font-italic" th:text="${cmd.infoComp}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
 								<h6	class="" ><a class="text-danger font-italic" th:text="${cmd.msgCommercant}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
 							</td>

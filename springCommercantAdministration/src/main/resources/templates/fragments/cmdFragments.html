@@ -17,25 +17,45 @@
 			<table class="table">					
 					<tbody>
 						<tr class="rowCmd" th:each="cmd, itemStat :${lstCmd}">						
-							<td><h5	class="" > <a class="text-dark" th:text="' N° ' + ${cmd.id}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
+							<td><h5 style="cursor: pointer;"> <a class="text-dark" th:text="' N° ' + ${cmd.id}" onclick="getApercuCmdFragment(this,'#viewDetailCmd')"></a></h5>
 								<h6 th:text="${cmd.getPointVenteString()}"></h6>
+								<input type="hidden" th:value="${cmd.id}" name="idCmd">
 							</td>
+							<td class="d-flex px-0">
+								<div class="mr-3" style="cursor: pointer;" onclick="getApercuCmdFragment(this,'#viewDetailCmd')" data-toggle="tooltip" data-placement="top" title="Aperçu">
+									<i class="fa fa-search text-dark" aria-hidden="true" ></i>																		
+								</div> 
+								<div style="cursor: pointer;" data-toggle="tooltip" data-placement="top" title="Modifier">									
+									<a th:href="@{viewCommande(id=${cmd.id})}"><i class="fa fa-pencil-square-o text-dark" aria-hidden="true" ></i></a>									
+								</div>
+							</td>
+							
 							<td th:if="${showUser!=null and showUser}">
-								<form th:action="@{viewUser}" method="get" id="frmViewUser" class="d-flex align-items-center">
-									<h4 th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom} ">
-										<!-- <a class="text-dark" th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom} " th:href="@{viewUser(id=${cmd.user.id})}"></a> -->
-									</h4>
+								<form th:action="@{viewUser}" method="get" name="frmViewUser" class="d-flex align-items-center text-primary">
 									<input type="hidden" th:value="${cmd.user.id}" name="id">
 									<input type="hidden" name="redirectAction" value="viewUserFromCommande">
-									<button type="submit" class="btn btn-sm text-dark m3-2" name="action" value="viewUserFromCommande" id="viewUserFromCommande">
-										<i class="fa fa-eye text-dark" aria-hidden="true" ></i>
+									<h4 th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom} "></h4>
+									<button type="submit" class="btn btn-sm" name="action" value="viewUserFromCommande"  data-toggle="tooltip" data-placement="top" title="Afficher la fiche du client">
+										<i class="fa fa-eye text-primary" aria-hidden="true" ></i>
 									</button>
 								</form>
 							</td>
 							<td>									
-								<h5	class="" > <a class="text-dark"  th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}" th:href="@{viewCommande(id=${cmd.id})}"></a></h5>
-								<h6	class="" ><a class="text-success" th:text="${cmd.infoComp}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
-								<h6	class="" ><a class="text-danger" th:text="${cmd.msgCommercant}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+								<h5	style="cursor: pointer;"> <a class="text-dark"  th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}" onclick="getApercuCmdFragment(this,'#viewDetailCmd')"></a></h5>
+								
+								<div class="text-left font-weight-bold" th:if="${!cmd.isEnAttente() && cmd.dateLivraison!=null}">
+									<div><i class="fa fa-calendar mr-2" aria-hidden="true"></i>Date de retrait choisie </div>					
+									<h5 class="text-danger" th:text="${cmd.getDateLivraisonStr()}"></h5>	
+								</div>
+								
+								<div class="text-left pointVenteInfoTexte font-weight-bold">				
+									<h6><i class="fa fa-calendar mr-2" aria-hidden="true"></i> Date de retrait souhaitée :</h6>
+									<h6 th:text="${cmd.getDateValidationSouhaiteeStr()}"></h6>									
+								</div>
+								
+								
+								<h6	class="" ><a class="text-success" th:text="${cmd.infoComp}" ></a></h6>
+								<h6	class="" ><a class="text-danger" th:text="${cmd.msgCommercant}" ></a></h6>
 							</td>
 							<td >
 								<div th:if="${cmd.calculeTotalReductionAll()>0}">
@@ -51,49 +71,258 @@
 							<td><h4 th:text="${#numbers.formatDecimal(cmd.totalFinal, 1, 2, 'COMMA')} + '€'"></h4>	</td>
 							<td>
 								<div class="pt-2">
-									<h6 th:class="${cmd.getCssClassStatut()}"><a style="color: inherit;" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}" th:href="@{viewCommande(id=${cmd.id})}"></a></h6>
+									<h6 th:class="${cmd.getCssClassStatut()}" style="cursor: pointer;"><a style="color: inherit;" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}" onclick="getApercuCmdFragment(this,'#viewDetailCmd')"></a></h6>
 								</div>	
-							</td>							
-							<td>
-								<div class="">
-									<a th:href="@{viewCommande(id=${cmd.id})}"><i class="fa fa-pencil-square-o text-dark" aria-hidden="true" ></i></a>									
-								</div>											      
-								<div class="">
-									<a th:href="@{deleteCommandeRequest(id=${cmd.id})}"><i class="fa fa-trash text-danger" aria-hidden="true" ></i></a>									
-								</div>
 							</td>
 						</tr>
 				</tbody>
 			</table>	
 		</div>
-		
+		  
+		<div id="viewDetailCmd">
+		</div>	
 	</div>
+
+
+
+
+	<div th:fragment="apercuCmd" class="modal fade" tabindex="-1"  id="dlgApercuCmd" >
+	  <div class="modal-dialog modal-xl">
+	    <div class="modal-content" th:object = "${cmd}" >
+<!-- 	      <div class="modal-header">		         -->	      				        
+<!-- 	        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler"> -->
+<!-- 	          <span aria-hidden="true">&times;</span> -->
+<!-- 	        </button> -->
+<!-- 	      </div> -->
+	      <div class="modal-body">			
+			<div >
+				<div class="text-center">
+					<div class="d-flex justify-content-center align-items-center">						
+						<h5 th:text="'Commande N° ' + ${cmd.id}"></h5>	
+						<h6 class="ml-2" th:text="'du ' + ${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>
+					</div>
+					<h6 th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom}"></h6>
+							
+					<div>
+						<h6 th:class="${cmd.getCssClassStatut()}" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>				
+						<div class="m-1  font-weight-bold" th:if="${!cmd.isEnAttente() && cmd.dateLivraison!=null}">
+							<div class="text-center text-dark"><i class="fa fa-calendar mr-2" aria-hidden="true"></i>La date de retrait au point de vente </div>					
+							<div class="d-flex justify-content-center align-items-center">
+								<label class="text-danger m-0" th:text="${cmd.getDateLivraisonStr()}"></label>
+							</div>
+						</div>				
+					</div>
+					<div class="d-flex justify-content-center py-2">
+						<div class="m-1 " th:if="${cmd.isEnAttente()}">
+							<button  class="px-2 btn btn-sm btn-success" name="action" value="validerCmd" id="validerCmd" onclick="setStatutCmd(this);">Valider la commande</button>
+						
+							<div class="text-left border p-1 " id="divRadioDateLivraison">
+								<div class="text-center text-dark font-weight-bold"><i class="fa fa-calendar mr-2" aria-hidden="true"></i>La date de retrait au point de vente </div>
+								<div class="pl-1 " id="divDateLivraisonSouhaitee">
+									<input type="radio" name="radioDateLivraison" value="def" class="radioDateLivraison mx-1" style="transform: scale(1.5)" id="radioDateLivraisonSouhaitee"  checked="checked" onchange="checkVisibilityChoixDateLivraison()" >
+									<label for="radioDateLivraisonSouhaitee">souhaitée par le client : </label>
+									<label id="lblDateLivraisonSouhaite"></label>							
+								</div>
+								<div class="pl-1 ">
+									<input type="radio" name="radioDateLivraison"  value="input" class="radioDateLivraison mx-1" style="transform: scale(1.5)" id="radioDateLivraison" onchange="checkVisibilityChoixDateLivraison()" >
+									<label for="radioDateLivraison">de votre choix   </label>
+									<input type="date" id="InputDateLivraison" name="InputDateLivraison">
+								</div>	
+							</div>
+						</div>
+						
+						<div class="m-1" th:if="${!cmd.isEnAttente()}">
+							<button  class="px-2 btn btn-sm btn-outline-secondary" name="action" value="statutPrecedentCmd" id="finaliserCmd" onclick="setStatutCmd(this);">
+							<i class="fa fa-undo" aria-hidden="true"></i>
+							Revenir au statut précedent</button>
+						</div>			
+						<div class="m-1" th:if="${cmd.isValide()}">	
+							<button  class="px-2 btn btn-sm btn-secondary" name="action" value="finaliserCmd" id="finaliserCmd" onclick="setStatutCmd(this);">Finaliser la commande</button>
+						</div>
+					</div>
+					
+					<input type="hidden" th:field="*{id}" />
+					<input type="hidden" th:value="${cmd.id}" id="idCmd">
+					<input id="statutCmd" type="hidden" th:value="*{statut}" />							
+					
+					<div class="form-group text-left mx-3 ">	
+						<div class="d-flex align-items-center justify-content-start">
+							<label class="_col-form-label font-weight-bold" style="font-size: medium;">Point de vente</label>
+						</div>
+						<div class="d-flex flex-lg-row flex-md-column justify-content-start card border-info px-2 " id="divPtV">
+							<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
+								<input type="radio" style="transform: scale(1.2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${cmd.getPointVente()!=null} and ${cmd.getPointVente().getId()==p.id}" onchange="checkPointsVente();" /> 
+								<input type="hidden"  class="ptVDate" name="ptVDate" th:value="${p.getNextDateValidationStr(cmd)}">
+								<input type="hidden"  class="ptVD" name="ptVD" th:value="${p.getNextDateValidation(cmd)}">
+								<label class="mx-2 font-weight-bold lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
+								data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
+								<div th:id="'popoverContentPtV'+ ${iter.index}" style="display:none; ">
+									<div class="myPopoverContent bg-dark text-white">
+										<div class="d-flex align-items-start">
+											<span class="text-center mr-1"> 
+												<i class="fa fa-calendar mr-2" aria-hidden="true"></i>										
+											</span>								
+											<div class="textWithCrLf w-100" th:text="${p.getHorairesConcatString()}"></div>
+										</div>
+									</div>
+								 </div>
+							</div>
+						</div>
+					</div>
+		
+					<div class="d-flex align-items-center text-left  mx-3 my-1 pointVenteInfoTexte">				
+						<div class="my-0"><i class="fa fa-calendar mr-2 my-0" aria-hidden="true"></i> Date de retrait souhaitée :</div>
+						<div class="pl-2  my-0" th:if="${cmd.dateChoixLivraison==null}">
+							<label class="my-0" id="estimationValidation"></label>
+						</div>
+						<div class="pl-2  my-0" th:if="${cmd.dateChoixLivraison!=null}">					
+							<label class="my-0"  id="dateChoixLivraisonStr"></label>
+							<input type="hidden" id="dateChoixLivraison" th:field="*{dateChoixLivraison}">
+						</div>
+					</div>
+					
+					<div class="my-1 mx-3  text-left" th:if="${cmd.msgCommercant !=null && cmd.msgCommercant.length()>0}">
+						<label for="msgCommercant" class="font-weight-bold mx-3 text-danger">Votre message : </label>					
+						<label th:text="${cmd.msgCommercant}" class="font-italic mx-3 textWithCrLf text-danger"></label>	
+					</div>
+					
+					<div th:if="${cmd.infoComp !=null && cmd.infoComp.length()>0}" class="my-1 mx-3 text-left">
+						<label for="infoComp" class="font-weight-bold mx-3">Information complementaire : </label>					
+						<label th:text="${cmd.infoComp}" class="font-italic mx-3 textWithCrLf text-success" ></label>					
+					</div>										
+					<input type="hidden" th:field="*{infoComp}" />
+					<input type="hidden" th:field="*{user.id}" />	
+					<input type="hidden" th:field="*{date}" />				
+					<input type="hidden" th:field="*{statut}" />	
+				</div>
+				<table class="table">					
+					<tbody>
+						<tr class="itemCmd" th:each="lp, itemStat :*{lignesCommandeProduit}"  th:with="p=${lp.produit}">
+							<td>
+								<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" style="max-width: 80px;" >					
+							</td>								
+									
+							<td>
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
+								<input type="hidden" class="idProdCmd"  th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.prix}" />	
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.statut}" />	
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.delai}" />
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.uniteDelai}" />
+								
+								<h6	class="font-weight-bold mr-1 mb-0" th:text="${p.libelle}"></h6>
+								<p th:if="${p.conditionnement!=null && p.conditionnement.length()>0}"	class="mr-1 mb-0" th:text="${p.conditionnement}"></p>
+								<label class="prixCmdV mb-0"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
+								<label class="prixCmd d-none" th:text="${p.prix}"></label>
+								<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelaisColor text-center mb-0" style="max-width:200px"> </p>
+							</td>
+							<td >								
+								<div  class="input-group mb-1" style="width:80px;" >							
+									<input class="form-control qteCmd" type="number" th:field="*{lignesCommandeProduit[__${itemStat.index}__].qte}" readonly="readonly">
+								</div>						
+							</td>	
+									
+							<td >								
+								<h6	class="subtotalCmdV mr-3 " th:text="${#numbers.formatDecimal(lp.calculeTotalProduit(), 1, 2, 'COMMA')} + '€'"></h6>
+								<label class="subtotalCmd d-none" th:text="${lp.calculeTotalProduit()}"></label>
+							</td>	
+						</tr>
+					</tbody>
+				</table>	
+				
+				<div class="d-flex justify-content-end mx-4">
+					<h6 class="font-weight-bold mr-3 totalProdCmd" id="totalProdCmd" th:text="'Total produit : ' +${#numbers.formatDecimal(cmd.totalSansPromo, 1, 2, 'COMMA')} + '€'"></h6>			
+				</div>
+				
+				<div class="mb-1 d-flex justify-content-end mx-4">			
+					<h6 class="mx-2" th:text="'Réduction spéciale : ' +${#numbers.formatDecimal(cmd.reductionSpeciale, 1, 2, 'COMMA')} + '€'"></h6>								
+				</div>
+		
+				<div class="d-flex justify-content-end mx-4">										
+					<h6	class="font-weight-bold mr-3 totalCmd" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(cmd.totalFinal, 1, 2, 'COMMA')} + '€'"></h6>					
+				</div>	
+			</div>	
+				
+	      </div>
+	      <div class="modal-footer d-flex justify-content-end mx-2">
+	     	<a class="py-0 mx-2 btn btn-sm btn-outline-primary" th:href="@{viewCommande(id=${cmd.id})}">Afficher la commande</a>
+	        <button type="button" class="py-0 btn btn-sm btn-outline-danger" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>	        
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+
+
 
 	<div th:fragment="viewCmd(cmd)" >
 		<div class="text-center">
 			<h4 th:text="'Commande N° ' + ${cmd.id}"></h4>	
+			<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>
 			<h4 th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom}"></h4>
 					
 			<div>
 				<h6 th:class="${cmd.getCssClassStatut()}" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>				
+				<div class="m-1  font-weight-bold" th:if="${!cmd.isEnAttente() && cmd.dateLivraison!=null} and ${isEditDateLivraison==null}">
+					<div class="text-center text-dark"><i class="fa fa-calendar mr-2" aria-hidden="true"></i>La date de retrait au point de vente </div>					
+					<div class="d-flex justify-content-center align-items-center">
+						<label class="text-danger m-0" th:text="${cmd.getDateLivraisonStr()}"></label>	
+						<button  type="submit" class="px-2 py-0 ml-1 btn btn-sm" name="action" value="editDateLivraisonRequest" id="editDateLivraison" data-toggle="tooltip" data-placement="top" title="Modifier">
+							<i class="fa fa-pencil-square-o  text-dark" aria-hidden="true"></i></button>
+					</div>
+				</div>
+				
+				<div class="d-flex justify-content-center" th:if="${!cmd.isEnAttente()} and ${isEditDateLivraison!=null && isEditDateLivraison}">					
+					<div class="text-left border p-1 text-success  font-weight-bold">
+						<div class="text-center text-dark"><i class="fa fa-calendar mr-2" aria-hidden="true"></i>Définir la date de retrait au point de vente 
+							<button  type="submit" class="px-2 py-0 btn btn-sm btn-outline-success" name="action" value="editDateLivraison" id="editDateLivraison">Valider</button>
+							<button  type="submit" class="px-2 py-0  btn btn-sm btn-outline-primary" name="action" value="cancelEditDateLivraison" id="cancelEditDateLivraison">Annuler</button>
+						</div>
+						<div class="pl-1 " id="divDateLivraisonSouhaitee">
+							<input type="radio" name="radioDateLivraison" value="def" class="radioDateLivraison mx-1" style="transform: scale(1.5)" id="radioDateLivraisonSouhaitee"  checked="checked" >
+							<label for="radioDateLivraisonSouhaitee">souhaitée par le client : </label>
+							<label id="lblDateLivraisonSouhaite"></label>							
+						</div>
+						<div class="pl-1 ">
+							<input type="radio" name="radioDateLivraison"  value="input" class="radioDateLivraison mx-1" style="transform: scale(1.5)" id="radioDateLivraison">
+							<label for="radioDateLivraison">de votre choix   </label>
+							<input type="date" id="InputDateLivraison" name="InputDateLivraison">
+						</div>						
+					</div>
+				</div>
+				
 			</div>
 			<div class="d-flex justify-content-center py-2">
-				<div class="m-1" th:if="${cmd.isEnAttente()}">
+				<div class="m-1 " th:if="${cmd.isEnAttente()}">
 					<button  type="submit" class="px-2 btn btn-sm btn-success" name="action" value="validerCmd" id="validerCmd">Valider la commande</button>
+				
+					<div class="text-left border p-1 text-success  font-weight-bold">
+						<div class="text-center text-dark"><i class="fa fa-calendar mr-2" aria-hidden="true"></i>La date de retrait au point de vente </div>
+						<div class="pl-1 " id="divDateLivraisonSouhaitee">
+							<input type="radio" name="radioDateLivraison" value="def" class="radioDateLivraison mx-1" style="transform: scale(1.5)" id="radioDateLivraisonSouhaitee"  checked="checked" >
+							<label for="radioDateLivraisonSouhaitee">souhaitée par le client : </label>
+							<label id="lblDateLivraisonSouhaite"></label>							
+						</div>
+						<div class="pl-1 ">
+							<input type="radio" name="radioDateLivraison"  value="input" class="radioDateLivraison mx-1" style="transform: scale(1.5)" id="radioDateLivraison">
+							<label for="radioDateLivraison">de votre choix   </label>
+							<input type="date" id="InputDateLivraison" name="InputDateLivraison">
+						</div>	
+					</div>
 				</div>
-				<div class="m-1" th:if="${cmd.isValide()}">
-					<button  type="submit" class="px-2 btn btn-sm btn-secondary" name="action" value="finaliserCmd" id="finaliserCmd">Finaliser la commande</button>
-				</div>
-				<div class="m-1" th:if="${!cmd.isEnAttente()}">
+				
+				<div class="m-1" th:if="${!cmd.isEnAttente()} and ${isEditDateLivraison==null}">
 					<button  type="submit" class="px-2 btn btn-sm btn-outline-secondary" name="action" value="statutPrecedentCmd" id="finaliserCmd">
 					<i class="fa fa-undo" aria-hidden="true"></i>
 					Revenir au statut précedent</button>
 				</div>			
+				<div class="m-1" th:if="${cmd.isValide()} and ${isEditDateLivraison==null}">	
+					<button  type="submit" class="px-2 btn btn-sm btn-secondary" name="action" value="finaliserCmd" id="finaliserCmd">Finaliser la commande</button>
+				</div>
 			</div>
 			
 			<input type="hidden" th:field="*{id}" />
-			<input id="statutCmd" type="hidden" th:value="*{statut}" />	
-			<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>				
+			<input id="statutCmd" type="hidden" th:value="*{statut}" />							
 			
 			<div class="form-group text-left mx-3 ">	
 				<div class="d-flex align-items-center justify-content-start">
@@ -101,7 +330,9 @@
 				</div>
 				<div class="d-flex flex-lg-row flex-md-column justify-content-start card border-info px-2 " id="divPtV">
 					<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
-						<input type="radio" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${cmd.getPointVente()!=null} and ${cmd.getPointVente().getId()==p.id}" onchange="savePointsVente(this);" /> 
+						<input type="radio" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${cmd.getPointVente()!=null} and ${cmd.getPointVente().getId()==p.id}" onchange="checkPointsVente();" /> 
+						<input type="hidden"  class="ptVDate" name="ptVDate" th:value="${p.getNextDateValidationStr(cmd)}">
+						<input type="hidden"  class="ptVD" name="ptVD" th:value="${p.getNextDateValidation(cmd)}">
 						<label class="mx-2 font-weight-bold lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
 						data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
 						<div th:id="'popoverContentPtV'+ ${iter.index}" style="display:none; ">
@@ -116,8 +347,19 @@
 						 </div>
 					</div>
 				</div>
-			</div>	
-			
+			</div>
+
+			<div class="text-left  mx-3 my-1 pointVenteInfoTexte font-weight-bold">				
+				<h6><i class="fa fa-calendar mr-2" aria-hidden="true"></i> <span th:text="${cmd.dateChoixLivraison==null}?'Date de retrait souhaitée (selon le point de vente sélectionné) : ':'Date de retrait souhaitée : '"></span></h6>
+				<div class="pl-3" th:if="${cmd.dateChoixLivraison==null}">					
+					<label>Aussi tôt que possible</label>
+					<label id="estimationValidation"></label>
+				</div>
+				<div class="pl-3" th:if="${cmd.dateChoixLivraison!=null}">					
+					<label id="dateChoixLivraisonStr"></label>
+					<input type="hidden" id="dateChoixLivraison" th:field="*{dateChoixLivraison}">
+				</div>
+			</div>
 			
 			<div class="my-4 input-group">
 				<label for="msgCommercant" class="font-weight-bold mx-3 text-danger">Votre message : </label>					
@@ -146,11 +388,15 @@
 						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
 						<input class="idProdCmd"  type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
 						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.prix}" />	
+						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.statut}" />	
+						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.delai}" />
+						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.uniteDelai}" />
 						
 						<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
 						<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
 						<label class="prixCmdV"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
 						<label class="prixCmd d-none" th:text="${p.prix}"></label>
+						<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelaisColor text-center" style="max-width:200px"> </p>
 					</td>
 					<td >								
 						<div  class="input-group mb-1" style="width:150px;" >
@@ -195,8 +441,27 @@
 
 		<div class="d-flex justify-content-end mx-4">										
 			<h5	class="font-weight-bold mr-3 totalCmd" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(cmd.totalFinal, 1, 2, 'COMMA')} + '€'"></h5>					
-		</div>
+		</div>	
+		
+		
 	</div>	
+
+
+
+
+
+					
+				
+				
+				
+
+
+	
+		
+		
+
+
+
 
 	<div th:replace="fragments/general.html :: assets"></div>		
 </body>

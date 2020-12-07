@@ -40,88 +40,44 @@
 	    	}
 	    	
 	   		$liTag.siblings('.active').removeClass('active');
-	    	$liTag.addClass('active');   
-	  	})
-      	     
-      	
-//       	function addQteCmd(btn) {
-// 				let parent = btn.parentElement.parentElement.parentElement;
-
-// 				let cible = parent.querySelector(".qte");
-
-// 				if (cible != null) {
-// 					let qte = cible.value;
-
-// 					if (qte == null) {
-// 						qte = 1;
-// 					}
-// 					cible.value = parseFloat(qte) + 1;
-// 					updateQuantityCmd(cible);
-// 				}
-// 			}
-// 			function dimQteCmd(btn) {
-// 				let parent = btn.parentElement.parentElement.parentElement;
-// 				let cible = parent.querySelector(".qte");
-
-// 				if (cible != null) {
-// 					let qte = cible.value;
-// 					if (qte == null) {
-// 						qte = 1;
-// 					}
-// 					if (qte > 0) {
-// 						cible.value = qte - 1;
-// 					} else
-// 						cible.value = 0;
-					
-// 					updateQuantityCmd(cible);
-// 				}
-
-// 			}
-
-// 			function supprimerProdCmd(btn) {
-// 				let parentTR = btn.closest("tr");
-// 				if (parentTR != null) {
-// 					parentTR.remove();
-// 					recalculateCartCmd();
-// 				}
-// 			}			
-
-// 			function updateQuantityCmd(quantityInput) {
-				  
-// 				var parent = quantityInput.closest("tr");
-				
-// 				var price = parseFloat(parent.querySelector(".prixCmd").textContent);			
-				
-// 				var quantity = parseFloat(parent.querySelector(".qte").value);
-// 				var linePrice = price * quantity;			
-				
-// 				var subTotalElt = parent.querySelector(".subtotalCmd");
-// 				var subTotalEltVisible = parent.querySelector(".subtotalCmdV");
-// 				subTotalElt.textContent = linePrice ; 				
-// 				subTotalEltVisible.textContent = linePrice.toFixed(2) + '€';	
-// 				recalculateCartCmd();
-				
-// 			}
-
-// 			/* Recalculate cart */
-// 			function recalculateCartCmd() {				  
-				  
-// 				var subtotal = 0;
-				
-// 				//
-// 				var allByClass = document.getElementsByClassName('itemCmd');
-// 				for (var i=0, len=allByClass.length|0; i<len; i=i+1|0) {
-// 					var subTotalElt = allByClass[i].querySelector(".subtotalCmd");
-// 					subtotal += parseFloat(subTotalElt.textContent);					
-// 				}
-// 				var reducElt = document.getElementById('reductionS');	
-// 				var reduction=parseFloat(reducElt.value);
-// 				subtotal=subtotal-reduction;
-				
-// 				var totalElt = document.getElementById('totalCmd');
-// 				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€';
-
-// 			}
+	    	$liTag.addClass('active'); 
+	    	checkPointsVente();
+	    	checkVisibilityChoixDateLivraison();
+	    	$("#dateChoixLivraisonStr").text(getDateFromInput('#dateChoixLivraison'));
+	  	})   
+	  	
+	  	function checkPointsVente(){
+ 			var checkboxes = $("#divPtV input[type='radio']:checked").length ;
+ 			if(checkboxes>0){
+ 				$('#divDateLivraisonSouhaitee').show();
+	 			let $idPtV =$("#divPtV input[type='radio']:checked").val();
+	 			let $tagDate= $("#divPtV input[type='radio']:checked").next( ".ptVDate" ); 			
+	 			$('#estimationValidation').text(', à partir du ' + $tagDate.val()); 
+	 			if($('#dateChoixLivraison').val()){
+	 				$('#lblDateLivraisonSouhaite').text(getDateFromInput('#dateChoixLivraison'));
+	 			}
+	 			else
+	 				$('#lblDateLivraisonSouhaite').text($tagDate.val()); 
+ 			} 
+ 			else {
+ 				$('#divDateLivraisonSouhaitee').hide(); 				
+ 				$( "#radioDateLivraison" ).prop( "checked", true );
+ 			}
+ 		}
+		
+		$('.radioDateLivraison').on('change', function(){ 	
+			checkVisibilityChoixDateLivraison();
+        }); 		
+		function checkVisibilityChoixDateLivraison(){
+			 let $tagChoixDefault= $('#radioDateLivraisonSouhaitee'); 
+			 if($tagChoixDefault.is(':checked')){
+				 $('#InputDateLivraison').hide();
+			 }
+			 else {
+				 $('#InputDateLivraison').show();
+			 }			
+		}
+ 		
     </script>	
 </body>
 </html>

@@ -1,0 +1,18 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Erreur</title>	
+	<link th:insert="fragments/general.html :: headWithLinks"> 
+</head>
+
+<body>
+	<h1 class="text-center"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>Une erreur s'est produite</h1>
+	<div class="text-center">
+		<a class="btn btn-outline-primary mx-1" th:href="@{accueil}"><i class="fa fa-home text-dark" aria-hidden="true" style="margin-right: 5px;"></i>Retour à l'accueil  </a>
+	</div>	
+    <div th:replace="fragments/general.html :: assets"></div>  	
+</body>	
+<footer th:replace="fragments/general.html :: footerTrade"></footer>
+</html>

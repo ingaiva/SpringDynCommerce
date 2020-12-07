@@ -82,6 +82,88 @@
  			document.getElementById('savePtV').click();	
  			 
  		}
+ 		
+ 		
+		$(document).on('shown.bs.modal','#dlgApercuCmd', function () {
+ 			
+ 			checkPointsVente();
+			checkVisibilityChoixDateLivraison();
+			$("#dateChoixLivraisonStr").text(getDateFromInput('#dateChoixLivraison'));   
+ 		}) 		 		
+ 			
+ 			
+ 		function checkPointsVente(){
+			
+ 			var checkboxes = $("#divPtV input[type='radio']:checked").length ;
+ 			if(checkboxes>0){
+ 				$('#divDateLivraisonSouhaitee').show();
+	 			let $idPtV =$("#divPtV input[type='radio']:checked").val();
+	 			let $tagDate= $("#divPtV input[type='radio']:checked").next( ".ptVDate" ); 			
+	 			$('#estimationValidation').text(' ' + $tagDate.val()); 
+	 			if($('#dateChoixLivraison').val()){
+	 				$('#lblDateLivraisonSouhaite').text(getDateFromInput('#dateChoixLivraison'));
+	 			}
+	 			else
+	 				$('#lblDateLivraisonSouhaite').text($tagDate.val()); 
+ 			} 
+ 			else {
+ 				$('#divDateLivraisonSouhaitee').hide(); 				
+ 				$( "#radioDateLivraison" ).prop( "checked", true );
+ 			}
+ 		}		
+			
+		function checkVisibilityChoixDateLivraison(){
+			 let $tagChoixDefault= $('#radioDateLivraisonSouhaitee'); 
+			 if($tagChoixDefault.is(':checked')){
+				 $('#InputDateLivraison').hide();
+			 }
+			 else {
+				 $('#InputDateLivraison').show();
+			 }			
+		}
+        
+        function setStatutCmd(input){
+        	//
+        	let action=input.value;
+        	let choixDateLivraison="";
+        	let InputDateLivraison;
+        	if($("#divRadioDateLivraison").length){
+	        	choixDateLivraison=$("#divRadioDateLivraison input[type='radio']:checked").val();//   
+	        	InputDateLivraison=$("#InputDateLivraison").val();//
+        	}
+        	let idPtV =$("#divPtV input[type='radio']:checked").val();
+        	let idCmd=$("#idCmd").val();
+        	data={id: idCmd, 
+        			idPtV:idPtV, 
+        			action:action, 
+        			choixDateLivraison:choixDateLivraison, 
+        			dateLivraison:InputDateLivraison};	
+        	
+        	urlTo = "/setStatutCmd";				
+    		
+			$.ajax({
+				type : "POST",
+				contentType : "application/json",
+				url : urlTo,
+				data : JSON.stringify(data),
+				dataType : 'json',
+				async : true,
+				success : function(result, textStatus, xhr) {
+					if (xhr.status == 200) {						
+						console.log(urlTo + ' ok :' + xhr.status);
+						$( "#frmStatutFilter" ).submit();
+						
+					} else {
+						console.log('Erreur status ' + xhr.status);
+					}
+				},
+				error : function(e) {
+					console.log("ERROR: ", e);
+				}
+			});
+        	
+        }
+        
     </script>	
 </body>
 </html>
