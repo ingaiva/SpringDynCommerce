@@ -11,6 +11,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import app.utility.FilterCmd;
 import app.utility.StatisticProduit;
 import data.entitys.CategorieProduit;
 import data.entitys.Commande;
@@ -64,6 +66,59 @@ public class CommandeController {
 	@PostMapping("/listCmd")
 	public String postToViewCmdFrm(Model model, 
 			@RequestParam(name="action",required = false) String action, 
+			@ModelAttribute(name = "filter") FilterCmd filter, 			
+			HttpSession session) {
+		
+		if(action!=null && action.equalsIgnoreCase("effacerFilters")) 
+			filter.effacer();	
+		else
+			filter.checkDates();		
+		
+		System.out.println(action);
+		
+		return getViewCmdFrm(model,action,filter,session);
+	}
+	
+	
+	@GetMapping("/listCmd")
+	public String getViewCmdFrm(Model model, 
+			@RequestParam(name="action",required = false) String action, 
+			@ModelAttribute(name = "filter") FilterCmd filter,
+			HttpSession session) {
+		
+		if(filter==null ) 
+			filter = new FilterCmd();	
+		
+		addStandardParams(model, session);			
+		
+		model.addAttribute("lstCmd", cmdR.findAll(filter.getCriteria(),Sort.by(Sort.Direction.DESC, "id")));
+		
+		model.addAttribute("filter", filter);		
+		
+		model.addAttribute("pointsV", ptsVR.findAll());			
+	//System.out.println("---------------");
+		List<Commande> lstCmd =(List<Commande>) model.getAttribute("lstCmd");		
+		StatisticProduit stat=new StatisticProduit();
+
+		if (action != null && action.equalsIgnoreCase("loadStats")) {
+			stat.setLoaded(true);
+			for (Commande cmd : lstCmd) {
+				for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {
+					Produit curProd = cp.getProduit();
+					stat.addProduit(curProd, cp.getQte());
+				}
+			}
+		}
+			
+		model.addAttribute("stat", stat);	
+		
+		return "viewLstCommande";
+	}
+	
+	
+	@PostMapping("/_listCmd")
+	public String postToViewCmdFrm(Model model, 
+			@RequestParam(name="action",required = false) String action, 
 			@RequestParam(name = "statutFilter", required = false) List<String> statutValues, 
 			@RequestParam(name = "ptVFilter", required = false) List<Long> ptVFilterValues,
 			HttpSession session) {
@@ -76,7 +131,7 @@ public class CommandeController {
 		return getViewCmdFrm(model,action,statutValues,ptVFilterValues,session);
 	}
 		
-	@GetMapping("/listCmd")
+	@GetMapping("/_listCmd")
 	public String getViewCmdFrm(Model model, 
 			@RequestParam(name="action",required = false) String action, 
 			@RequestParam(name = "statutFilter", required = false) List<String> statutValues, 

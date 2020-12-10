@@ -19,24 +19,26 @@
 		<h3 class="text-center">Liste des commandes</h3>
 		
 		<div class="d-flex justify-content-end mx-3">
-				<form th:action="@{listCmd}" method="post" id="frmStatutFilter">
+				<form th:action="@{listCmd}" method="post" id="frmStatutFilter"  th:object="${filter}" style="display: none;">
 					<div class="form-group text-left ">	
 						<div class="d-flex align-items-center">
 							<label class="col-form-label font-weight-bold">Filtrer les commandes</label>						
+							<button type="submit" class="d-none" name="action" id="submitFilters" value="submitFilters"></button>
 
-							<div class="mx-2 my-0" th:if="(${statutSelectedValues!=null} and ${#lists.isEmpty(statutSelectedValues)==false}) or (${ptvSelectedValues!=null} and ${#lists.isEmpty(ptvSelectedValues)==false})">
+							<div class="mx-2 my-0" th:if="${filter.isEmpty()==false}">
 								<button type="submit" class="px-2 py-0 btn btn-sm btn-outline-secondary" name="action"
 									value="effacerFilters" id="effacerFilters">
 									<i class="fa fa-undo mr-1" aria-hidden="true"></i>Effacer les filtres
 								</button>
 							</div>
+							<button type="submit" class="d-none" name="action" id="btnLoadStats" value="loadStats"></button>
 						</div>
 						<div class="d-flex align-items-start">
 							<div class="mx-2">
 								<label class="mb-0">Points de vente:</label>	
-								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divUserFilter">
+								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divPtvFilter">
 									<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
-										<input type="checkbox" style="transform: scale(1.5)" name="ptVFilter" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${ptvSelectedValues!=null} and ${#lists.isEmpty(ptvSelectedValues)==false} and ${#lists.contains(ptvSelectedValues,  p.id)}" onchange="checkFilter(this);" /> 
+										<input type="checkbox" style="transform: scale(1.5)" name="ptSelectedValues" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${filter.hasSelectedPt()} and ${#lists.contains(filter.ptSelectedValues,  p.id)}" onchange="checkFilter(this);" /> 
 										<label class="mx-1 lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
 										data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
 	
@@ -61,19 +63,36 @@
 							<div class="mx-2">
 								<label class="mb-0">Statut:</label>	
 								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divStatutFilter">
-									<div class="mx-2  pt-2" th:each="st, iter  : ${statutValues}">								
-										<input type="checkbox" style="transform: scale(1.5)" name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${statutSelectedValues!=null} and ${#lists.contains(statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
+									<div class="mx-2  pt-2" th:each="st, iter  : ${T(data.entitys.Commande.StatutCommande).values()}">								
+										<input type="checkbox" style="transform: scale(1.5)"  name="statutSelectedValues"  th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${filter.hasSelectedStatut()} and ${#lists.contains(filter.statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
 										<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
 									</div>
 								</div>
 							</div>
 							
-							<div class="mx-2" th:object = "${filterDates}">
-								<label class="mb-0">Dates:</label>	
-								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divStatutFilter">
-									<div class="mx-2  pt-2" th:each="st, iter  : ${statutValues}">								
-										<input type="checkbox" style="transform: scale(1.5)" name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${statutSelectedValues!=null} and ${#lists.contains(statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
-										<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
+						</div>
+						<div class="mx-2">
+							<label class="mb-0">Date:</label>	
+							
+							<div class="card border px-2 bg-secondary text-white" id="divDateFilter">
+								<div class="d-flex flex-lg-row flex-md-column justify-content-start align-items-lg-center ">
+									<div class="mx-2  pt-2" th:each="d, iter  : ${T(app.utility.FilterCmd.enumChoixDate).values()}" th:id="${d==T(app.utility.FilterCmd.enumChoixDate).none}?'divDateNone'" th:classappend="${T(app.utility.FilterCmd).allowChooseDate(d)}?'divShowDate':'divHideDate'">								
+										<input type="radio" style="transform: scale(1.5)" th:field="*{choixDate}"  th:id="${d==T(app.utility.FilterCmd.enumChoixDate).none}?'choixDateNone':'choixDate' + ${iter.index}"   th:value="${d}"  th:checked="${filter.choixDate==d}" onclick="checkRadioDateFilter();" /> 
+										<label class="mx-1" th:for="${d==T(app.utility.FilterCmd.enumChoixDate).none}?'choixDateNone':'choixDate' + ${iter.index}"  th:text="${T(app.utility.FilterCmd).getChoixDateLibelle(d)}"></label>
+										<!-- <input type="radio" style="transform: scale(1.5)" th:field="*{choixDate}"  th:id="'dateFilter' + ${iter.index}"  th:value="${d}"  th:checked="${filter.choixDate==d}" onchange="checkFilter(this);" /> -->
+										<!-- <label class="mx-1" th:for="'dateFilter' + ${iter.index}" th:text="${T(app.utility.FilterCmd).getChoixDateLibelle(d)}"></label> -->
+									</div>
+								</div>
+								<div id="divDateInput" th:style="${!filter.allowChooseDate()}?'display: none'">
+									<div class="d-flex pl-2" >
+										<div class="d-flex align-items-center">
+											<label class="mr-2">Du:</label>
+											<input type="date" th:field="*{dateDebut}" onkeyup="checkKeyUp(this.id,event)"  onblur="checkInputDateFilter();" onchange="onchangeInputDateFilter(this);"><a class="btn btn-sm btn-outline-light py-0 px-2 " onclick="clearDate('#dateDebut')">X</a>
+										</div>
+										<div class="d-flex align-items-center">	
+											<label class="mx-3">Au:</label>								
+											<input type="date" th:field="*{dateFin}" onblur="checkInputDateFilter();" onchange="onchangeInputDateFilter(this);"><a class="btn btn-sm btn-outline-light py-0 px-2" onclick="clearDate('#dateFin')">X</a>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -85,10 +104,14 @@
 		
 			<div th:with="showUser='true'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${lstCmd}, showUser)"></div>
 
-			<div th:if="${stat.hasProduits()}" class="mx-4 my-2 text-center border rounded bg-secondary text-white">
-				<div class="table-responsive">					
-					<h4 class="">Statistique</h4>
-					<table class="table">
+			<div th:if="${stat.hasProduits() || stat.loaded==false} and ${lstCmd.size() > 0}" class="mx-4 my-2 text-center border rounded bg-secondary text-white">
+				<div class="table-responsive">
+					<div class="d-flex align-items-center justify-content-center">
+						<h4 class="">Statistique</h4>
+						<a th:if="${stat.loaded==false}" class="btn btn-sm btn-outline-light py-0 px-2 mx-3" onclick="chargerStats();"><i class="fa fa-upload mx-2" aria-hidden="true"></i>Charger</a>
+					</div>					
+					
+					<table class="table" th:if="${stat.hasProduits()}">
 						<tbody>
 							<tr th:each="p, itemStat :${stat.getProduits()}">
 								<td>
@@ -110,7 +133,7 @@
 							</tr>
 						</tbody>
 					</table>
-					<div class="text-right">
+					<div class="text-right"  th:if="${stat.hasProduits()}">
 						<h5	class="font-weight-bold mr-3" th:text=" 'Total : ' + ${#numbers.formatDecimal(stat.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
 						<h5	class="font-weight-bold mr-3" th:text=" 'Total quantité: ' + ${#numbers.formatDecimal(stat.getTotalQte(), 1, 2, 'COMMA')}"></h5>
 					</div>	
@@ -121,32 +144,123 @@
 	
     <div th:replace="fragments/general.html :: assets"></div>
 	<script>
-		
+			
  		$(document).ready(function() { 
         	
         	let $liTag =  $('#liCmd');   // 
        
         	if ($liTag.hasClass('active')) {         
-          		return false;
-        	}
+          		//return false;
+        	}else{
+	       		$liTag.siblings('.active').removeClass('active');
+	        	$liTag.addClass('active');
+        	}        	
         	
-       		$liTag.siblings('.active').removeClass('active');
-        	$liTag.addClass('active');   
+        	/* var checkboxesDateNone = $(".divHideDate input[type='radio']:checked").length ;  //  divDateNone     	
+        	if(checkboxesDateNone>0){
+        		//$('#divDateInput').hide(); 
+        		 $("#divDateInput").fadeOut("slow");
+        	}
+        	else{
+        		//$('#divDateInput').show();
+        		 $("#divDateInput").fadeIn("slow");
+        	} */
+        	var checkboxesDate = $(".divShowDate input[type='radio']:checked").length ;
+        	if(checkboxesDate>0 && $('#dateDebut').val()==false){
+        		$("#dateDebut").css('color', 'red');
+        	}
+        	$("#frmStatutFilter").fadeIn("fast");
+        	return false;
       	})
-      	      	 		
+      
+ 		 		
+      	function clearDate(tagInput){
+ 			if( $(tagInput).val()){
+ 				$(tagInput).val('');
+ 				//$( "#frmStatutFilter" ).submit(); //submitFilters
+ 				document.getElementById('submitFilters').click();	
+ 			}
+ 			return false;
+ 		}
+      	
       	function checkFilter(chkInput){ 			
- 			 var checkboxes = $('input[name=statutFilter]:checked').length ;
- 			var checkboxesPtV = $('input[name=ptVFilter]:checked').length ;
- 			 if((checkboxes+checkboxesPtV)==0){
+ 			var checkboxesStatut = $("#divStatutFilter input[type='checkbox']:checked").length ;
+ 			var checkboxesPtV = $("#divPtvFilter input[type='checkbox']:checked").length ;
+ 			var checkboxesDate = $("#divDateFilter input[type='radio']:checked").not('#choixDateNone').length ;
+ 			 if((checkboxesStatut + checkboxesPtV + checkboxesDate)==0){
  				document.getElementById('effacerFilters').click();	  
  			 } 	
  			 else {
- 				$( "#frmStatutFilter" ).submit();
+ 				//var checkboxesDateNone = $("#divDateNone input[type='radio']:checked").length ;       	
+ 	        	//$( "#frmStatutFilter" ).submit(); 
+ 	        	document.getElementById('submitFilters').click();	
  			 }
+ 			return false;
+ 		}
+ 				 
+ 	        	
+ 	        	
+ 		function checkRadioDateFilter(){
+ 			var checkboxesDate = $(".divShowDate input[type='radio']:checked").length ;
+ 			var checkboxesSansDate = $(".divHideDate input[type='radio']:checked").length ; 			
+ 			if(checkboxesDate>0){
+ 				if($('#dateDebut').val()){ 					
+	 				//$( "#frmStatutFilter" ).submit(); 
+	 				document.getElementById('submitFilters').click();						
+ 				} else {
+ 					 $("#divDateInput").fadeIn("slow");
+ 					$("#dateDebut").css('color', 'red');
+ 				}
+ 			}
+ 			else if (checkboxesSansDate>0){
+ 				//$( "#frmStatutFilter" ).submit(); 
+ 				document.getElementById('submitFilters').click();	
+ 			} 
+ 			return false;
  		}
  		
- 		$(document).on('shown.bs.modal','#dlgApercuCmd', function () {
- 			
+ 		var isDateDebutChanged=false;
+ 		var isDateDebutFin=false;
+ 		function onchangeInputDateFilter(input){ 			
+ 			if(input.id=="dateDebut"){
+ 				isDateDebutChanged=true;
+ 			}
+ 			if(input.id=="dateFin"){
+ 				isDateDebutFin=true;
+ 			}
+ 			return false;
+ 		}
+ 		
+ 		function checkKeyUp(idTag ,e){
+ 			//console.log("checkKeyUp " + idTag + " key: " + e.keyCode)
+ 			if( e.keyCode==13 ){
+ 				e.preventDefault(); 				
+ 				onchangeInputDateFilter(idTag);
+ 				checkInputDateFilter();
+ 			} 	
+ 			return false;
+ 		}	
+ 		
+ 		function checkInputDateFilter(){ 			
+ 			/* console.log('checkFilterDate '); */
+ 			/* var checkboxesDate = $("#divDateFilter input[type='radio']:checked").length ; */
+ 			var checkboxesDate = $(".divShowDate input[type='radio']:checked").length ;
+ 			 if( (isDateDebutChanged || isDateDebutFin) && $('#dateDebut').val()  && checkboxesDate>0){
+ 				//$( "#frmStatutFilter" ).submit();
+ 				document.getElementById('submitFilters').click();	
+ 				/* var checkboxesDateNone = $("#divDateNone input[type='radio']:checked").length ;        	
+ 	        	if(checkboxesDateNone==0){
+ 	        		$( "#frmStatutFilter" ).submit();
+ 	        	}   */
+ 			 } 
+ 			return false;
+ 		}
+ 		
+ 		function chargerStats(){
+ 			document.getElementById('btnLoadStats').click();
+ 		}
+ 		
+ 		$(document).on('shown.bs.modal','#dlgApercuCmd', function () { 			
  			checkPointsVente();
 			checkVisibilityChoixDateLivraison();
 			$("#dateChoixLivraisonStr").text(getDateFromInput('#dateChoixLivraison'));   
@@ -171,11 +285,10 @@
  				$('#divDateLivraisonSouhaitee').hide(); 				
  				$( "#radioDateLivraison" ).prop( "checked", true );
  			}
+ 			return false;
  		}
 		
-		/* $('.radioDateLivraison').on('change', function(){ 	
-			checkVisibilityChoixDateLivraison();
-        });  */		
+			
 		function checkVisibilityChoixDateLivraison(){
 			 let $tagChoixDefault= $('#radioDateLivraisonSouhaitee'); 
 			 if($tagChoixDefault.is(':checked')){
@@ -183,7 +296,8 @@
 			 }
 			 else {
 				 $('#InputDateLivraison').show();
-			 }			
+			 }	
+			 return false;
 		}
         
         function setStatutCmd(input){
@@ -225,7 +339,7 @@
 					console.log("ERROR: ", e);
 				}
 			});
-        	
+			return false;        	
         }
     </script>	
 </body>

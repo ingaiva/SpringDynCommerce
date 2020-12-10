@@ -13,6 +13,7 @@ import lombok.Setter;
 @Setter
 public class StatisticProduit {
 	private List<Produit> produits = new ArrayList<Produit>();
+	private boolean loaded=false;
 	
 	public boolean hasProduits() {
 		return this.produits!=null && this.produits.size()>0;

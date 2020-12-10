@@ -1,0 +1,232 @@
+
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Liste des commandes</title>
+<link th:insert="fragments/general.html :: headWithLinks"> 
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+<header>
+	<div th:insert="fragments/general.html :: navbarDynamique">	
+	</div>	
+</header>
+	
+	<div>
+		<h3 class="text-center">Liste des commandes</h3>
+		
+		<div class="d-flex justify-content-end mx-3">
+				<form th:action="@{listCmd}" method="post" id="frmStatutFilter">
+					<div class="form-group text-left ">	
+						<div class="d-flex align-items-center">
+							<label class="col-form-label font-weight-bold">Filtrer les commandes</label>						
+
+							<div class="mx-2 my-0" th:if="(${statutSelectedValues!=null} and ${#lists.isEmpty(statutSelectedValues)==false}) or (${ptvSelectedValues!=null} and ${#lists.isEmpty(ptvSelectedValues)==false})">
+								<button type="submit" class="px-2 py-0 btn btn-sm btn-outline-secondary" name="action"
+									value="effacerFilters" id="effacerFilters">
+									<i class="fa fa-undo mr-1" aria-hidden="true"></i>Effacer les filtres
+								</button>
+							</div>
+						</div>
+						<div class="d-flex align-items-start">
+							<div class="mx-2">
+								<label class="mb-0">Points de vente:</label>	
+								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divUserFilter">
+									<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
+										<input type="checkbox" style="transform: scale(1.5)" name="ptVFilter" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${ptvSelectedValues!=null} and ${#lists.isEmpty(ptvSelectedValues)==false} and ${#lists.contains(ptvSelectedValues,  p.id)}" onchange="checkFilter(this);" /> 
+										<label class="mx-1 lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
+										data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
+	
+	
+										<div th:id="'popoverContentPtV'+ ${iter.index}"
+											style="display: none;">
+											<div class="myPopoverContent bg-dark text-white">
+												<div class="d-flex align-items-start">
+													<span class="text-center mr-1"> <i
+														class="fa fa-calendar mr-2" aria-hidden="true"></i>
+													</span>
+													<div class="textWithCrLf w-100"
+														th:text="${p.getHorairesConcatString()}"></div>
+												</div>
+											</div>
+										</div>
+	
+									</div>
+								</div>
+							</div>
+										
+							<div class="mx-2">
+								<label class="mb-0">Statut:</label>	
+								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divStatutFilter">
+									<div class="mx-2  pt-2" th:each="st, iter  : ${statutValues}">								
+										<input type="checkbox" style="transform: scale(1.5)" name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${statutSelectedValues!=null} and ${#lists.contains(statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
+										<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
+									</div>
+								</div>
+							</div>
+							
+							<div class="mx-2" th:object = "${filterDates}">
+								<label class="mb-0">Dates:</label>	
+								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divStatutFilter">
+									<div class="mx-2  pt-2" th:each="st, iter  : ${statutValues}">								
+										<input type="checkbox" style="transform: scale(1.5)" name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${statutSelectedValues!=null} and ${#lists.contains(statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
+										<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>					
+				</form>
+			</div>
+						
+		
+			<div th:with="showUser='true'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${lstCmd}, showUser)"></div>
+
+			<div th:if="${stat.hasProduits()}" class="mx-4 my-2 text-center border rounded bg-secondary text-white">
+				<div class="table-responsive">					
+					<h4 class="">Statistique</h4>
+					<table class="table">
+						<tbody>
+							<tr th:each="p, itemStat :${stat.getProduits()}">
+								<td>
+									<div class="d-lg-flex">
+										<div class="mr-3"><img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" ></div>
+										<div class="text-white">											
+											<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
+											<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
+											<label class="prixV" th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>											
+										</div>
+									</div>									
+								</td>								
+								<td >
+									<h5 class="text-white" style="width:60px;" th:text="${#numbers.formatDecimal(p.qte, 1, 2, 'COMMA')}"></h5>
+								</td>						
+								<td >
+									<h6	 class="text-white" th:text="${#numbers.formatDecimal(p.getTotalProduit(), 1, 2, 'COMMA')} + '€'"></h6>									
+								</td>									
+							</tr>
+						</tbody>
+					</table>
+					<div class="text-right">
+						<h5	class="font-weight-bold mr-3" th:text=" 'Total : ' + ${#numbers.formatDecimal(stat.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
+						<h5	class="font-weight-bold mr-3" th:text=" 'Total quantité: ' + ${#numbers.formatDecimal(stat.getTotalQte(), 1, 2, 'COMMA')}"></h5>
+					</div>	
+				</div>
+			</div>
+	</div>	
+	
+	
+    <div th:replace="fragments/general.html :: assets"></div>
+	<script>
+		
+ 		$(document).ready(function() { 
+        	
+        	let $liTag =  $('#liCmd');   // 
+       
+        	if ($liTag.hasClass('active')) {         
+          		return false;
+        	}
+        	
+       		$liTag.siblings('.active').removeClass('active');
+        	$liTag.addClass('active');   
+      	})
+      	      	 		
+      	function checkFilter(chkInput){ 			
+ 			 var checkboxes = $('input[name=statutFilter]:checked').length ;
+ 			var checkboxesPtV = $('input[name=ptVFilter]:checked').length ;
+ 			 if((checkboxes+checkboxesPtV)==0){
+ 				document.getElementById('effacerFilters').click();	  
+ 			 } 	
+ 			 else {
+ 				$( "#frmStatutFilter" ).submit();
+ 			 }
+ 		}
+ 		
+ 		$(document).on('shown.bs.modal','#dlgApercuCmd', function () {
+ 			
+ 			checkPointsVente();
+			checkVisibilityChoixDateLivraison();
+			$("#dateChoixLivraisonStr").text(getDateFromInput('#dateChoixLivraison'));   
+ 		}) 		 		
+ 			
+ 			
+ 		function checkPointsVente(){
+			
+ 			var checkboxes = $("#divPtV input[type='radio']:checked").length ;
+ 			if(checkboxes>0){
+ 				$('#divDateLivraisonSouhaitee').show();
+	 			let $idPtV =$("#divPtV input[type='radio']:checked").val();
+	 			let $tagDate= $("#divPtV input[type='radio']:checked").next( ".ptVDate" ); 			
+	 			$('#estimationValidation').text(' ' + $tagDate.val()); 
+	 			if($('#dateChoixLivraison').val()){
+	 				$('#lblDateLivraisonSouhaite').text(getDateFromInput('#dateChoixLivraison'));
+	 			}
+	 			else
+	 				$('#lblDateLivraisonSouhaite').text($tagDate.val()); 
+ 			} 
+ 			else {
+ 				$('#divDateLivraisonSouhaitee').hide(); 				
+ 				$( "#radioDateLivraison" ).prop( "checked", true );
+ 			}
+ 		}
+		
+		/* $('.radioDateLivraison').on('change', function(){ 	
+			checkVisibilityChoixDateLivraison();
+        });  */		
+		function checkVisibilityChoixDateLivraison(){
+			 let $tagChoixDefault= $('#radioDateLivraisonSouhaitee'); 
+			 if($tagChoixDefault.is(':checked')){
+				 $('#InputDateLivraison').hide();
+			 }
+			 else {
+				 $('#InputDateLivraison').show();
+			 }			
+		}
+        
+        function setStatutCmd(input){
+        	//
+        	let action=input.value;
+        	let choixDateLivraison="";
+        	let InputDateLivraison;
+        	if($("#divRadioDateLivraison").length){
+	        	choixDateLivraison=$("#divRadioDateLivraison input[type='radio']:checked").val();//   
+	        	InputDateLivraison=$("#InputDateLivraison").val();//
+        	}
+        	let idPtV =$("#divPtV input[type='radio']:checked").val();
+        	let idCmd=$("#idCmd").val();
+        	data={id: idCmd, 
+        			idPtV:idPtV, 
+        			action:action, 
+        			choixDateLivraison:choixDateLivraison, 
+        			dateLivraison:InputDateLivraison};	
+        	
+        	urlTo = "/setStatutCmd";				
+    		
+			$.ajax({
+				type : "POST",
+				contentType : "application/json",
+				url : urlTo,
+				data : JSON.stringify(data),
+				dataType : 'json',
+				async : true,
+				success : function(result, textStatus, xhr) {
+					if (xhr.status == 200) {						
+						console.log(urlTo + ' ok :' + xhr.status);
+						$( "#frmStatutFilter" ).submit();
+						
+					} else {
+						console.log('Erreur status ' + xhr.status);
+					}
+				},
+				error : function(e) {
+					console.log("ERROR: ", e);
+				}
+			});
+        	
+        }
+    </script>	
+</body>
+</html>
