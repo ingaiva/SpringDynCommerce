@@ -21,6 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FilterCmd {
+	private Long userId;
 	
 	List<String> statutSelectedValues=new ArrayList<String>();
 	List<Long> ptSelectedValues=new ArrayList<Long>();
@@ -32,6 +33,10 @@ public class FilterCmd {
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	Date dateFin;
+	
+	public FilterCmd(Long userId) {		
+		this.userId = userId;
+	}
 	
 	public void effacer() {
 		statutSelectedValues=new ArrayList<String>() ;
@@ -77,13 +82,10 @@ public class FilterCmd {
 	}
 	
 	public boolean allowChooseDate() {
-//		System.out.println("------------allowChooseDate = " + choixDate);
 		if(choixDate.equals(enumChoixDate.none.toString()) || choixDate.equals(enumChoixDate.retrait_null.toString())) {
-//			System.out.println("------------allowChooseDate " + false);
 			return false;
 		}
 		else {
-//			System.out.println("------------allowChooseDate " + true);
 			return true;
 		}
 	}
@@ -97,6 +99,9 @@ public class FilterCmd {
 	public CommandeSpecification getCriteria() {
 		
 		 CommandeSpecification spec = new CommandeSpecification();
+		 if(this.userId!=null) {
+			 spec.add(new SearchCriteria("user.id",this.userId, SearchOperation.EQUAL));//user
+		 }
 		 if(hasSelectedStatut())			 
 			 spec.add(new SearchCriteria("statut", this.getStatutSelectedValues(), SearchOperation.IN));
 		 if(hasSelectedPt())			 
@@ -152,11 +157,12 @@ public class FilterCmd {
 
 	@Override
 	public String toString() {
-		return "FilterCmd ["
+		return "FilterCmd [" + (userId != null ? "userId=" + userId + ", " : "")
 				+ (statutSelectedValues != null ? "statutSelectedValues=" + statutSelectedValues + ", " : "")
 				+ (ptSelectedValues != null ? "ptSelectedValues=" + ptSelectedValues + ", " : "")
 				+ (choixDate != null ? "choixDate=" + choixDate + ", " : "")
 				+ (dateDebut != null ? "dateDebut=" + dateDebut + ", " : "")
 				+ (dateFin != null ? "dateFin=" + dateFin : "") + "]";
 	}
+	
 }

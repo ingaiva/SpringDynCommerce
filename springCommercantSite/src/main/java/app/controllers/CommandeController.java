@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
@@ -149,7 +150,42 @@ public class CommandeController {
 		return "viewCommande";	
 	}
 	
-	@GetMapping("/deleteCommande")
+	@GetMapping("/deleteCmdFragment/{id}")
+	public String getDeleteCmdFragment(Model model, @PathVariable("id") Long id, HttpSession session) {
+		System.out.println("getDeleteCmdFragment");
+		if(cmdR.existsById(id)) {
+			Commande cmd= cmdR.getOne(id);	
+			if(cmd.allowCancel()|| cmd.allowDelete()) {
+				model.addAttribute("cmd", cmd);	
+//				List<PointVente> pointsV = ptsVR.findAll();
+//				model.addAttribute("pointsV",pointsV);	
+//				addStandardParams(model,session);
+				System.out.println("on envoi getDeleteCmdFragment");
+				return "fragments/cmdFragments.html :: dlgDeleteCmd";				
+			}
+		}
+		return "";
+	}	
+	
+	@PostMapping("/deleteCommande")
+	public String deleteCommandePost(Model model, 
+			@RequestParam(name="action",required = false) String action,			
+			@ModelAttribute("cmd") Commande cmd,  HttpSession session) {
+		
+		System.out.println("----------deleteCommandePost");	
+		if (cmd!=null) {
+			if (cmd.allowDelete()) {
+				lignesCmdR.deleteByCommande(cmd.getId());
+				cmdR.deleteById(cmd.getId());
+			}
+			else if(cmd.allowCancel()) {				
+				cmdR.updateStatut(cmd.getId(), StatutCommande.Annule.toString());				
+			}
+		}
+		return "redirect:/listCmd";	
+	}
+	
+	//@GetMapping("/deleteCommande")
 	public String deleteCommande(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session) {
 		Commande cmd= cmdR.getOne(idCommande);		
 		if (cmd!=null) {
@@ -170,11 +206,7 @@ public class CommandeController {
 		addStandardParams(model,session);
 		Commande cmd= cmdR.getOne(idCommande);	
 		cmd.calculeTotaux();
-		model.addAttribute("cmd", cmd);	
-		/*
-		 * List<PointVente> pointsV = ptsVR.findAll();
-		 * model.addAttribute("pointsV",pointsV);
-		 */
+		model.addAttribute("cmd", cmd);			
 		return "viewCommande";	
 	}
 	
@@ -202,12 +234,8 @@ public class CommandeController {
 				cmd.getLignesCommandeProduit().add(new CommandeProduit(elt));		
 			}
 			cmd.calculeTotaux();
-			model.addAttribute("cmd", cmd);
-			
-			/*
-			 * List<PointVente> pointsV = ptsVR.findAll();
-			 * model.addAttribute("pointsV",pointsV);
-			 */			
+			model.addAttribute("cmd", cmd);			
+					
 			return "viewCommande";	
 		}
 		else {			
@@ -221,17 +249,7 @@ public class CommandeController {
 			@RequestParam Map<String,String> allParams,
 			Model model,  @ModelAttribute("panier") PanierWrapper panierFromPage,
 			HttpSession session) {
-		//@ModelAttribute @SessionAttribute
-		/*
-		 * System.out.println("creerCommande : ");
-		 * 
-		 * System.out.println(panierFromPage.getProduits().size()); for (Produit elt :
-		 * panierFromPage.getProduits()) { System.out.println(elt.getLibelle() + " : " +
-		 * elt.getQte()); }
-		 */
-		 
-		/* System.out.println("Parameters are " + allParams.entrySet()); */
-		
+				
 		if (action !=null && action.equalsIgnoreCase("valPanier")) {
 			validerPanier(panierFromPage,session);
 			return "redirect:/accueil";

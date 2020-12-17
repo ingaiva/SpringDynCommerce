@@ -3,9 +3,13 @@ package app.controllers;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -35,6 +40,7 @@ import data.entitys.PointVente;
 import data.entitys.Produit;
 
 @Controller
+//@RequestMapping("/")
 public class CommandeController {
 	@Autowired
 	data.repositorys.RepoUser usrR;
@@ -74,7 +80,7 @@ public class CommandeController {
 		else
 			filter.checkDates();		
 		
-		System.out.println(action);
+//		System.out.println(action);
 		
 		return getViewCmdFrm(model,action,filter,session);
 	}
@@ -110,81 +116,58 @@ public class CommandeController {
 			}
 		}
 			
-		model.addAttribute("stat", stat);	
-		
+		model.addAttribute("stat", stat);
+		model.addAttribute("redirectAction", "listCmd");
+		//<input type="hidden" name="redirectAction" th:value="${redirectAction}">
 		return "viewLstCommande";
 	}
 	
-	
-	@PostMapping("/_listCmd")
-	public String postToViewCmdFrm(Model model, 
-			@RequestParam(name="action",required = false) String action, 
-			@RequestParam(name = "statutFilter", required = false) List<String> statutValues, 
-			@RequestParam(name = "ptVFilter", required = false) List<Long> ptVFilterValues,
-			HttpSession session) {
-		
-		if(action!=null && action.equalsIgnoreCase("effacerFilters")) {
-			ptVFilterValues = new ArrayList<Long>();
-			statutValues = new ArrayList<String>();
-		}
+	private Map<String, String> getHeadersInfo(HttpServletRequest request) {
 
-		return getViewCmdFrm(model,action,statutValues,ptVFilterValues,session);
-	}
-		
-	@GetMapping("/_listCmd")
-	public String getViewCmdFrm(Model model, 
-			@RequestParam(name="action",required = false) String action, 
-			@RequestParam(name = "statutFilter", required = false) List<String> statutValues, 
-			@RequestParam(name = "ptVFilter", required = false) List<Long> ptVFilterValues,
-			HttpSession session) {
-		
-		if(ptVFilterValues==null ) 
-			ptVFilterValues = new ArrayList<Long>();			
-		
-		if(statutValues==null ) 			
-			statutValues = new ArrayList<String>();	
+        Map<String, String> map = new HashMap<String, String>();
 
-		
-		addStandardParams(model, session);		
-		if ((statutValues ==null || statutValues.size() == 0) && (ptVFilterValues == null || ptVFilterValues.size()==0))
-			model.addAttribute("lstCmd", cmdR.getCommandesOrdered());
-		else if (statutValues.size() > 0 &&  (ptVFilterValues == null || ptVFilterValues.size()==0))
-			model.addAttribute("lstCmd", cmdR.getCommandesFilteredByStatut(statutValues));
-		else if ((statutValues ==null || statutValues.size() == 0) && ptVFilterValues.size()>0)
-			model.addAttribute("lstCmd", cmdR.getCommandesFilteredByPtV(ptVFilterValues));
-		else
-			model.addAttribute("lstCmd", cmdR.getCommandesFiltered(statutValues,ptVFilterValues));
-		
-		model.addAttribute("statutValues", Commande.StatutCommande.values());
-		model.addAttribute("statutSelectedValues", statutValues);
-		//session.setAttribute("statutSelectedValuesS", statutValues);
-		
-		model.addAttribute("pointsV", ptsVR.findAll());
-		model.addAttribute("ptvSelectedValues", ptVFilterValues);	
-	
-		List<Commande> lstCmd =(List<Commande>) model.getAttribute("lstCmd");
-		//List<Produit> lstProduits = new ArrayList<Produit>();
-		StatisticProduit stat=new StatisticProduit();
-		for (Commande cmd : lstCmd) {
-			for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {
-				Produit curProd=cp.getProduit();
-				stat.addProduit(curProd, cp.getQte());				
-			}
-		}
-		model.addAttribute("stat", stat);	
-		
-		return "viewLstCommande";
-	}
+        Enumeration headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String key = (String) headerNames.nextElement();
+            String value = request.getHeader(key);
+            map.put(key, value);
+        }
+
+        return map;
+    }
 	
 	
 	@GetMapping("/viewCommande")
-	public String getViewCommandeFrm(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session) {
-		addStandardParams(model,session);
-		Commande cmd= cmdR.getOne(idCommande);		
-		model.addAttribute("cmd", cmd);	
-		List<PointVente> pointsV = ptsVR.findAll();
-		model.addAttribute("pointsV",pointsV);	
-		return "viewCommande";	
+	public String getViewCommandeFrm(Model model,@RequestParam(name = "id") Long idCommande,  HttpSession session
+			,HttpServletRequest request) {
+		if(cmdR.existsById(idCommande)) {
+			addStandardParams(model,session);
+			Commande cmd= cmdR.getOne(idCommande);		
+			model.addAttribute("cmd", cmd);	
+			List<PointVente> pointsV = ptsVR.findAll();
+			model.addAttribute("pointsV",pointsV);	
+			
+			String referer = request.getHeader("Referer");
+			if(referer==null) {
+				model.addAttribute("redirectAction", "listCmd");
+			}
+			else {
+				String host=request.getHeader("host");
+				if(referer.contains(host)) {
+					int partToRemoveLength=referer.indexOf(host)+host.length()+1;
+					if(referer.length()>partToRemoveLength) {
+						referer=referer.substring(partToRemoveLength);
+						model.addAttribute("redirectAction", referer);
+					}				
+				}	
+			}	
+			return "viewCommande";	
+			
+		}
+		else {
+			model.addAttribute("msg", "La commande demandée n'existe pas");
+			return "error";	
+		}
 	}
 	
 	@PostMapping("/saveCommande")
@@ -192,7 +175,8 @@ public class CommandeController {
 			@RequestParam(name = "ptV", required = false) Long selectedPtV,
 			@RequestParam(name="radioDateLivraison", required = false) String choixDateLivraison,
 			@RequestParam(name="InputDateLivraison", required = false) Date dateLivraison,
-			@ModelAttribute("cmd") @Valid Commande cmd, BindingResult bindingRes, HttpSession session, RedirectAttributes ra) {
+			@RequestParam(name="redirectAction", required = false) String redirectAction,
+			@ModelAttribute("cmd") @Valid Commande cmd, BindingResult bindingRes, HttpSession session,HttpServletRequest request) {
 		
 			
 		if (cmd!=null ) {
@@ -236,22 +220,33 @@ public class CommandeController {
 				cmd.setStatutCmd(statutToSet);
 				saveCommande(cmd,selectedPtV);
 				
-				return getViewCommandeFrm(model,cmd.getId(),session);
+				return getViewCommandeFrm(model,cmd.getId(),session,request);
 			}
 			else if(action!=null && action.equalsIgnoreCase("editDateLivraisonRequest")) {
 				saveCommande(cmd,selectedPtV);
 				model.addAttribute("isEditDateLivraison", true);
-				return getViewCommandeFrm(model,cmd.getId(),session);
+				return getViewCommandeFrm(model,cmd.getId(),session,request);
 			}
 			else if(action!=null && action.equalsIgnoreCase("editDateLivraison")) {
 				saveCommande(cmd,selectedPtV);				
 				saveDateLivraison(cmd, selectedPtV, choixDateLivraison, dateLivraison);
-				return getViewCommandeFrm(model,cmd.getId(),session);
+				return getViewCommandeFrm(model,cmd.getId(),session,request);
 				
 			}
 			else if (action!=null && action.equalsIgnoreCase("cancelEditDateLivraison")) {
 				saveCommande(cmd,selectedPtV);				
-				return getViewCommandeFrm(model,cmd.getId(),session);
+				return getViewCommandeFrm(model,cmd.getId(),session,request);
+			}
+			else if (action!=null && action.equalsIgnoreCase("retour")) {
+				if(redirectAction!=null && redirectAction.toLowerCase().contains("user"))	{
+					System.out.println("redirection vers " + "redirect:/viewUser/"+ cmd.getUser().getId());
+					return "redirect:/viewUser?id="+ cmd.getUser().getId();	
+				}
+				else if(redirectAction!=null) {
+					System.out.println("redirection vers " + "redirect:/"+ redirectAction);
+					return "redirect:/"+ redirectAction;			
+					
+				}
 			}
 			else {
 				
@@ -356,6 +351,74 @@ public class CommandeController {
 		}
 		return "";
 	}	
+	
+	
+	
+	
+	
+	
+//	@PostMapping("/_listCmd")
+//	public String postToViewCmdFrm(Model model, 
+//			@RequestParam(name="action",required = false) String action, 
+//			@RequestParam(name = "statutFilter", required = false) List<String> statutValues, 
+//			@RequestParam(name = "ptVFilter", required = false) List<Long> ptVFilterValues,
+//			HttpSession session) {
+//		
+//		if(action!=null && action.equalsIgnoreCase("effacerFilters")) {
+//			ptVFilterValues = new ArrayList<Long>();
+//			statutValues = new ArrayList<String>();
+//		}
+//
+//		return getViewCmdFrm(model,action,statutValues,ptVFilterValues,session);
+//	}
+//		
+//	@GetMapping("/_listCmd")
+//	public String getViewCmdFrm(Model model, 
+//			@RequestParam(name="action",required = false) String action, 
+//			@RequestParam(name = "statutFilter", required = false) List<String> statutValues, 
+//			@RequestParam(name = "ptVFilter", required = false) List<Long> ptVFilterValues,
+//			HttpSession session) {
+//		
+//		if(ptVFilterValues==null ) 
+//			ptVFilterValues = new ArrayList<Long>();			
+//		
+//		if(statutValues==null ) 			
+//			statutValues = new ArrayList<String>();	
+//
+//		
+//		addStandardParams(model, session);		
+//		if ((statutValues ==null || statutValues.size() == 0) && (ptVFilterValues == null || ptVFilterValues.size()==0))
+//			model.addAttribute("lstCmd", cmdR.getCommandesOrdered());
+//		else if (statutValues.size() > 0 &&  (ptVFilterValues == null || ptVFilterValues.size()==0))
+//			model.addAttribute("lstCmd", cmdR.getCommandesFilteredByStatut(statutValues));
+//		else if ((statutValues ==null || statutValues.size() == 0) && ptVFilterValues.size()>0)
+//			model.addAttribute("lstCmd", cmdR.getCommandesFilteredByPtV(ptVFilterValues));
+//		else
+//			model.addAttribute("lstCmd", cmdR.getCommandesFiltered(statutValues,ptVFilterValues));
+//		
+//		model.addAttribute("statutValues", Commande.StatutCommande.values());
+//		model.addAttribute("statutSelectedValues", statutValues);
+//		//session.setAttribute("statutSelectedValuesS", statutValues);
+//		
+//		model.addAttribute("pointsV", ptsVR.findAll());
+//		model.addAttribute("ptvSelectedValues", ptVFilterValues);	
+//	
+//		List<Commande> lstCmd =(List<Commande>) model.getAttribute("lstCmd");
+//		//List<Produit> lstProduits = new ArrayList<Produit>();
+//		StatisticProduit stat=new StatisticProduit();
+//		for (Commande cmd : lstCmd) {
+//			for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {
+//				Produit curProd=cp.getProduit();
+//				stat.addProduit(curProd, cp.getQte());				
+//			}
+//		}
+//		model.addAttribute("stat", stat);	
+//		
+//		return "viewLstCommande";
+//	}
+	
+	
+	
 	
 	
 }

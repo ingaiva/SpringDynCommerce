@@ -20,7 +20,7 @@
 				
 				<div th:class="${iter.index==0} ? 'border rounded p-2 mt-2 divPhotoMain' : 'border rounded p-2 mt-2  divPhotoSmall'" th:each="ph, iter : ${categorie.photos}">
 					
-					<img th:src="'data:image/png;base64,'+ ${ph.getImageStr()}"	class="border imgAutoSize">
+					<img th:src="'data:image/png;base64,'+ ${ph.getImageStr()}"	class="border imgAutoSize imgTrasition">
 
 					<div th:if="${ph.legende !=null && ph.legende.length()>0}" class="input-group  mt-1">
 						<label class="form-control font-italic " th:text="${ph.legende}"></label>								
@@ -29,8 +29,8 @@
 			</div>
 		</div>
 		
-		<div class="divCategorieInfo">
-			<div class=" mx-2">	
+		<div class="divCategorieInfo d-flex align-items-center">
+			<div class=" mx-2 ">	
 				<h4  th:text="${categorie.titre}"  class="capitale font-weight-bold" ></h4>							
 				<h5  th:text="${categorie.description}" class="text-left textWithCrLf"></h5>
 			</div>					

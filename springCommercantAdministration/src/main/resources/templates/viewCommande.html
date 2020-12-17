@@ -19,10 +19,11 @@
 		<form method="post"	th:action="@{saveCommande}" th:object="${cmd}" >
 			
 			<div th:insert="fragments/cmdFragments.html :: viewCmd(${cmd})"></div>
-			
+			<input type="hidden" name="redirectAction" th:value="${redirectAction}">
 						
 			<div class="d-flex justify-content-end mx-4">
- 		        <a th:href="@{listCmd}" class="py-1 px-2 mx-1  btn btn-primary text-white">Retour à la liste des commandes</a> 		        				
+				<button  type="submit" class="py-1 px-2 mx-1  btn btn-primary text-white" name="action" value="retour" id="btnRetour">Retour à la liste des commandes</button>
+ 		        <!-- <a th:href="@{listCmd}" class="py-1 px-2 mx-1  btn btn-primary text-white">Retour à la liste des commandes</a> --> 		        				
 				<button  type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>    	
 				<a th:if="${!cmd.isCanceledByAdmin()}" th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir annuler cette commande?')" class="py-1 px-2 mx-1  btn btn-danger">Annuler la commande</a>				
 		    </div>

@@ -23,13 +23,13 @@
 		<h3>Liste des produits</h3>
 		<h4 th:if="${hasProd==false}">Aucun produit n'existe encore</h4>
 		<div th:if="${lstCat.size() > 0}">
-			<div class="card border-info mb-3"  th:each="c:${lstCat}">
+			<div class="card _border-info mb-3"  th:each="c:${lstCat}">
 				
-				<div class="card text-white bg-info  "> 				
+				<div class="card text-white _bg-info  " style="background-image: url('images/pic02.jpg'); background-size: cover;"> 				
 					<div  class="card-header row text-left mx-0">						
 						<div class="col-md card-title d-flex ">
 							<a class="mx-2 text-white"  th:href="@{modifierCat(id=${c.id})}" >
-								<img th:if="${c.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${c.defPhotoData()}"	class="border p-1 mr-2" width="auto" height="auto" style="max-width: 100%;">
+								<img th:if="${c.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${c.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize imgTrasition" >
 							</a>
 							<h4><a  th:text="${c.titre}" class="mx-2 text-white"  th:href="@{modifierCat(id=${c.id})}" ></a></h4>
 						</div>
@@ -42,8 +42,8 @@
 							<div>
 								<a class="mx-2 text-white" th:href="@{addProdInCat(id=${c.id})}" ><i class="fa fa-2x mx-2 fa-plus-square-o text-white" aria-hidden="true"></i>Ajouter produits dans cette catégorie</a>
 							</div>
-							<div>
-								<a class="mx-2 text-white" th:href="@{supprCat(id=${c.id})}" ><i class="fa fa-2x mx-2 fa-trash text-white" aria-hidden="true"></i>Supprimer</a>						
+							<div style="cursor: pointer;">
+								<a class="mx-2 text-white" th:onclick="'retrieveCagegorieFragment(' + ${c.id} + ')'" ><i class="fa fa-2x mx-2 fa-trash text-white" aria-hidden="true"></i>Supprimer</a>						
 							</div>
 						</div>
 					</div>
@@ -60,21 +60,15 @@
 		</div>
 
 		<div th:if="${lstProdSansCat.size() > 0}">
-			<h4 class="bg-warning py-2">Produits sans catégorie</h4>
+			<h4 class="bg-warning py-2 rounded">Produits sans catégorie</h4>
 			<div th:replace="fragments/general.html :: productList(${lstProdSansCat})"></div>
 		</div>
 	</div>
-	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-		crossorigin="anonymous"></script>
-	<script
-		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-		crossorigin="anonymous"></script>
-	<script
-		src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-		crossorigin="anonymous"></script>
+	
+	<div id="divApercuProduit"></div>
+	<div id="divApercuCat"></div>
+	
+	<div th:replace="fragments/general.html :: assets"></div>  	
 	<script>
  		$(document).ready(function() { 
         	
@@ -87,6 +81,35 @@
        		$liTag.siblings('.active').removeClass('active');
         	$liTag.addClass('active');        
       	})
+      	
+      	function retrieveProduitFragment(idProd){
+		 	
+			var url = '/produitFragment' + '/' + idProd;				
+			$('#divApercuProduit').empty();
+	        $('#divApercuProduit').load(url, 
+	                  function() {
+	              $('#divApercuProduit').find('.modal').modal('show');  
+		})
+ 		}   
+	        
+ 		$(document).on('hide.bs.modal','#modalApercuProduit', function () { 			
+ 			$('#divApercuProduit').empty();		
+		});
+ 		
+		function retrieveCagegorieFragment(idCat){
+		 	
+			var url = '/categorieFragment' + '/' + idCat;				
+			$('#divApercuCat').empty();
+	        $('#divApercuCat').load(url, 
+	                  function() {
+	              $('#divApercuCat').find('.modal').modal('show');  
+		})
+ 		}   
+	        
+ 		$(document).on('hide.bs.modal','#modalApercuCat', function () { 			
+ 			$('#divApercuCat').empty();		
+		});
+ 		
     </script>
 </body>
 

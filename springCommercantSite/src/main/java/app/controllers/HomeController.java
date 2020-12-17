@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 
 import data.entitys.CategorieProduit;
 import data.entitys.PanierWrapper;
@@ -178,24 +180,26 @@ public class HomeController {
 		
 		return "viewCompte";
 	}
+
 	@GetMapping({ "/modifierCompte" })
 	public String getViewCompteFrm(Model model, HttpSession session) {
-				
-		addStandardParams(model,session);
-		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();	
-		model.addAttribute("lstCat", lstCat);
-		
-		User connectedCli=(User) session.getAttribute("connectedCli");	
-		model.addAttribute("user", connectedCli);
-		
-		List<PointVente> pointsV = ptsVR.findAll();
-		model.addAttribute("pointsV",pointsV);
-		model.addAttribute("pointsVselected",connectedCli.getLstIdPtv());
-		
-		if (connectedCli!=null) 
+
+		User connectedCli = (User) session.getAttribute("connectedCli");
+
+		if (connectedCli != null) {
+			model.addAttribute("user", connectedCli);
+
+			addStandardParams(model, session);
+			Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();
+			model.addAttribute("lstCat", lstCat);
+
+			List<PointVente> pointsV = ptsVR.findAll();
+			model.addAttribute("pointsV", pointsV);
+			model.addAttribute("pointsVselected", connectedCli.getLstIdPtv());
+
 			return "viewCompte";
-		else
-			return "redirect:/login";		
+		} else
+			return "redirect:/login";
 	}
 	
 	@PostMapping({ "/saveCompte" })
@@ -258,6 +262,8 @@ public class HomeController {
 
 	}
 	
+	
+	
 	@GetMapping("/supprimerCompte")
 	public String getSuppressionCompteFrm(Model model, HttpSession session) {
 		addStandardParams(model,session);
@@ -277,9 +283,21 @@ public class HomeController {
 		else
 			return "redirect:/login";
 	}
-	
+	//
 	@PostMapping("supprimerCompte")
-	public String supprimerCompte(Model model, HttpSession session) {
+	public String supprimerCompte(Model model,@ModelAttribute("user") User userToDelete) {
+		if(usrR.existsById(userToDelete.getId()))	{
+			lignesCmdR.deleteByUser(userToDelete.getId());			
+			cmdR.deleteCommandesByUser(userToDelete.getId());
+			usrR.delete(userToDelete);
+			return "redirect:/deconnexion";
+		}
+		return "redirect:/login";
+	}
+		
+	
+	//@PostMapping("supprimerCompte")
+	public String supprimerCompteOld(Model model, HttpSession session) {
 		User connectedCli=(User) session.getAttribute("connectedCli");			
 		
 		if (connectedCli!=null) {

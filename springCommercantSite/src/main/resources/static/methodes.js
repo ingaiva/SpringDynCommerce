@@ -372,8 +372,9 @@ $(window).scroll(function () {
 	}
 
 	function getProdTotalCmdAjax(id, prix, qte, parent) {
-		data={produit:{id : id, prix : prix}, qte: qte};				
-
+		//data={produit:{id : id, prix : prix}, qte: qte, prix : prix};	
+					
+		data={produit:{id : id}, qte: qte, prix : prix};
 		urlTo = "/getTotalProduitCmd";		
 		
 		$.ajax({type : "POST",
@@ -420,8 +421,8 @@ $(window).scroll(function () {
 					var id = parseInt(allByClass[i].querySelector(".idProdCmd").value);
 					var price = parseFloat(allByClass[i].querySelector(".prixCmd").textContent);
 					var quantity = parseFloat(allByClass[i].querySelector(".qteCmd").value);
-					data = {produit:{id : id, prix : price}, qte: quantity};		
-					
+					//data = {produit:{id : id, prix : price}, qte: quantity};		
+					data = {produit:{id : id}, qte: quantity, prix : price};
 					lignesProd.push(data); 
 				}	
 				

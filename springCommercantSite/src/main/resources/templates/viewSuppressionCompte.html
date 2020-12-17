@@ -14,19 +14,44 @@
 <header th:replace="fragments/general.html :: headerFragment" ></header>	
 
 	
-	<div class="p-4 m-2" style="margin-left: auto; margin-right: auto; text-align: center;">
-		<form class="" method="post" th:action="@{supprimerCompte}" th:object="${user}">
-			<div class="bg-danger text-white p-3 d-inline-flex rounded">
-				<h4 class="capitale text-center">êtes-vous certain de vouloir supprimer votre compte et toutes vos commandes ?</h4>										
+	<div class="p-4 my-2 text-center" style="margin-left: auto; margin-right: auto; " th:object="${user}">		
+			<div class="bg-danger text-white p-3 mb-2 d-inline-flex rounded">
+				<h4 class="capitale text-center">suppression de votre compte et de toutes vos commandes</h4>										
 			</div>
-			<div th:replace="fragments/general.html :: infoCompte"></div>	
-			<div class="d-flex text-center py-2">
-				<button type="submit" class="btn btn-danger mx-1">Supprimer le compte</button>
+			<div th:replace="fragments/general.html :: infoCompteReadOnly"></div>	
+			<div class="d-flex text-center py-2">				
+				<a class="btn btn-danger mx-1 text-white" style="cursor: pointer;" th:onclick="'dlgDeleteCompte()'"><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer le compte</a>
 				<a th:href="@{accueil}" class="mx-1 btn btn-primary">Annuler</a>
-			</div>
-		</form>
+			</div>		
 	</div>	
 	
+	<div id="divDlgDeleteCompte">
+		<div  class="modal fade" tabindex="-1" id="modalDeleteCompte">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<form method="post"	th:action="@{supprimerCompte}" th:object="${user}" class="text-center" > 
+						<input type="hidden" th:field="*{id}" />
+							
+						<div class="modal-header">
+							<label class=" text-danger font-weight-bold" >Vous allez supprimer votre compte et toutes vos commandes. <br> <i class="fa fa-exclamation-triangle mx-2" aria-hidden="true"></i>Cette action est irréversible<i class="fa fa-exclamation-triangle mx-2" aria-hidden="true"></i> <br> Voulez-vous continuer ?</label>
+													
+							<button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">						
+						</div>
+						<div class="modal-footer">
+							<button type="submit" name="action" value="deleteUser" class="mx-2 py-0  btn btn-sm btn-outline-danger"><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>						
+								Supprimer							
+							</button>						
+							<button type="button" class="py-0 btn btn-sm btn-outline-dark"	data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 	
 		
 	<div th:replace="fragments/general.html :: footerContact"></div>
@@ -56,6 +81,10 @@
                 return $(elementId).html();
             }
         });
+ 		
+		function dlgDeleteCompte(){		 	
+			$('#divDlgDeleteCompte').find('.modal').modal('show');
+ 		} 
     </script>	
 </body>
 <footer th:replace="fragments/general.html :: footerTrade"></footer>

@@ -1,7 +1,9 @@
 package app.controllers;
 
 import java.util.List;
+import java.util.Set;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,13 +43,38 @@ public class ProduitController {
 	
 	@Autowired
 	data.repositorys.RepoPhoto_Produit photoR;
-
+	
+	@Autowired
+	data.repositorys.RepoPhoto_CategorieProduit phR;
+	
+	@Autowired
+	data.repositorys.RepoCommandeProduit lignesCmdR;
 	
 	private String redirectToEditProduit(Produit produitToEdit,	RedirectAttributes ra) {
 		/* System.out.println("dans redirectToEditProduit " + produitToEdit); */
 		ra.addAttribute("produit", produitToEdit);		
 		//ra.addFlashAttribute("produit", produitToEdit);		
 		return "redirect:/editProduit";	
+	}
+	@GetMapping("/listeProduit")
+	public String getListeProduitFrm(Model model) {
+		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();		
+		Set<Produit> lstProdSansCat=prodR.getProduitWithDependencyByCategorieNull();
+		
+		boolean hasProd=(lstProdSansCat.size()>0);
+		if (! hasProd) {
+			for (CategorieProduit cat : lstCat) {
+				cat.setPhotos(phR.getByCategorie(cat.getId()));				
+				if (cat.getProduits().size()>0) {
+					hasProd=true;
+					break;
+				}
+			}			
+		}		
+		model.addAttribute("hasProd", hasProd);	
+		model.addAttribute("lstCat", lstCat);	
+		model.addAttribute("lstProdSansCat", lstProdSansCat);	
+		return "viewLstProduit";
 	}
 	
 	@GetMapping("/editProduit")
@@ -61,23 +89,29 @@ public class ProduitController {
 			model.addAttribute("statutProduit", Produit.StatutProduit.values());
 			model.addAttribute("lstCat", catR.findAll());
 			model.addAttribute("produit", produitToEdit);	
-			System.out.println("dans editProduit avant la vue: " + produitToEdit);
+			
 			
 			return "viewEditProd";		
 		}
 		else
-			return "redirect:/accueil";	
+			return "redirect:/listeProduit";	
 	}
 	
 	@GetMapping("/modifierProd")
 	public String modifierProduit(Model model, @RequestParam(name="id") Long id, RedirectAttributes ra) {
-		
-		Produit produitToEdit =prodR.getProduitWithDependency(id);
-				
-		if (produitToEdit==null) 
-			return "redirect:/accueil";		
+		if(prodR.existsById(id)) {
+			Produit produitToEdit =prodR.getProduitWithDependency(id);
+			
+			if (produitToEdit==null) 
+				return "redirect:/listeProduit";		
+			else {
+				return redirectToEditProduit(produitToEdit,ra);
+			}
+			
+		}
 		else {
-			return redirectToEditProduit(produitToEdit,ra);
+			model.addAttribute("msg", "Le produit demandé n'existe pas");
+			return "error";
 		}
 	}	
 	
@@ -85,23 +119,30 @@ public class ProduitController {
 	@GetMapping("addProdInCat")
 	public String addProduitInCatFrm(Model model, @RequestParam(name="id") Long id, RedirectAttributes ra) {
 		CategorieProduit categorieToEdit = null;
-		
-		categorieToEdit=catR.getCategoriesWithDependencyById(id);	
+		if( catR.existsById(id)){
+			categorieToEdit=catR.getCategoriesWithDependencyById(id);	
+			
+			if (categorieToEdit!=null) {
 				
-		if (categorieToEdit!=null) {
+				Produit newProduit = new Produit();
+				newProduit.setStatut(Produit.StatutProduit.Disponible.toString());
+				newProduit.setCategorieProduit(categorieToEdit);
+				model.addAttribute("statutProduit", Produit.StatutProduit.values());
+				model.addAttribute("lstCat", catR.findAll());
+				model.addAttribute("produit", newProduit);				
+				
+				return "viewEditProd";
+				//return redirectToEditProduit(newProduit,ra);		
+			}
+			else
+				return "redirect:/listeProduit";
 			
-			Produit newProduit = new Produit();
-			newProduit.setStatut(Produit.StatutProduit.Disponible.toString());
-			newProduit.setCategorieProduit(categorieToEdit);
-			model.addAttribute("statutProduit", Produit.StatutProduit.values());
-			model.addAttribute("lstCat", catR.findAll());
-			model.addAttribute("produit", newProduit);				
-			
-			return "viewEditProd";
-			//return redirectToEditProduit(newProduit,ra);		
 		}
-		else
-			return "redirect:/accueil";
+		else {
+			model.addAttribute("msg", "La catégorie demandée n'existe pas");
+			return "error";
+		}
+			
 	}
 	
 	@GetMapping("/addProduit")
@@ -193,7 +234,7 @@ public class ProduitController {
 				saveProduitWithDependency(produitToEdit);
 
 		}
-		return "redirect:/accueil";		
+		return "redirect:/listeProduit";		
 		
 	}
 	private Produit saveProduitWithDependency(Produit produitToEdit) {			
@@ -271,7 +312,7 @@ public class ProduitController {
 			return "redirect:/modifierProd";
 			
 		}
-		return "redirect:/accueil";
+		return "redirect:/listeProduit";
 	}
 	
 	@GetMapping("/supprimerPhotoProduit")
@@ -285,46 +326,64 @@ public class ProduitController {
 	
 	@GetMapping("/effacerCatProd")
 	public String effacerCatProd(@RequestParam(name="id") Long id) {
-		Produit produitToEdit=prodR.getOne(id);
-		if (produitToEdit!=null) {
-			produitToEdit.setCategorieProduit(null);
-			prodR.save(produitToEdit);
+		if(prodR.existsById(id)) {			
+			Produit produitToEdit=prodR.getOne(id);
+			if (produitToEdit!=null) {
+				produitToEdit.setCategorieProduit(null);
+				prodR.save(produitToEdit);
+			}
+			return "redirect:/listeProduit";				
 		}
-		return "redirect:/accueil";				
+		else {			
+			return "error";
+		}
 	}
 	
 	@GetMapping("/supprimerProd")
 	public String supprimerProd(@RequestParam(name="id") Long id) {
+		
 		if (id!=null) {
-			Produit produitToDelete=prodR.getOne(id);
-			if (produitToDelete!=null) {
-				lnInfoPR.deleteByProduit(id);			
-				infoPR.deleteByProduit(id);
-				photoR.deleteByProduit(id);
-				prodR.delete(produitToDelete);		
+			if(prodR.existsById(id)) {
+				Produit produitToDelete=prodR.getOne(id);
+				if (produitToDelete!=null) {
+					lnInfoPR.deleteByProduit(id);			
+					infoPR.deleteByProduit(id);
+					photoR.deleteByProduit(id);
+					lignesCmdR.deleteByProduit(id);
+					prodR.delete(produitToDelete);		
+				}				
 			}
-								
+			else {	
+				return "error";
+			}				
 		}
-		return "redirect:/accueil";		
+		return "redirect:/listeProduit";		
 	}
 	
 	@GetMapping("/supprimerInfo")
 	public String supprimerInfo(Model model, @RequestParam(name="id") Long id, @RequestParam(name="idProd") Long idProd, RedirectAttributes ra) {
-		if (id!=null) {
-			InfoCompProduit infoToDelete = infoPR.getOne(id);
-			if (infoToDelete!=null) {
-				infoToDelete.setProduit(null);
-				lnInfoPR.deleteByInfoComp(id);			
-				infoPR.delete(infoToDelete);				
+		if(infoPR.existsById(id) && prodR.existsById(idProd)) {
+			
+			if (id!=null) {
+				InfoCompProduit infoToDelete = infoPR.getOne(id);
+				if (infoToDelete!=null) {
+					infoToDelete.setProduit(null);
+					lnInfoPR.deleteByInfoComp(id);			
+					infoPR.delete(infoToDelete);				
+				}
 			}
-		}
-		if (idProd!=null) {
-			Produit produitToEdit =prodR.getProduitWithDependency(idProd);
-			if (produitToEdit!=null) {
-				return redirectToEditProduit(produitToEdit,ra);		
+			if (idProd!=null) {
+				Produit produitToEdit =prodR.getProduitWithDependency(idProd);
+				if (produitToEdit!=null) {
+					return redirectToEditProduit(produitToEdit,ra);		
+				}
 			}
+			return "redirect:/listeProduit";	
 		}
-		return "redirect:/accueil";	
+		else {
+			model.addAttribute("msg", "Les ressources demandées n'existent pas");
+			return "error";
+		}
 	}
 	
 	@GetMapping("/supprimerLigneInfo")
@@ -345,7 +404,19 @@ public class ProduitController {
 				return redirectToEditProduit(produitToEdit,ra);		
 			}
 		}
-		return "redirect:/accueil";
+		return "redirect:/listeProduit";
+	}
+	
+	
+	@GetMapping("/produitFragment/{id}")
+	public String loadProduitFragment(Model model, @PathVariable("id") Long idProduit, HttpSession session) {
+		if(prodR.existsById(idProduit)) {
+			Produit produitToEdit =prodR.getOne(idProduit);			
+			model.addAttribute("p", produitToEdit);	
+			return "fragments/general.html :: apercuProduit";			
+		}
+		else
+			return "";
 	}
 }
 

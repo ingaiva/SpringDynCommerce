@@ -31,8 +31,8 @@
 							<tbody>
 								<tr class="rowP" th:each="p, itemStat :${pointsV}">						
 									<td>
-										<a class="mx-2"  th:href="@{viewPtVente(id=${p.id})}" >
-											<img th:if="${p.hasPhoto()}" th:src="${p.getPhotoStrSm()}"	class="border p-1 mr-2 imgAutoSize">
+										<a class="mx-2"  th:href="@{/viewPtVente(id=${p.id})}" >
+											<img th:if="${p.hasPhoto()}" th:src="${p.getPhotoStrSm()}"	class="border p-1 mr-2 imgAutoSize imgTrasition">
 										</a>
 									</td>								
 									<td><h5	class="" ><a class="text-dark" th:text="${p.libelle}" th:href="@{viewPtVente(id=${p.id})}"></a></h5>

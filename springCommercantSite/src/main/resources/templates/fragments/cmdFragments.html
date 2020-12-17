@@ -27,12 +27,7 @@
 				</div>
 			</div>
 				
-			<input type="hidden" th:field="*{id}" />
-			
-			<!-- <div th:if="${cmd.id != null}">				
-				<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>				
-			</div> -->
-			
+			<input type="hidden" th:field="*{id}" />	
 			
 			<div class="form-group text-left mx-3 ">	
 				<div class="d-flex align-items-center justify-content-start">
@@ -99,18 +94,19 @@
 						<div class="d-md-flex">
 							<div class="mr-3">
 								<a th:href="@{produit(id=${p.id})}" >
-									<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" >							
+									<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize imgTrasition" >							
 								</a>
 							</div>
 							<div>
 								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
 								<input class="idProdCmd" type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
 								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.prix}" />	
-							
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].prix}" />	
+								
 								<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
 								<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
-								<label class="prixCmdV"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
-								<label class="prixCmd d-none" th:text="${p.prix}"></label>
+								<label class="prixCmdV"  th:text="${#numbers.formatDecimal(lp.getPrix(), 1, 2, 'COMMA')} + '€'"></label>
+								<label class="prixCmd d-none" th:text="${lp.getPrix()}"></label>
 								<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelaisColor text-center"> </p>
 							</div>
 						</div>						
@@ -192,6 +188,61 @@
 		</div>
 	</div>
 
+
+	<div th:fragment="dlgDeleteCmd" class="modal fade" tabindex="-1" id="modalDeleteCmd">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form method="post"	th:action="@{deleteCommande}" th:object="${cmd}" > 
+					<input type="hidden" th:field="*{id}" />
+					<input type="hidden" th:field="*{statut}" />		
+					<div class="modal-header">
+						<label class="text-danger font-weight-bold" th:if="${cmd.allowDelete()}" >Etes-vous certain de vouloir supprimer cette commande?</label>
+						<label class="text-danger font-weight-bold" th:if="${cmd.allowCancel()}" >Etes-vous certain de vouloir annuler cette commande?</label>
+						
+						<button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<div>
+							<div class="text-center">
+								<h4 th:text="'Commande N° ' + ${cmd.id}"></h4>	
+								<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>
+							</div>			
+							
+							<div class="text-center">
+								<h6 th:class="${cmd.getCssClassStatut()}" th:text="${T(data.entitys.Commande).getStatutLibelle(cmd.statut)}"></h6>				
+								<div class="font-weight-bold" th:if="${!cmd.isEnAttente() && cmd.dateLivraison!=null}">
+									<div><i class="fa fa-calendar mr-2" aria-hidden="true"></i>Date de retrait </div>					
+									<h5 class="text-danger" th:text="${cmd.getDateLivraisonStr()}"></h5>	
+								</div>
+							</div>	
+							
+							<div class="text-right mr-3">
+								<!--on affiche le detail total prod et total reduction si il y a des reductions, sinon on affiche directement le total -->
+								<div th:if="${cmd.reductionSpeciale > 0}" class="d-flex justify-content-end mx-4">
+									<h6 class="font-weight-bold mr-3 totalProdCmd" id="totalProdCmd" th:text="'Total produit : ' +${#numbers.formatDecimal(cmd.totalSansPromo, 1, 2, 'COMMA')} + '€'"></h6>			
+								</div>
+								<div th:if="${cmd.reductionSpeciale > 0}" class="d-flex justify-content-end mx-4">
+									<h6 class="font-weight-bold mr-3 reductionS" id="reductionS" th:text="'Réduction spéciale : ' +${#numbers.formatDecimal(cmd.reductionSpeciale, 1, 2, 'COMMA')} + '€'"></h6>			
+								</div>
+								<div class="d-flex justify-content-end mx-4">										
+									<h5	class="font-weight-bold mr-3 totalCmd" id="totalCmd" th:text="'Total : ' +${#numbers.formatDecimal(cmd.totalFinal, 1, 2, 'COMMA')} + '€'"></h5>					
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" name="action" value="deleteCmd" class="mx-2 py-0  btn btn-sm btn-outline-danger"><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>						
+							<span th:if="${cmd.allowDelete()}">Supprimer</span>
+							<span th:if="${cmd.allowCancel()}">Annuler</span>
+						</button>						
+						<button type="button" class="py-0 btn btn-sm btn-outline-dark"	data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>	
 
 	<div th:replace="fragments/general.html :: assets"></div>		
 </body>

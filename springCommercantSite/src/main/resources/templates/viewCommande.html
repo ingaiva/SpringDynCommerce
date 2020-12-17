@@ -18,17 +18,23 @@
 			<div th:insert="fragments/cmdFragments.html :: viewCmd(${cmd})"></div>
 			
 			<div class="d-flex justify-content-end mx-4">
-				<a th:if="${cmd.id == null} " th:href="@{accueil}" class="py-1 px-2 mx-1  btn btn-danger">Annuler	</a>
- 		        <a  th:unless="${cmd.id == null} " th:href="@{listCmd}" class="py-1 px-2 mx-1  btn btn-primary text-white">Revenir à la liste des commandes</a>
+				<a th:if="${cmd.id == null} " th:href="@{accueil}" class="py-1 px-2 mx-1  btn btn-primary">Revenir à l'accueil sans enregistrer</a>
+ 		        <a  th:unless="${cmd.id == null} " th:href="@{listCmd}" class="py-1 px-2 mx-1  btn btn-primary text-white" th:text="${cmd.allowEditLimited()}?'Revenir à la liste des commandes sans enregistrer':'Revenir à la liste des commandes'"></a>
  		        				
-				<button th:if="${cmd.allowEditLimited()}"  type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd">Enregistrer</button>    	
-<!-- 				<a th:if="${ cmd.id != null && (cmd.allowDelete() or cmd.allowCancel())}"  th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir supprimer cette commande')" class="py-1 px-2 mx-1  btn btn-danger ">Supprimer</a> -->
+				<button th:if="${cmd.allowEditLimited()}"  type="submit" class="py-1 px-2 mx-1 btn btn-success" name="action" value="saveCmd" id="saveCmd" style="min-width: 124px;"><i class="fa fa-floppy-o mx-2" aria-hidden="true"></i>Enregistrer</button>    	
+
 		    </div>
-		    <div class="d-flex justify-content-end mx-4 mt-2">
-		    	<a th:if="${ cmd.id != null && (cmd.allowDelete() or cmd.allowCancel())}"  th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir supprimer cette commande?')" class="py-1 px-2 mx-1  btn btn-danger ">Supprimer</a>
+		    <div class="d-flex justify-content-end mx-4 mt-2" style="cursor: pointer;">
+		    	<a th:if="${ cmd.id != null && (cmd.allowDelete() or cmd.allowCancel())}" th:onclick="'retrieveDeleteCmdFragment(' + ${cmd.id} + ')'" class="py-1 px-2 mx-1  btn btn-danger text-white" style="min-width: 124px;"><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer</a>
+		    	<!-- <a th:if="${ cmd.id != null && (cmd.allowDelete() or cmd.allowCancel())}" th:onclick="'retrieveDeleteCmdFragment(' + ${cmd.id} + ')'" th:href="@{deleteCommande(id=${cmd.id})}" th:onclick="return confirm('Etes-vous sûr de vouloir supprimer cette commande?')" class="py-1 px-2 mx-1  btn btn-danger ">Supprimer</a> -->
 		    </div>
 		</form>
 	</div>	
+	
+	
+	<div id="divDlgDeleteCmd"></div>
+	
+	
 		
 	<div th:replace="fragments/general.html :: footerContact"></div>
     <div th:replace="fragments/general.html :: assets"></div>
@@ -100,168 +106,21 @@
  			checkVisibilityChoixValidation();
         }); 
   
-//       	$(document).unload(function() {         	
-//         	let $liTag =  $('#liPanier'); 
-//         	$liTag.removeAttr('disabled');        	 
-//       	})
-      	
-//       	function addQteCmd(btn) {
-// 				let parent = btn.parentElement.parentElement.parentElement;
 
-// 				let cible = parent.querySelector(".qteCmd");
-
-// 				if (cible != null) {
-// 					let qte = cible.value;
-
-// 					if (qte == null) {
-// 						qte = 1;
-// 					}
-// 					cible.value = parseFloat(qte) + 1;
-// 					updateQuantityCmd(cible);
-// 				}
-// 			}
- 		
-// 			function dimQteCmd(btn) {
-// 				let parent = btn.parentElement.parentElement.parentElement;
-// 				let cible = parent.querySelector(".qteCmd");
-
-// 				if (cible != null) {
-// 					let qte = cible.value;
-// 					if (qte == null) {
-// 						qte = 1;
-// 					}
-// 					if (qte > 0) {
-// 						cible.value = parseFloat(qte) - 1;
-// 					} else
-// 						cible.value = 0;
-					
-// 					updateQuantityCmd(cible);
-// 				}
-
-// 			}
-
-// 			function supprimerProdCmd(btn) {
-// 				let parentTR = btn.closest("tr");
-// 				if (parentTR != null) {
-// 					parentTR.remove();
-// 					recalculateCartCmd();
-// 				}
-// 			}			
-
-// 			function updateQuantityCmd(quantityInput) {
-				  
-// 				var parent = quantityInput.closest("tr");
-				
-// 				var price = parseFloat(parent.querySelector(".prixCmd").textContent);			
-				
-// 				var quantity = parseFloat(parent.querySelector(".qteCmd").value);
-				
-// 				var id=parseInt(parent.querySelector(".idProdCmd").value);
-				
-// 				getProdTotalAjax(id,price,quantity, parent);
-				
-// // 				var linePrice = price * quantity;			
-				
-// // 				var subTotalElt = parent.querySelector(".subtotalCmd");
-// // 				var subTotalEltVisible = parent.querySelector(".subtotalCmdV");
-// // 				subTotalElt.textContent = linePrice ; 				
-// // 				subTotalEltVisible.textContent = linePrice.toFixed(2) + '€';	
-// // 				recalculateCartCmd();
-				
-// 			}
-
-// 			function getProdTotalAjax(id, prix, qte, parent) {
-// 				data={produit:{id : id, prix : prix}, qte: qte};
-// 				//data = {id : id, prix : prix, qte : qte};
-
-// 				urlTo = "/getTotalProduitCmd";		
-				
-// 				$.ajax({type : "POST",
-// 							contentType : "application/json",
-// 							url : urlTo,
-// 							data : JSON.stringify(data),
-// 							dataType : 'json',
-// 							async : false,
-// 							success : function(result, textStatus, xhr) {
-// 								if (xhr.status == 200) {
-
-// 									var result = parseFloat(result).toFixed(2);
-// 									var subTotalElt = parent.querySelector(".subtotalCmd");
-// 									var subTotalEltVisible = parent.querySelector(".subtotalCmdV");
-// 									subTotalElt.textContent = result;
-// 									subTotalEltVisible.textContent = result	+ '€';
-// 									recalculateCartCmd();
-
-// 								} else {
-// 									console.log('Erreur status ' + xhr.status);
-// 								}
-// 							},
-// 							error : function(e) {
-// 								console.log("ERROR: ", e);
-// 							}
-// 				});
-// 			}
-			
-			
-		
-// 			function recalculateCartCmd() {				  
-				  
-// 				/* var subtotal = 0;
-				
-// 				var allByClass = document.getElementsByClassName('itemCmd');
-// 				for (var i=0, len=allByClass.length|0; i<len; i=i+1|0) {
-// 					var subTotalElt = allByClass[i].querySelector(".subtotalCmd");
-// 					subtotal += parseFloat(subTotalElt.textContent);					
-// 				}
-								
-// 				var totalElt = document.getElementById('totalCmd');
-// 				totalElt.textContent = 'Total : ' + subtotal.toFixed(2) + '€'; */
-// 				recalculateCartCmdAjax();
-// 			}
-			
-			
-	/* function recalculateCartCmdAjax() {
-				
-				statutCmd=document.getElementById('statutCmd').value;//
-				idCmd=document.getElementById('id').value;//
-				console.log('idCmd: ' + idCmd);
-				
-				lignesProd = [];
-				var allByClass = document.getElementsByClassName('itemCmd');
-				for (var i = 0, len = allByClass.length | 0; i < len; i = i + 1 | 0) {
-					var id = parseInt(allByClass[i].querySelector(".idProdCmd").value);
-					var price = parseFloat(allByClass[i].querySelector(".prixCmd").textContent);
-					var quantity = parseFloat(allByClass[i].querySelector(".qteCmd").value);
-					data = {produit:{id : id, prix : price}, qte: quantity};		
-					console.log(JSON.stringify(data));
-					lignesProd.push(data); 
-				}	
-				
-				var formData =  {id:idCmd,lignesCommandeProduit : lignesProd, statut: statutCmd};								
-				urlTo = "/calculeTotalCmd";				
-			
-				$.ajax({
-					type : "POST",
-					contentType : "application/json",
-					url : urlTo,
-					data : JSON.stringify(formData),
-					dataType : 'json',
-					async : false,
-					success : function(result, textStatus, xhr) {
-						if (xhr.status == 200) {
-							var result = parseFloat(result.totalFinal).toFixed(2);							
-							var totalElt = document.getElementById('totalCmd');
-							totalElt.textContent = 'Total : ' + result + '€';
-							
-						} else {
-							console.log('Erreur status ' + xhr.status);
-						}
-					},
-					error : function(e) {
-						console.log("ERROR: ", e);
-					}
-				});
-			}  */
+ 		 
+		function retrieveDeleteCmdFragment(idCmd){
+		 	
+			var url = '/deleteCmdFragment' + '/' + idCmd;				
+			$('#divDlgDeleteCmd').empty();
+	        $('#divDlgDeleteCmd').load(url, 
+	                  function() {
+	              $('#divDlgDeleteCmd').find('.modal').modal('show');  
+		})
+ 		}   
+	        
+ 		$(document).on('hide.bs.modal','#modalDeleteCmd', function () { 			
+ 			$('#divDlgDeleteCmd').empty();		
+		});
 			
     </script>	
 </body>

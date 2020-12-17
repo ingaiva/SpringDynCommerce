@@ -15,21 +15,21 @@
 	</div>
 	
 	
-	<div class="slogan text-center px-5 mx-5 my-3 d-flex">
+	<div class="slogan text-center px-5 mx-5 my-3 d-flex" th:if="${session.paramMP.texteAccueil!=null && session.paramMP.texteAccueil.length()>0}">
 		<i class="fa fa-quote-left mr-2 text-secondary" aria-hidden="true"></i>
 		<label class="font-italic font-weight-bold text-center" style="white-space: pre-line;" th:text="${session.paramMP.texteAccueil}" ></label>
 		<i class="fa fa-quote-right ml-2 text-secondary" aria-hidden="true"></i>						
 	</div>	
 
-	<div th:if="${session.paramMP.photos.size() > 0}"  class="galerie mx-auto my-3 py-2 " style="width: 80%;">
+	<div th:if="${session.paramMP.photos.size() > 0}"  class="galerie mx-auto my-2 py-1 " style="width: 80%; display: none;">
 
 		<div id="carouselCaptions"	class="carousel slide carousel-fade" data-ride="carousel" data-interval="10000">			
 			<ol class="carousel-indicators">
 				<li data-target="#carouselCaptions" th:each="ph, iter : ${session.paramMP.photos}" th:attr="data-slide-to= ${iter.index}" th:class="${iter.index==0} ? 'active'"></li>
 			</ol>
 			<div class="carousel-inner text-center">
-				<div th:each="ph, iter : ${session.paramMP.photos}"	th:class="${iter.index==0} ? 'carousel-item active ' : 'carousel-item '" style="min-height: 200px;">
-					<img class="d-block border mx-auto my-2" width="auto" height="auto"	style="max-width: 100%;" alt="image..."
+				<div th:each="ph, iter : ${session.paramMP.photos}"	th:class="${iter.index==0} ? 'carousel-item active ' : 'carousel-item '" style="min-height: 200px; height: 300px;">
+					<img class="d-block border imgAutoSize mx-auto" alt="image..."
 						th:src="'data:image/png;base64,'+ ${ph.getImageStr()}">
 					<div class="carousel-caption d-none d-md-block">						
 					</div>
@@ -47,14 +47,14 @@
 	</div>
 
 	<div th:if="${session.paramMP.showCategories}" class="divCategoriesMP mt-3 px-4">
-		<div class="border d-flex align-items-center justify-content-center" th:each="c : ${lstCat}" >
+		<div class="border d-flex align-items-center justify-content-center divCategorieColor" th:each="c : ${lstCat}" >
 			
 			<div class="">
 				<a th:href="@{listProdByCat(idCat=${c.id})}">
-					<img th:if="${c.photos.size() > 0 }" th:src="${c.defPhotoDataMd()}"	class="border p-1" width="auto" height="auto" style="max-width: 100%;">				
+					<img th:if="${c.photos.size() > 0 }" th:src="${c.defPhotoDataMd()}"	class="border p-1 imgAutoSize imgTrasition" >				
 				</a>
 				<h4 class="my-2" >
-					<a class="text-dark" th:href="@{listProdByCat(idCat=${c.id})}" th:text="${c.titre}"></a>	
+					<a class="text-white" th:href="@{listProdByCat(idCat=${c.id})}" th:text="${c.titre}"></a>	
 				</h4>		
 			</div>		
 					
@@ -93,11 +93,17 @@
        		$liTag.siblings('.active').removeClass('active');
         	$liTag.addClass('active'); 
         	
+        	$(".galerie").fadeIn("fast");   
+        	
         	let $Tag =  $('#newCmdConfirmModal'); 
-        	if ( $Tag !=null){
+        	if ( $Tag ){
 	        	$('#newCmdConfirmModal').modal('show');        		
         	}
-      	})      	
+      	}) 
+      	
+      	$(document).on('hide.bs.modal','#newCmdConfirmModal', function () { 			
+ 			$('#newCmdConfirmModal').parent().empty();		
+		});
 
     </script>
 </body>	

@@ -13,11 +13,12 @@
 
 <body>
 	<nav th:fragment="navbarDynamique" class="navbar navbar-expand-md navbar-dark bg-dark">
-		<a class="navbar-brand" th:href="@{accueil}">
-			<i class="fa fa-home"
+		<a class="navbar-brand" th:href="@{/accueil}">
+			<img src="images/logo.svg" alt="" style="margin-right: 5px; width: 36px;" />
+			<!-- <i class="fa fa-home"
 			aria-hidden="true"
 			style="margin-right: 5px; color: rgb(73, 192, 178);">
-			</i>			 
+			</i> -->			 
 		</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse"
 			data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
@@ -27,16 +28,16 @@
 		<div class="collapse navbar-collapse" id="navbarNavDropdown">
 			<ul class="navbar-nav">				
 				<li id="liMainPage" class="nav-item">
-					<a class="nav-link" th:href="@{mainPage}"> Paramétrage de la page principale </a>
+					<a class="nav-link" th:href="@{/mainPage}"> Paramétrage de la page principale </a>
 				</li>
 				<li id="liProduit"  class="nav-item dropdown" >
-					<a class="nav-link dropdown-toggle"  th:href="@{accueil}"
+					<a class="nav-link dropdown-toggle"  th:href="@{/listeProduit}"
 						id="navbarDropdownMenuLink" data-toggle="dropdown"
 						aria-haspopup="true" aria-expanded="false"> Gestion des produits</a>
 					<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-						<a class="dropdown-item" th:href="@{accueil}">Liste des produits</a> 
-						<a class="dropdown-item" th:href="@{addCategorie}">Ajouter une categorie produit</a> 
-						<a class="dropdown-item" th:href="@{addProduit}">Ajouter un produit</a>						
+						<a class="dropdown-item" th:href="@{/listeProduit}">Liste des produits</a> 
+						<a class="dropdown-item" th:href="@{/addCategorie}">Ajouter une categorie produit</a> 
+						<a class="dropdown-item" th:href="@{/addProduit}">Ajouter un produit</a>						
 					</div>
 				</li>			
 				
@@ -45,13 +46,13 @@
 				</li>
 				
 				<li id="liCmd" class="nav-item" >
-					<a class="nav-link" th:href="@{listCmd}">Gerer les commandes des clients</a>
+					<a class="nav-link" th:href="@{/listCmd}">Gerer les commandes des clients</a>
 				</li>
 				<li id="liUsr" class="nav-item" >
-					<a class="nav-link" th:href="@{listUser}">Liste des clients</a>
+					<a class="nav-link" th:href="@{/listUser}">Liste des clients</a>
 				</li>
 				<li id="liPtV" class="nav-item" >
-					<a class="nav-link" th:href="@{listPointVente}">Vos points de vente</a>
+					<a class="nav-link" th:href="@{/listPointVente}">Vos points de vente</a>
 				</li>
 			</ul>
 		</div>
@@ -113,43 +114,45 @@
 		</div>	
 	</nav>
 
-	<div th:fragment="infoCompte">
+	<div th:fragment="infoCompte" >
+		<div th:object="${userModel.user}" th:with="user=${userModel.user}">
 		
-		<div th:unless="${user.id==null}">			
-			<input type="hidden" th:field="*{id}" />
-			<input type="hidden" th:field="*{dateCreation}" />
-		</div>			
-		
-		<small id="msg" class="text-danger" th:text="${msg}"></small>
-		<div class="bg-warning border rounded  p-3">
-			<div  class="text-left">
-				<p th:text="'Date création du compte: ' + ${#dates.format(user.dateCreation, 'dd/MM/yyyy HH:mm')}"></p>
-			</div>
-			<div class="row">
-				<div class=" col text-left">
-					<p class="mb-2 ">Nom / Prénom</p> 
-					<h4 class="border rounded bg-white p-1 font-weight-bold" th:text="${user.nom} + ' ' + ${user.prenom}"></h4>  
-					<p class="mb-2">Adresse</p> 
-					<div class="border rounded bg-white p-1" style="min-height: 34px;">
-						<p class="textWithCrLf my-0" th:text="${user.getAdresse()}"></p> 
-						<p class="textWithCrLf my-0" th:text="${user.cp} + ' ' + ${user.ville} + ' ' + ${user.pays} "></p> 
-					</div>
-				</div>			
-						
-				<div class="col text-left">
-					<div th:if="${user.mail !=null && user.mail.length()>0}">
-						<p class="mb-2">E-mail</p> 
-						<p class="border rounded bg-white p-1"  th:text="${user.mail}" ></p>
-					</div>
-					<div th:if="${user.tel1 !=null && user.tel1.length()>0}">
-						<p class="mb-2">n° de téléphone portable</p> 
-						<p class="border rounded bg-white p-1" th:text="${user.tel1}" ></p> 
-					</div>
-					<div th:if="${user.tel2 !=null && user.tel2.length()>0}">
-						<p class="mb-2">n° de téléphone</p> 
-						<p class="border rounded bg-white p-1"  th:text="${user.tel2}" ></p>  
-					</div>
-				</div>								
+			<div th:unless="${user.id==null}">			
+				<input type="hidden" th:field="*{id}" />
+				<input type="hidden" th:field="*{dateCreation}" />
+			</div>			
+			
+			<small id="msg" class="text-danger" th:text="${msg}"></small>
+			<div class="bg-warning border rounded  p-3 divInfoCompte" >
+				<div  class="text-left">
+					<p th:text="'Date création du compte: ' + ${#dates.format(user.dateCreation, 'dd/MM/yyyy HH:mm')}"></p>
+				</div>
+				<div class="row">
+					<div class=" col text-left">
+						<p class="mb-2 ">Nom / Prénom</p> 
+						<h4 class="border rounded bg-white text-dark p-1 font-weight-bold" th:text="${user.nom} + ' ' + ${user.prenom}"></h4>  
+						<p class="mb-2">Adresse</p> 
+						<div class="border rounded bg-white text-dark p-1" style="min-height: 34px;">
+							<p class="textWithCrLf my-0" th:text="${user.getAdresse()}"></p> 
+							<p class="textWithCrLf my-0" th:text="${user.cp} + ' ' + ${user.ville} + ' ' + ${user.pays} "></p> 
+						</div>
+					</div>			
+							
+					<div class="col text-left">
+						<div th:if="${user.mail !=null && user.mail.length()>0}">
+							<p class="mb-2">E-mail</p> 
+							<p class="border rounded bg-white text-dark p-1"  th:text="${user.mail}" ></p>
+						</div>
+						<div th:if="${user.tel1 !=null && user.tel1.length()>0}">
+							<p class="mb-2">n° de téléphone portable</p> 
+							<p class="border rounded bg-white text-dark p-1" th:text="${user.tel1}" ></p> 
+						</div>
+						<div th:if="${user.tel2 !=null && user.tel2.length()>0}">
+							<p class="mb-2">n° de téléphone</p> 
+							<p class="border rounded bg-white text-dark p-1"  th:text="${user.tel2}" ></p>  
+						</div>
+					</div>								
+				</div>
 			</div>
 		</div>
 	</div>
@@ -175,7 +178,7 @@
 						</div>
 						<div><a class="mx-3 text-dark" th:href="@{effacerCatProd(id=${p.id})}" ><i class="fa  mx-2 fa-eraser" aria-hidden="true"></i>Retirer de cette cat.</a>
 						</div>
-						<div><a class="mx-3 text-dark" th:href="@{supprimerProd(id=${p.id})}" ><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer</a>
+						<div style="cursor: pointer;"><a class="mx-3 text-dark" th:onclick="'retrieveProduitFragment(' + ${p.id} + ')'" ><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer</a>
 						</div>				
 					</div>									
 				</div>			
@@ -183,7 +186,89 @@
 			</div>							
 		</div>
 	</div>
-
+	
+	<div th:fragment="apercuProduit" class="modal fade" tabindex="-1" id="modalApercuProduit">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<label class="text-danger font-weight-bold">Etes-vous certain de vouloir supprimer ce produit?</label>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div>
+						<table class="table">					
+							<tbody>
+								<tr>
+									<td>
+										<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize imgTrasition" style="max-width: 80px;" >					
+									</td>								
+											
+									<td>							
+										<h6	class="font-weight-bold mr-1 mb-0" th:text="${p.libelle}"></h6>
+										<p th:if="${p.conditionnement!=null && p.conditionnement.length()>0}"	class="mr-1 mb-0" th:text="${p.conditionnement}"></p>
+										<label class="mb-0"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>							
+									</td>
+									<td> 
+										<p th:if="${!p.isAucunStatut()}" th:text="${T(data.entitys.Produit).getStatutLibelle(p.statut)}" class="etiquetteJaune"></p>	
+										<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelaisColor text-center mb-0" style="max-width:200px"> </p>									
+									</td>									
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<a class="mx-2 py-0  btn btn-sm btn-outline-danger" th:href="@{supprimerProd(id=${p.id})}" ><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer</a>
+					<button type="button" class="py-0 btn btn-sm btn-outline-dark"	data-dismiss="modal">Annuler</button>
+				</div>
+			</div>
+		</div>
+	</div>	
+	
+	<div th:fragment="apercuCategorie" class="modal fade" tabindex="-1" id="modalApercuCat">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<label class="text-danger font-weight-bold">Etes-vous certain de vouloir supprimer cette catégorie?</label>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Annuler">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div>
+						<table class="table">					
+							<tbody>
+								<tr>
+									<td>
+										<img th:if="${c.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${c.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize imgTrasition" >					
+									</td>						
+									<td>							
+										<h4 th:text="${c.titre}"></h4>	
+										<div class="card-text font-italic" th:text="${c.description}"></div>						
+									</td>																		
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<a class="mx-2 py-0  btn btn-sm btn-outline-danger" th:href="@{supprCat(id=${c.id})}" ><i class="fa  mx-2 fa-trash" aria-hidden="true"></i>Supprimer</a>
+					<button type="button" class="py-0 btn btn-sm btn-outline-dark"	data-dismiss="modal">Annuler</button>
+				</div>
+			</div>
+		</div>
+	</div>	
+											
+	
+	<div th:fragment="customError">
+		<h1 class="text-center"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>Une erreur s'est produite</h1>
+		<div class="text-center">
+			<a class="btn btn-outline-primary mx-1" th:href="@{/}"><i class="fa fa-home text-dark" aria-hidden="true" style="margin-right: 5px;"></i>Retour</a>
+		</div>	
+	</div>
+	
 	<div th:fragment="assets" th:remove="tag">
 		<script src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  crossorigin="anonymous"></script>	    
 		<script	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"	crossorigin="anonymous"></script>

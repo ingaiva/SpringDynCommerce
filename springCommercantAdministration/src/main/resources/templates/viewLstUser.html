@@ -18,7 +18,7 @@
 	<div>
 		<h3 class="text-center">Liste des clients</h3>
 		<div class="d-flex justify-content-end mx-3">
-			<form th:action="@{listUser}" method="post" id="frmUserFilter">
+			<form th:action="@{listUser}" method="post" id="frmUserFilter">				
 				<div class="form-group text-left ">	
 					<div class="d-flex align-items-center">
 						<label class="col-form-label">Filtrer les clients</label>						
@@ -30,9 +30,9 @@
 						</div>
 					</div>
 					
-					<div class="d-flex flex-lg-row flex-md-column justify-content-between card border-info px-2 " id="divUserFilter">
-						<div class="mx-2" th:each="p, iter  : ${pointsV}">								
-							<input type="checkbox" name="ptVFilter" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${ptvSelectedValues!=null} and ${#lists.isEmpty(ptvSelectedValues)==false} and ${#lists.contains(ptvSelectedValues,  p.id)}" onchange="checkFilter(this);" /> 
+					<div class="d-flex flex-lg-row flex-md-column justify-content-between card border-info px-2 text-white" id="divUserFilter" style="background-image: url('images/pic03.jpg'); background-size: cover;">
+						<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
+							<input type="checkbox" style="transform: scale(1.5)" name="ptVFilter" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${ptvSelectedValues!=null} and ${#lists.isEmpty(ptvSelectedValues)==false} and ${#lists.contains(ptvSelectedValues,  p.id)}" onchange="checkFilter(this);" /> 
 							
 							<label class="mx-1 lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
 							data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
@@ -60,36 +60,42 @@
 		
 			<table class="table">					
 					<tbody>
-						<tr class="rowCmd" th:each="u, itemStat :${lstUsr}">						
-							
+						<tr class="rowCmd" th:each="u, itemStat :${lstUsr}">
+													
 							<td>
-								<h4><a th:text="${u.nom} + ' ' + ${u.prenom} " class="text-dark" th:href="@{viewUser(id=${u.id})}"></a></h4>
+								<form th:action="@{user}" method="post" class="d-none">
+									<input type="hidden" name="redirectAction" th:value="${redirectAction}">
+									<input type="hidden" th:value="${u.id}" name="id">
+									<button type="submit" name="action" value="viewUserLstUser"></button>
+								</form>
+							
+								<h4 style="cursor: pointer;"><a th:text="${u.nom} + ' ' + ${u.prenom} " class="text-dark" onclick="submitUser(this)" ></a></h4>
 								<h6 th:if="${u.hasPtv()}" th:text="${u.getStringPtv()}"></h6>
 							</td>
 							<td>									
-								<p><a class="text-dark" th:text="${u.tel1}" th:href="@{viewUser(id=${u.id})}"></a></p>								
-								<p><a class="text-dark" th:text="${u.tel2}" th:href="@{viewUser(id=${u.id})}"></a></p>
+								<p style="cursor: pointer;"><a class="text-dark" th:text="${u.tel1}" onclick="submitUser(this)"></a></p>								
+								<p style="cursor: pointer;"><a class="text-dark" th:text="${u.tel2}" onclick="submitUser(this)"></a></p>
 							</td>
 							<td >
-								<h6> <a class="text-dark"  th:text="${u.mail}" th:href="@{viewUser(id=${u.id})}"></a></h6>										
+								<h6 style="cursor: pointer;"> <a class="text-dark"  th:text="${u.mail}" onclick="submitUser(this)"></a></h6>										
 							</td>
 							<td >
-								<h6> <a class="text-dark"  th:text="${u.getAdresseComplete()}" th:href="@{viewUser(id=${u.id})}"></a></h6>										
+								<h6 style="cursor: pointer;"> <a class="text-dark"  th:text="${u.getAdresseComplete()}" onclick="submitUser(this)"></a></h6>										
 							</td>
 							
 							<td >
-								<h5> <a class="text-dark"  th:text="${#dates.format(u.dateCreation, 'dd/MM/yyyy HH:mm')}" th:href="@{viewUser(id=${u.id})}"></a>									
+								<h5 style="cursor: pointer;"> <a class="text-dark"  th:text="${#dates.format(u.dateCreation, 'dd/MM/yyyy HH:mm')}" onclick="submitUser(this)"></a>									
 								</h5>							
 							</td>					
 							<td>
-								<h6 th:if="${u.nbCmd!=null}" th:text="${u.nbCmd} + ' commande(s)'"></h6>
-								<h6 th:if="${u.totalCmd !=null}" th:text="${#numbers.formatDecimal(u.totalCmd, 1, 2, 'COMMA')} + '€'"></h6>
-								
+								<!-- <h6 th:if="${u.nbCmd!=null}" th:text="${u.nbCmd} + ' commande(s)'"></h6>
+								<h6 th:if="${u.totalCmd !=null}" th:text="${#numbers.formatDecimal(u.totalCmd, 1, 2, 'COMMA')} + '€'"></h6> -->
+								<h6 th:text="${u.commandes.size()} + ' commande(s)'"></h6>
 							</td>						
 														
 							<td>
-								<div class="">
-									<a th:href="@{viewUser(id=${u.id})}"><i class="fa fa-eye text-dark" aria-hidden="true" ></i></a>									
+								<div style="cursor: pointer;">
+									<a onclick="submitUser(this)"><i class="fa fa-eye text-dark" aria-hidden="true" ></i></a>									
 								</div>	
 							</td>
 						</tr>
@@ -122,6 +128,12 @@
  			 else {
  				$( "#frmUserFilter" ).submit();
  			 }
+ 		}
+ 		
+ 		function submitUser(linkClicked){
+ 			var parent = linkClicked.closest("tr");
+	        var btn = parent.querySelector('[name="action"]');
+	        btn.click();	
  		}
     </script>	
 </body>

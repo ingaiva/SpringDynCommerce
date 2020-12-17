@@ -16,17 +16,22 @@
 	</div>	
 </header>
 	
-	<div class="p-4 m-2" style="margin-left: auto; margin-right: auto; text-align: center;">
-		<form class="" method="post" th:action="@{saveUser}" th:object="${user}">				
+	<div class="pt-4 pl-4 pr-4 pb-2 mt-2" style="margin-left: auto; margin-right: auto; text-align: center;">
+		<form class="" method="post" th:action="@{viewUser}" th:object="${userModel}">				
 			<input type="hidden" name="redirectAction" th:value="${redirectAction}">
 			<div th:replace="fragments/general.html :: infoCompte"></div>
 			
-			<div class="form-group text-left ">	
-				<div class="d-flex align-items-center justify-content-start">
-					<label class="col-form-label font-weight-bold" style="font-size: larger;">Points de vente</label>						
+			<div class="form-group text-left  ">	
+				<div>
+					<div class="d-flex align-items-center justify-content-between">
+						<label class="col-form-label font-weight-bold" style="font-size: larger;">Points de vente préférés</label>						
+						<div class="d-flex text-center py-2">				
+							<a class="btn btn-sm btn-success mx-1" th:text="Retour" th:href="@{${redirectAction}}"></a>								
+						</div>
+					</div>
 
 					<div class="mx-2 my-0 d-none">
-						<button type="submit" class="px-2 py-0 btn btn-sm btn-outline-secondary" name="action" value="savePtV" id="savePtV"></button>
+						<button type="submit" name="action" value="savePtV" id="savePtV"></button>
 					</div>
 				</div>
 				
@@ -49,17 +54,112 @@
 				</div>
 			</div>	
 			
-			<div class="text-left">
-				<h4 th:text="'Nombre de commandes finalisées: ' + ${user.nbCmd}"></h4>
-				<h4 th:if="${user.totalCmd!=null}" th:text="'Total général: ' + ${#numbers.formatDecimal(user.totalCmd, 1, 2, 'COMMA')} + '€'"></h4>
-			</div>	
-			<div class="d-flex text-center py-2">				
-				<a class="btn btn-success mx-1" th:text="Retour" th:href="@{${redirectAction}}"></a>								
+			<!-- place des totaux -->
+			
+			<div class="row" th:if="${userModel.user.hasCommandes()}">	
+			
+				<div class="col d-flex justify-content-end mx-3">
+						<div  id="divFilter"  th:object="${userModel.filter}" th:with="filter=${userModel.filter}" style="display: none;">
+							<input type="hidden" th:field="*{userId}">
+							<div class="_form-group text-left ">	
+								<div class="d-flex align-items-center">
+									<label class="col-form-label font-weight-bold">Filtrer les commandes</label>						
+									<button type="submit" class="d-none" name="action" id="submitFilters" value="submitFilters"></button>
+		
+									<div class="mx-2 my-0" th:if="${filter.isEmpty()==false}">
+										<button type="submit" class="px-2 py-0 btn btn-sm btn-outline-secondary" name="action"
+											value="effacerFilters" id="effacerFilters">
+											<i class="fa fa-undo mr-1" aria-hidden="true"></i>Effacer les filtres
+										</button>
+									</div>
+									<button type="submit" class="d-none" name="action" id="btnLoadStats" value="loadStats"></button>
+								</div>
+								<div class="_d-flex _align-items-start">								
+												
+									<div class="mx-2">
+										<label class="mb-0">Statut:</label>	
+										<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 _bg-secondary text-white" id="divStatutFilter" style="background-image: url('images/pic03.jpg'); background-size: cover;">
+											<div class="mx-2  pt-2" th:each="st, iter  : ${T(data.entitys.Commande.StatutCommande).values()}">								
+												<input type="checkbox" style="transform: scale(1.5)"  name="filter.statutSelectedValues"  th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${filter.hasSelectedStatut()} and ${#lists.contains(filter.statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
+												<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
+											</div>
+										</div>
+									</div>
+									
+								</div>
+								<div class="mx-2">
+									<label class="mb-0">Date:</label>	
+									
+									<div class="card border px-2 _bg-secondary text-white" id="divDateFilter" style="background-image: url('images/pic03.jpg'); background-size: cover;">
+										<div class="d-flex flex-lg-row flex-md-column justify-content-start align-items-lg-center ">
+											<div class="mx-2  pt-2" th:each="d, iter  : ${T(app.utility.FilterCmd.enumChoixDate).values()}" th:id="${d==T(app.utility.FilterCmd.enumChoixDate).none}?'divDateNone'" th:classappend="${T(app.utility.FilterCmd).allowChooseDate(d)}?'divShowDate':'divHideDate'">								
+												<input type="radio" style="transform: scale(1.5)" th:field="*{choixDate}"  th:id="${d==T(app.utility.FilterCmd.enumChoixDate).none}?'choixDateNone':'choixDate' + ${iter.index}"   th:value="${d}"  th:checked="${filter.choixDate==d}" onclick="checkRadioDateFilter();" /> 
+												<label class="mx-1" th:for="${d==T(app.utility.FilterCmd.enumChoixDate).none}?'choixDateNone':'choixDate' + ${iter.index}"  th:text="${T(app.utility.FilterCmd).getChoixDateLibelle(d)}"></label>											
+											</div>
+										</div>
+										<div id="divDateInput" th:style="${!filter.allowChooseDate()}?'display: none'">
+											<div class="d-flex pl-2" >
+												<div class="d-flex align-items-center">
+													<label class="mr-2">Du:</label>
+													<input type="date" th:field="*{dateDebut}" onkeyup="checkKeyUp(this.id,event)"  onblur="checkInputDateFilter();" onchange="onchangeInputDateFilter(this);"><a class="btn btn-sm btn-outline-light py-0 px-2 " onclick="clearDate('#dateDebut')">X</a>
+												</div>
+												<div class="d-flex align-items-center">	
+													<label class="mx-3">Au:</label>								
+													<input type="date" th:field="*{dateFin}" onblur="checkInputDateFilter();" onchange="onchangeInputDateFilter(this);"><a class="btn btn-sm btn-outline-light py-0 px-2" onclick="clearDate('#dateFin')">X</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>					
+						</div>
+					</div>
+			
 			</div>
 		</form>
+		
+		
 	</div>	
 	
-	<div class="mx-3" th:with="showUser='false'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${user.commandes}, showUser)"></div>
+	<div class="mx-3" th:with="showUser='false'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${userModel.user.commandesFiltered}, showUser)"></div>
+	
+	
+	<div th:if="${stat.hasProduits() || stat.loaded==false} and ${userModel.user.commandesFiltered.size() > 0}" class="mx-4 my-2 text-center border rounded bg-secondary text-white">
+		<div class="table-responsive">
+			<div class="d-flex align-items-center justify-content-center">
+				<h4 class="">Statistique</h4>
+				<a th:if="${stat.loaded==false}" class="btn btn-sm btn-outline-light py-0 px-2 mx-3" onclick="chargerStats();"><i class="fa fa-upload mx-2" aria-hidden="true"></i>Charger</a>
+			</div>					
+			
+			<table class="table" th:if="${stat.hasProduits()}">
+				<tbody>
+					<tr th:each="p, itemStat :${stat.getProduits()}">
+						<td>
+							<div class="d-lg-flex">
+								<div class="mr-3"><img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" ></div>
+								<div class="text-white">											
+									<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
+									<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
+									<label class="prixV" th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>											
+								</div>
+							</div>									
+						</td>								
+						<td >
+							<h5 class="text-white" style="width:60px;" th:text="${#numbers.formatDecimal(p.qte, 1, 2, 'COMMA')}"></h5>
+						</td>						
+						<td >
+							<h6	 class="text-white" th:text="${#numbers.formatDecimal(p.getTotalProduit(), 1, 2, 'COMMA')} + '€'"></h6>									
+						</td>									
+					</tr>
+				</tbody>
+			</table>
+			<div class="text-right"  th:if="${stat.hasProduits()}">
+				<h5	class="font-weight-bold mr-3" th:text=" 'Total : ' + ${#numbers.formatDecimal(stat.getTotal(), 1, 2, 'COMMA')} + '€'"></h5>					
+				<h5	class="font-weight-bold mr-3" th:text=" 'Total quantité: ' + ${#numbers.formatDecimal(stat.getTotalQte(), 1, 2, 'COMMA')}"></h5>
+			</div>	
+		</div>
+	</div>
+	
 		
 	
     <div th:replace="fragments/general.html :: assets"></div>
@@ -69,20 +169,105 @@
         	let $liTag =  $('#liUsr');   // 
        
         	if ($liTag.hasClass('active')) {         
-          		return false;
+          		//return false;
+        	}
+        	else {
+	       		$liTag.siblings('.active').removeClass('active');
+	        	$liTag.addClass('active');         		
         	}
         	
-       		$liTag.siblings('.active').removeClass('active');
-        	$liTag.addClass('active');          	
         	
+        	var checkboxesDate = $(".divShowDate input[type='radio']:checked").length ;
+        	if(checkboxesDate>0 && $('#dateDebut').val()==false){
+        		$("#dateDebut").css('color', 'red');
+        	}
+        	$("#divFilter").fadeIn("fast");
+        	return false;
       	})
       	
-      	function savePointsVente(chkInput){ 			
-//  			var checkboxes = $('input[name=statutFilter]:checked').length ;
- 			document.getElementById('savePtV').click();	
- 			 
+      	
+      	
+      	
+      	function checkFilter(chkInput){ 			
+ 			var checkboxesStatut = $("#divStatutFilter input[type='checkbox']:checked").length ; 			
+ 			var checkboxesDate = $("#divDateFilter input[type='radio']:checked").not('#choixDateNone').length ;
+ 			 if((checkboxesStatut + checkboxesDate)==0){
+ 				document.getElementById('effacerFilters').click();	  
+ 			 } 	
+ 			 else { 				
+ 	        	document.getElementById('submitFilters').click();	
+ 			 }
+ 			return false;
+ 		}
+ 				 
+ 	        	
+ 	        	
+ 		function checkRadioDateFilter(){
+ 			var checkboxesDate = $(".divShowDate input[type='radio']:checked").length ;
+ 			var checkboxesSansDate = $(".divHideDate input[type='radio']:checked").length ; 			
+ 			if(checkboxesDate>0){
+ 				if($('#dateDebut').val()){
+	 				document.getElementById('submitFilters').click();						
+ 				} else {
+ 					 $("#divDateInput").fadeIn("slow");
+ 					$("#dateDebut").css('color', 'red');
+ 				}
+ 			}
+ 			else if (checkboxesSansDate>0){
+ 				document.getElementById('submitFilters').click();	
+ 			} 
+ 			return false;
+ 		}
+ 				
+ 		function clearDate(tagInput){
+ 			if( $(tagInput).val()){
+ 				$(tagInput).val(''); 				
+ 				document.getElementById('submitFilters').click();	
+ 			}
+ 			return false;
  		}
  		
+ 		var isDateDebutChanged=false;
+ 		var isDateDebutFin=false;
+ 		function onchangeInputDateFilter(input){ 			
+ 			if(input.id=="dateDebut"){
+ 				isDateDebutChanged=true;
+ 			}
+ 			if(input.id=="dateFin"){
+ 				isDateDebutFin=true;
+ 			}
+ 			return false;
+ 		}
+ 		
+ 		function checkKeyUp(idTag ,e){ 			
+ 			if( e.keyCode==13 ){
+ 				e.preventDefault(); 				
+ 				onchangeInputDateFilter(idTag);
+ 				checkInputDateFilter();
+ 			} 	
+ 			return false;
+ 		}	
+ 		
+ 		function checkInputDateFilter(){ 			
+ 			
+ 			var checkboxesDate = $(".divShowDate input[type='radio']:checked").length ;
+ 			 if( (isDateDebutChanged || isDateDebutFin) && $('#dateDebut').val()  && checkboxesDate>0){
+ 				document.getElementById('submitFilters').click();	
+ 			 } 
+ 			return false;
+ 		}
+ 				
+ 		
+      	
+      	
+      	
+      	function savePointsVente(chkInput){ 
+ 			document.getElementById('savePtV').click();
+ 		}
+      	
+      	function chargerStats(){
+ 			document.getElementById('btnLoadStats').click();
+ 		}
  		
 		$(document).on('shown.bs.modal','#dlgApercuCmd', function () {
  			
@@ -151,7 +336,7 @@
 				success : function(result, textStatus, xhr) {
 					if (xhr.status == 200) {						
 						console.log(urlTo + ' ok :' + xhr.status);
-						$( "#frmStatutFilter" ).submit();
+						document.getElementById('submitFilters').click();
 						
 					} else {
 						console.log('Erreur status ' + xhr.status);

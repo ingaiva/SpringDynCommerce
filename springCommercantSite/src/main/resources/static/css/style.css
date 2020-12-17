@@ -28,6 +28,20 @@ header{
 	 height: auto;
 	 max-width: 100%;
 }
+
+
+.carousel-control-prev:hover, .carousel-control-next:hover{
+	background-color: white;
+}
+
+.imgTrasition{
+	transition: all 0.2s ease-in;
+}
+
+.imgTrasition:hover {	
+	border: 1px #333333bb;
+	box-shadow: 3px 3px 3px 3px #333333bb;		
+}
 .divCenterContainer {
  	padding: 0px 5px ;
 	text-align: center;
@@ -92,12 +106,24 @@ header{
 .divCategorieColor{
 	/* background-color:#f4f4f4; */
 	background-color: lightgray;
-	box-shadow: 0 1px 1px 1px cadetblue;
+	box-shadow: 0 1px 1px 1px #333333bb;
+	background-image: url('/images/pic02.jpg');
+	background-size: cover;
+	color: white;
+	border-radius: 5px;
 }
 .divProduitBoxColor{
 	background-color:white;
-	box-shadow: 0 1px 1px 1px cadetblue;
+	box-shadow: 0 1px 1px 1px #333333bb;
+	transition: all 0.5s ease-in;
 }
+
+.divProduitBoxColor:hover {
+	opacity: 1;
+	border: 1px #333333bb;
+	box-shadow: 3px 3px 3px 3px #333333bb;		
+}
+
 .divProduit {
     padding: 10px;
     display: grid;
@@ -109,7 +135,7 @@ header{
 .divCategorie {
     padding: 10px 10px 2px 10px;
     display: grid;
-    grid-template-columns: 25% auto;   
+    grid-template-columns: 15% auto;   
     column-gap: 10px;
     align-items: left;
 }
@@ -246,4 +272,40 @@ header{
     /* width: 400px; */
     border-radius: 5px;
     
+}
+.divInfoCompteAdr{
+	background-image: url("/images/pic01.jpg");
+	background-size: cover;	
+	color: white;
+}
+.divInfoCompte{
+	background-image: url("/images/pic15.jpg");
+	background-size: cover;	
+	color: white;
+}
+
+.divInfoCompteReadOnly{
+	background-image: url("/images/pic15.jpg");
+	background-size: cover;
+	color: white;
+}
+.infoCompteBlack{
+	color: black;
+}
+.footerContact{
+	background-image: url("/images/pic02.jpg");
+	background-size: cover;	
+	background-color: #f6f6f6;
+	margin: 5px;
+	border: #f6f6f6 solid 1px;
+	border-radius: 5px;
+	color: white;
+}
+	
+	
+footer{
+	background-image: url("/images/pic03.jpg");
+	background-size: cover;	
+	color: white;
+	padding: 10px 10px;
 }

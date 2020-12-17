@@ -31,6 +31,7 @@ public class CommandeProduit   implements Serializable  {
 	private Long id;
 	private Float qte;
 	private Float total;
+	private Float prix;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_commande")
@@ -47,21 +48,31 @@ public class CommandeProduit   implements Serializable  {
 	public CommandeProduit(Produit produit) {
 		this.produit = produit;
 		this.qte=produit.getQte();
+		this.prix=produit.getPrix();
 	}
-	
+	public Float getPrix() {
+		if(this.prix!=null) {
+			return this.prix;
+		}
+		else {
+			if (this.produit!=null && this.produit.getPrix()!=null) {
+				return	this.produit.getPrix();				
+			}
+			else
+				return 0f;
+		}
+	}
 	public Float calculeTotalProduit() {
-		if (this.produit!=null && this.produit.getPrix()!=null && this.getQte()!=null) {
-			return	this.produit.getPrix() * this.getQte();
-			
+		if (this.getPrix()!=null && this.getQte()!=null) {
+			return	this.getPrix() * this.getQte();			
 		}
 		else
 			return 0f;
 	}	
 	
 	public Float calculeTotalReduction() {
-		if (this.produit!=null && this.produit.getPrix()!=null && this.getQte()!=null) {
-			return	0f;//pour l'instant...
-			
+		if (this.produit!=null && this.getPrix()!=null && this.getQte()!=null) {
+			return	0f;//pour l'instant...			
 		}
 		else
 			return 0f;

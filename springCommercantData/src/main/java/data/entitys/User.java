@@ -83,6 +83,16 @@ public class User implements Serializable {
                 inverseJoinColumns = @JoinColumn( name = "\"id_pointVente\"" ) )
 	private List<PointVente> pointsVente = new ArrayList<PointVente>();
 	
+	@Transient
+	private List<Commande> commandesFiltered;
+	
+	public boolean hasCommandes() {
+		if(this.commandes!=null)
+			return this.commandes.size()>0;
+		else
+			return false;
+	}
+	
 	public String getAdresseComplete() {
 		String retVal="";
 		

@@ -3,6 +3,7 @@ package app.controllers;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,13 +41,21 @@ public class CategorieProduitController {
 	
 	@GetMapping("/modifierCat")
 	public String modifierCategorie(Model model, @RequestParam(name="id") Long id) {
-		CategorieProduit categorieToEdit =catR.getOne(id);
-		if (categorieToEdit==null) 
-			return "redirect:/accueil";		
+		if(catR.existsById(id)) {
+			
+			CategorieProduit categorieToEdit =catR.getOne(id);
+			if (categorieToEdit==null) 
+				return "redirect:/listeProduit";		
+			else {
+				categorieToEdit.setPhotos( photoR.getByCategorie(categorieToEdit.getId()));
+				model.addAttribute("categorie", categorieToEdit);
+				return "viewEditCat";
+			}
+		}
 		else {
-			categorieToEdit.setPhotos( photoR.getByCategorie(categorieToEdit.getId()));
-			model.addAttribute("categorie", categorieToEdit);
-			return "viewEditCat";
+			
+			model.addAttribute("msg", "La catégorie demandée n'existe pas");
+			return "error";
 		}
 	}
 
@@ -63,7 +73,7 @@ public class CategorieProduitController {
 			photoR.deleteByCategorie(id);
 			catR.delete(categorieToDelete);			
 		}
-		return "redirect:/accueil";				
+		return "redirect:/listeProduit";				
 	}
 	
 	@PostMapping({"/saveCategorie"})
@@ -109,7 +119,7 @@ public class CategorieProduitController {
 					photoR.updatePhotoInfo(photo.getId(), photo.getLegende(), photo.getOrdre());
 				}
 		}
-		return "redirect:/accueil";
+		return "redirect:/listeProduit";
 	}
 		
 	
@@ -154,7 +164,7 @@ public class CategorieProduitController {
 			@ModelAttribute("categorie")  CategorieProduit categorieToEdit,			
 			RedirectAttributes ra) {
 		
-		System.out.println("dans save photo");
+		
 		
 		if (categorieToEdit != null) {
 			catR.save(categorieToEdit);
@@ -172,7 +182,7 @@ public class CategorieProduitController {
 			return "redirect:/modifierCat";
 			
 		}
-		return "redirect:/accueil";
+		return "redirect:/listeProduit";
 	}
 	
 	@GetMapping("/supprimerPhotoCategorie")
@@ -184,4 +194,14 @@ public class CategorieProduitController {
 		return "redirect:/modifierCat";
 	}
 	
+	@GetMapping("/categorieFragment/{id}")
+	public String loadProduitFragment(Model model, @PathVariable("id") Long idCat) {
+		if(catR.existsById(idCat)) {			
+			CategorieProduit catToEdit =catR.getOne(idCat);			
+			model.addAttribute("c", catToEdit);					
+			return "fragments/general.html :: apercuCategorie";			
+		}
+		else
+			return "";
+	}
 }

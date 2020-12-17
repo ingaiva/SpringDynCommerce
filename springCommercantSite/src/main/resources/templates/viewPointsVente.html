@@ -23,7 +23,7 @@
 									<td>
 										<input type="hidden" class="idPTV" th:value="${p.id}" />
 										<a style=" cursor: pointer;"  class="mx-2"  onclick="retrievePointVenteFragment(this,'#viewDetailPointVente')" >
-											<img th:if="${p.hasPhoto()}" th:src="${p.getPhotoStrSm()}"	class="border p-1 mr-2 imgAutoSize">
+											<img th:if="${p.hasPhoto()}" th:src="${p.getPhotoStrSm()}"	class="border p-1 mr-2 imgAutoSize imgTrasition">
 										</a>
 									</td>								
 									<td><h5	style=" cursor: pointer;" class="" th:text="${p.libelle}" onclick="retrievePointVenteFragment(this,'#viewDetailPointVente')"></h5>

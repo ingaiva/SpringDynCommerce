@@ -129,7 +129,7 @@
 				<input type="hidden" class="idProdExpress" th:name="|lstProd[${itemStat.index}].id|" th:value="${p.id}" />								
 											
 				<a th:href="@{produit(id=${p.id})}"  class="linkProduit">
-					<img th:if="${p.photos.size() > 0 }" th:src="${p.defPhotoDataMd()}"	class="border p-1 imgAutoSize ">
+					<img th:if="${p.photos.size() > 0 }" th:src="${p.defPhotoDataMd()}"	class="border p-1 imgAutoSize imgTrasition">
 				</a>
 				<div class="divAddToPanier ">
 					<button class="btn btn-success mx-1"  th:onclick="'addToPanierExpress(this,' + ${p.id} + ')'">Ajouter au panier</button>
@@ -139,8 +139,9 @@
 				<h4 class="font-weight-bold capitale">
 					<a class="text-dark"  th:text="${p.libelle}" th:href="@{produit(id=${p.id})}"></a>
 				</h4>
-				<h4	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h4>				
-				<h4	class="font-weight-bold mr-3" th:text="'Prix: '+${p.prix} + '€'"></h4>		
+				<h4	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h4>
+				<h4	class="font-weight-bold mr-3" th:text="'Prix: ' + ${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'" ></h4>				
+				<!-- <h4	class="font-weight-bold mr-3" th:text="'Prix: '+${p.prix} + '€'"></h4> -->	<!-- "'Prix: ' + ${#numbers.formatDecimal(produit.prix, 1, 2, 'COMMA')} + '€'" -->	
 			</div>							
 		</div>
 	</div>
@@ -162,10 +163,10 @@
 				</div>
 
 				<div class="d-flex text-center py-2">
-					<button type="submit" class="btn btn-outline-primary col mx-1" >
+					<button type="submit" class="btn btn-outline-success col mx-1" >
 						Se connecter
 					</button>
-					<a th:href="@{accueil}" class="col mx-1 btn btn-outline-danger">Annuler	</a>
+					<a th:href="@{accueil}" class="col mx-1 btn btn-outline-primary">Annuler	</a>
 				</div>
 
 				<div class="text-left my-3">
@@ -175,7 +176,48 @@
 		</div>
 	</div>
 	
-	
+	<div th:fragment="infoCompteReadOnly" >
+		<div th:object="${user}">
+		
+			<div th:unless="${user.id==null}">			
+				<input type="hidden" th:field="*{id}" />
+				<input type="hidden" th:field="*{dateCreation}" />
+			</div>			
+			
+			<small id="msg" class="text-danger" th:text="${msg}"></small>
+			<div class="bg-warning border rounded  p-3 divInfoCompteReadOnly" >
+				<div  class="text-left">
+					<p th:text="'Date création du compte: ' + ${#dates.format(user.dateCreation, 'dd/MM/yyyy HH:mm')}"></p>
+				</div>
+				<div class="row">
+					<div class=" col text-left">
+						<p class="mb-2 ">Nom / Prénom</p> 
+						<h4 class="border rounded bg-white text-dark p-1 font-weight-bold" th:text="${user.nom} + ' ' + ${user.prenom}"></h4>  
+						<p class="mb-2">Adresse</p> 
+						<div class="border rounded bg-white text-dark p-1" style="min-height: 34px;">
+							<p class="textWithCrLf my-0" th:text="${user.getAdresse()}"></p> 
+							<p class="textWithCrLf my-0" th:text="${user.cp} + ' ' + ${user.ville} + ' ' + ${user.pays} "></p> 
+						</div>
+					</div>			
+							
+					<div class="col text-left">
+						<div th:if="${user.mail !=null && user.mail.length()>0}">
+							<p class="mb-2">E-mail</p> 
+							<p class="border rounded bg-white text-dark p-1"  th:text="${user.mail}" ></p>
+						</div>
+						<div th:if="${user.tel1 !=null && user.tel1.length()>0}">
+							<p class="mb-2">n° de téléphone portable</p> 
+							<p class="border rounded bg-white text-dark p-1" th:text="${user.tel1}" ></p> 
+						</div>
+						<div th:if="${user.tel2 !=null && user.tel2.length()>0}">
+							<p class="mb-2">n° de téléphone</p> 
+							<p class="border rounded bg-white text-dark p-1"  th:text="${user.tel2}" ></p>  
+						</div>
+					</div>								
+				</div>
+			</div>
+		</div>
+	</div>
 	
 	<div th:fragment="infoCompte">
 		<div th:if="${user.id==null}">
@@ -188,29 +230,34 @@
 		</div>			
 		
 		<small id="msg" class="text-danger" th:text="${msg}"></small>
-		<div class="row bg-info">
-			<div class=" col form-group text-left">
-				<label for="nom">Nom</label> 
-				<input type="text"	class="form-control" placeholder="Votre nom" th:field="*{nom}"  required> 
+		<div class="border rounded  p-2 divInfoCompte">
+			<div class="row _bg-info ">
+				<div class=" col form-group text-left">
+					<label for="nom">Nom</label> 
+					<input type="text"	class="form-control" placeholder="Votre nom" th:field="*{nom}"  required> 
+				</div>
+				<div class=" col form-group text-left">
+					<label for="prenom">Prénom</label> 
+					<input type="text"	class="form-control" placeholder="Votre prénom"	th:field="*{prenom}" > 					
+				</div>			
 			</div>
-			<div class=" col form-group text-left">
-				<label for="prenom">Prénom</label> 
-				<input type="text"	class="form-control" placeholder="Votre prénom"	th:field="*{prenom}" > 					
-			</div>			
-		</div>
-		<div class="row  bg-info">
-			<div class="col-6 form-group text-left">
-				<label>E-mail</label> 
-				<input type="email"	class="form-control" placeholder="Votre mail" th:field="*{mail}" required>
-			</div>	
-			<div th:if="${suppressionCompteRequest==null}" class="col form-group text-left ">
-				<label for="password">Mot de passe</label> 
-				<input type="password"	class="form-control"  placeholder="Mot de passe" th:field="*{password}" required>
-			</div>				
+			<div class="row  _bg-info">
+				<div class="col-6 form-group text-left">
+					<label>E-mail</label>
+					<button type="button" th:if="${user.id!=null}" class="px-2 py-0 ml-1 btn btn-sm" name="editMail" value="editMail" id="editMail" data-toggle="tooltip" data-placement="top" title="Modifier">
+							<i class="fa fa-pencil-square-o  text-white" aria-hidden="true"></i></button> 
+					<input type="email"	class="form-control" placeholder="Votre mail" th:field="*{mail}" th:readonly="${user.id!=null}"  required="required">
+				</div>	
+				<div th:if="${suppressionCompteRequest==null}" class="col form-group text-left ">
+					<label for="password">Mot de passe</label> 
+					<input type="password"	class="form-control" placeholder="Mot de passe" th:field="*{password}"  required="required"  onfocus="this.select();">
+					<div class="d-none"><input type="hidden" id="oldPwd" name="oldPwd" th:value="*{password}"></div>
+				</div>				
+			</div>
 		</div>
 		
 		<div class="row">
-			<div class="col form-group text-left">
+			<div class="col  form-group text-left">
 				<label>Votre n° de téléphone portable</label> 
 				<input type="text"	class="form-control" placeholder="Votre n° de téléphone portable" th:field="*{tel1}" >
 			</div>	
@@ -220,7 +267,7 @@
 			</div>				
 		</div>
 		
-		<div  class="bg-warning p-3 text-left">			
+		<div  class="bg-warning p-3 text-left border rounded divInfoCompteAdr">			
 			<div class="form-group">
 				<label for="nomVoie">Adresse</label> 
 				<textarea type="text" class="form-control textWithCrLf" th:field="*{nomVoie}"></textarea>
@@ -255,7 +302,7 @@
 			
 			<div class="d-flex flex-lg-row flex-md-column justify-content-start card border-info px-2 " id="divPtV">
 				<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
-					<input type="checkbox" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${pointsVselected!=null} and ${#lists.isEmpty(pointsVselected)==false} and ${#lists.contains(pointsVselected, p.id)}" onchange="savePointsVente(this);" /> 
+					<input type="checkbox" style="transform: scale(2)" name="ptV" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${pointsVselected!=null} and ${#lists.isEmpty(pointsVselected)==false} and ${#lists.contains(pointsVselected, p.id)}"  /> 
 					
 					<label class="mx-2 font-weight-bold lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
 					data-placement="bottom" data-toggle="popover" data-trigger="hover" th:attr="data-popover-content='#popoverContentPtV' + ${iter.index}"></label>
@@ -292,7 +339,7 @@
 					<div class="divPtV" >				
 						<div class="m-2">						
 							<div th:if="${ptV.hasPhoto()}"	class="border border-info rounded p-2 my-2 text-center" style="min-width: 100px; max-width: 450px;">
-								<img th:src="${ptV.getPhotoStrLg()}" class="imgAutoSize">
+								<img th:src="${ptV.getPhotoStrLg()}" class="imgAutoSize imgTrasition">
 								<div class="  mt-1">	
 									<label class="font-italic text-center" th:text="*{photoTitre}"></label>	
 								</div>
@@ -338,8 +385,8 @@
 	        
 	
 	
-	<div th:fragment="footerContact" >
-		<hr>	
+	<div th:fragment="footerContact" class="footerContact" >
+		<!-- <hr> -->	
 		<div style="padding: 10px 20px; display: flex; justify-content: space-between; flex-wrap: wrap;">
 	
 	        <div> 	       
@@ -357,7 +404,7 @@
 						<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.contactTel2}" ></label>            	
 	            	</div>
 	            	<div th:if="${session.paramMP.contactMail !=null && session.paramMP.contactMail.length()>0}">
-		            	<a th:href="@{'mailto:' + ${session.paramMP.contactMail}}" class="text-dark ">
+		            	<a th:href="@{'mailto:' + ${session.paramMP.contactMail}}" style="color: inherit;">
 			            	<i class="fa fa-envelope-o mr-2" aria-hidden="true"></i>
 		            	</a>
 						<label class="font-italic " style="white-space: pre-line;" th:text="${session.paramMP.contactMail}" ></label>            	
@@ -367,8 +414,8 @@
 	        </div>
 	        <div th:if="${session.paramMP.hasHoraires()}">
 	            <div class="d-flex align-items-center" >
-					<i class="fa fa-calendar my-2 mr-2" aria-hidden="true"></i>
-					<h5 class=" my-2" th:text="${session.paramMP.horairesTitre!=null && session.paramMP.horairesTitre.length()>0} ? ${session.paramMP.horairesTitre} : 'Horaires'">					
+					<i class="fa fa-map-marker my-2 mr-2" aria-hidden="true"></i>
+					<h5 class=" my-2" th:text="${session.paramMP.horairesTitre!=null && session.paramMP.horairesTitre.length()>0} ? ${session.paramMP.horairesTitre} : 'Informations'">					
 					</h5>
 				</div>				
 	            <div th:if="${session.paramMP.horairesText !=null && session.paramMP.horairesText.length()>0}">	            	
@@ -378,11 +425,16 @@
 	    </div>
 	</div>
 	
-	
+	<div th:fragment="customError">
+		<h1 class="text-center"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>Une erreur s'est produite</h1>
+		<div class="text-center">
+			<a class="btn btn-outline-primary mx-1" th:href="@{accueil}"><i class="fa fa-home text-dark" aria-hidden="true" style="margin-right: 5px;"></i>Retour</a>
+		</div>	
+	</div>
 	
 	
 	<footer th:fragment="footerTrade"> 
-		 <div class="text-center border" style="color: lightslategray; padding: 20px 10px;">© 2020 Aqualas -  ♥	        
+		 <div class="text-center" >© 2020 Aqualas -  ♥	        
 		 </div>
 	</footer>
 	
@@ -409,12 +461,15 @@
 		<div id="viewPanierPlein">
 		</div>
 	
-
-		<script src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  crossorigin="anonymous"></script>
+		<div id="divScripts" th:insert="fragments/general.html :: scripts"></div>	
+		
+	</div>
+	
+	<div th:fragment="scripts" th:remove="tag">
+	 	<script src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  crossorigin="anonymous"></script>
 		<script	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"	crossorigin="anonymous"></script>
 		<script	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 		<script th:src="@{/methodes.js}"></script>	
-		
 	</div>
 	
 </body>

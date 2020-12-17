@@ -7,12 +7,12 @@
 	<link th:insert="fragments/general.html :: headWithLinks"> 
 </head>
 
-<body>
-	<h1 class="text-center"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>La page démandée n'est pas trouvée</h1>
-	<div class="text-center">
-		<a class="btn btn-outline-primary mx-1" th:href="@{accueil}"><i class="fa fa-home text-dark" aria-hidden="true" style="margin-right: 5px;"></i>Retour à l'accueil  </a>
+<body class="my-5">
+	<h1 class="text-center"><i class="fa fa-exclamation-triangle text-warning mx-2" aria-hidden="true"></i>La page dÃ©mandÃ©e n'est pas trouvÃ©e</h1>
+	<div class="text-center my-4">
+		<a class="btn btn-outline-primary mx-1" th:href="@{accueil}"><i class="fa fa-home text-dark" aria-hidden="true" style="margin-right: 5px;"></i>Retour Ã  l'accueil  </a>
 	</div>	
-    <div th:replace="fragments/general.html :: assets"></div>  	
+    <div th:replace="fragments/general.html :: scripts"></div>  	
 </body>	
 <footer th:replace="fragments/general.html :: footerTrade"></footer>
 </html>

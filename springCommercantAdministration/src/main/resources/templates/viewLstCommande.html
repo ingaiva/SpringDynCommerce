@@ -36,7 +36,7 @@
 						<div class="d-flex align-items-start">
 							<div class="mx-2">
 								<label class="mb-0">Points de vente:</label>	
-								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divPtvFilter">
+								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 _bg-secondary text-white" id="divPtvFilter" style="background-image: url('images/pic03.jpg'); background-size: cover;">
 									<div class="mx-2 pt-2" th:each="p, iter  : ${pointsV}">								
 										<input type="checkbox" style="transform: scale(1.5)" name="ptSelectedValues" th:id="'ptV' + ${iter.index}"  th:value="${p.id}"  th:checked="${filter.hasSelectedPt()} and ${#lists.contains(filter.ptSelectedValues,  p.id)}" onchange="checkFilter(this);" /> 
 										<label class="mx-1 lblPtV" th:for="'ptV' + ${iter.index}" th:text="${p.libelle}"
@@ -62,7 +62,7 @@
 										
 							<div class="mx-2">
 								<label class="mb-0">Statut:</label>	
-								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 bg-secondary text-white" id="divStatutFilter">
+								<div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-lg-center card border px-2 _bg-secondary text-white" id="divStatutFilter" style="background-image: url('images/pic03.jpg'); background-size: cover;">
 									<div class="mx-2  pt-2" th:each="st, iter  : ${T(data.entitys.Commande.StatutCommande).values()}">								
 										<input type="checkbox" style="transform: scale(1.5)"  name="statutSelectedValues"  th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${filter.hasSelectedStatut()} and ${#lists.contains(filter.statutSelectedValues, '' + st)}" onchange="checkFilter(this);" /> 
 										<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
@@ -74,7 +74,7 @@
 						<div class="mx-2">
 							<label class="mb-0">Date:</label>	
 							
-							<div class="card border px-2 bg-secondary text-white" id="divDateFilter">
+							<div class="card border px-2 _bg-secondary text-white" id="divDateFilter" style="background-image: url('images/pic03.jpg'); background-size: cover;">
 								<div class="d-flex flex-lg-row flex-md-column justify-content-start align-items-lg-center ">
 									<div class="mx-2  pt-2" th:each="d, iter  : ${T(app.utility.FilterCmd.enumChoixDate).values()}" th:id="${d==T(app.utility.FilterCmd.enumChoixDate).none}?'divDateNone'" th:classappend="${T(app.utility.FilterCmd).allowChooseDate(d)}?'divShowDate':'divHideDate'">								
 										<input type="radio" style="transform: scale(1.5)" th:field="*{choixDate}"  th:id="${d==T(app.utility.FilterCmd.enumChoixDate).none}?'choixDateNone':'choixDate' + ${iter.index}"   th:value="${d}"  th:checked="${filter.choixDate==d}" onclick="checkRadioDateFilter();" /> 
@@ -104,7 +104,7 @@
 		
 			<div th:with="showUser='true'" th:insert="fragments/cmdFragments.html :: viewListeCmd(${lstCmd}, showUser)"></div>
 
-			<div th:if="${stat.hasProduits() || stat.loaded==false} and ${lstCmd.size() > 0}" class="mx-4 my-2 text-center border rounded bg-secondary text-white">
+			<div th:if="${stat.hasProduits() || stat.loaded==false} and ${lstCmd.size() > 0}" class="mx-4 my-2 text-center border rounded bg-secondary text-white" >
 				<div class="table-responsive">
 					<div class="d-flex align-items-center justify-content-center">
 						<h4 class="">Statistique</h4>

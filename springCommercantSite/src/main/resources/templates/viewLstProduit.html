@@ -22,12 +22,12 @@
 					<div  class="card-header row text-left mx-0">						
 						<div class="col card-title d-flex ">
 							<a th:href="@{listProdByCat(idCat=${c.id})}">
-								<img th:if="${c.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${c.defPhotoData()}"	class="border p-1 mr-2" width="auto" height="auto" style="max-width: 100%;">							
+								<img th:if="${c.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${c.defPhotoData()}"	class="border p-1 mr-2  imgAutoSize imgTrasition" >							
 							</a>
-							<a class="text-dark  ml-2" th:text="${c.titre}" th:href="@{listProdByCat(idCat=${c.id})}"></a>								
+							<a class="ml-2 text-white" th:text="${c.titre}" th:href="@{listProdByCat(idCat=${c.id})}"></a>								
 						</div>
 					</div>					
-					<div class="card-body  ">
+					<div th:if="${c.description !=null && c.description.length()>0}" class="_card-body  ">
 						<div class="card-text font-italic" th:text="${c.description}">
 						</div>
 					</div>

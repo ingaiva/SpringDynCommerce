@@ -31,9 +31,10 @@
 							</td>
 							
 							<td th:if="${showUser!=null and showUser}">
-								<form th:action="@{viewUser}" method="get" name="frmViewUser" class="d-flex align-items-center text-primary">
+								<form th:action="@{user}" method="post" name="frmViewUser" class="d-flex align-items-center text-primary">
 									<input type="hidden" th:value="${cmd.user.id}" name="id">
-									<input type="hidden" name="redirectAction" value="viewUserFromCommande">
+									<!-- <input type="hidden" name="redirectAction" value="listCmd"> -->
+									<input type="hidden" name="redirectAction" th:value="${redirectAction}">
 									<h4 th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom} "></h4>
 									<button type="submit" class="btn btn-sm" name="action" value="viewUserFromCommande"  data-toggle="tooltip" data-placement="top" title="Afficher la fiche du client">
 										<i class="fa fa-eye text-primary" aria-hidden="true" ></i>
@@ -89,11 +90,6 @@
 	<div th:fragment="apercuCmd" class="modal fade" tabindex="-1"  id="dlgApercuCmd" >
 	  <div class="modal-dialog modal-xl">
 	    <div class="modal-content" th:object = "${cmd}" >
-<!-- 	      <div class="modal-header">		         -->	      				        
-<!-- 	        <button type="button" class="close" data-dismiss="modal" aria-label="Annuler"> -->
-<!-- 	          <span aria-hidden="true">&times;</span> -->
-<!-- 	        </button> -->
-<!-- 	      </div> -->
 	      <div class="modal-body">			
 			<div >
 				<div class="text-center">
@@ -203,7 +199,8 @@
 							</td>								
 									
 							<td>
-								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />
+								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].prix}" />								
 								<input type="hidden" class="idProdCmd"  th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
 								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.prix}" />	
 								<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.statut}" />	
@@ -212,8 +209,8 @@
 								
 								<h6	class="font-weight-bold mr-1 mb-0" th:text="${p.libelle}"></h6>
 								<p th:if="${p.conditionnement!=null && p.conditionnement.length()>0}"	class="mr-1 mb-0" th:text="${p.conditionnement}"></p>
-								<label class="prixCmdV mb-0"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
-								<label class="prixCmd d-none" th:text="${p.prix}"></label>
+								<label class="prixCmdV mb-0"  th:text="${#numbers.formatDecimal(lp.prix, 1, 2, 'COMMA')} + '€'"></label>
+								<label class="prixCmd d-none" th:text="${lp.prix}"></label>
 								<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelaisColor text-center mb-0" style="max-width:200px"> </p>
 							</td>
 							<td >								
@@ -257,8 +254,10 @@
 
 	<div th:fragment="viewCmd(cmd)" >
 		<div class="text-center">
-			<h4 th:text="'Commande N° ' + ${cmd.id}"></h4>	
-			<h6 th:text="${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>
+			<div class="d-flex justify-content-center align-items-center">
+				<h4 th:text="'Commande N° ' + ${cmd.id}"></h4>	
+				<h6 class="ml-2" th:text="'du ' + ${#dates.format(cmd.date, 'dd/MM/yyyy HH:mm')}"  ></h6>
+			</div>
 			<h4 th:text="${cmd.user.nom} + ' ' + ${cmd.user.prenom}"></h4>
 					
 			<div>
@@ -380,12 +379,13 @@
 				<tr class="itemCmd" th:each="lp, itemStat :*{lignesCommandeProduit}"  th:with="p=${lp.produit}">
 					<td>
 						<a th:href="@{modifierProd(id=${p.id})}" >
-							<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize" >					
+							<img th:if="${p.photos.size() > 0 }" th:src="'data:image/png;base64,'+ ${p.defPhotoData()}"	class="border p-1 mr-2 imgAutoSize imgTrasition" >					
 						</a>
 					</td>
 							
 					<td>
-						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />							
+						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].id}" />	
+						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].prix}" />							
 						<input class="idProdCmd"  type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.id}" />	
 						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.prix}" />	
 						<input type="hidden" th:field="*{lignesCommandeProduit[__${itemStat.index}__].produit.statut}" />	
@@ -394,8 +394,8 @@
 						
 						<h5	class="font-weight-bold mr-3" th:text="${p.libelle}"></h5>
 						<h6	class="font-weight-bold mr-3" th:text="${p.conditionnement}"></h6>
-						<label class="prixCmdV"  th:text="${#numbers.formatDecimal(p.prix, 1, 2, 'COMMA')} + '€'"></label>
-						<label class="prixCmd d-none" th:text="${p.prix}"></label>
+						<label class="prixCmdV"  th:text="${#numbers.formatDecimal(lp.prix, 1, 2, 'COMMA')} + '€'"></label>
+						<label class="prixCmd d-none" th:text="${lp.prix}"></label>
 						<p th:if="${p.getDelaisSurCommande().length()>0}" th:text="${p.getDelaisSurCommande()}" class="etiquetteDelaisColor text-center" style="max-width:200px"> </p>
 					</td>
 					<td >								

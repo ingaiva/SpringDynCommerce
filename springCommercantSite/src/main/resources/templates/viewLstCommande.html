@@ -21,8 +21,8 @@
 					<div class="form-group text-left ">	
 						<label class="col-form-label">Filtrer les commandes</label>
 						<div class="d-flex flex-lg-row flex-md-column justify-content-between card border-info px-2">
-							<div class="mx-2" th:each="st, iter  : ${statutValues}">								
-								<input type="checkbox" name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${#lists.contains(statutSelectedValues, '' + st)}" onchange="submit();" /> 
+							<div class="mx-2 pt-2" th:each="st, iter  : ${statutValues}">								
+								<input type="checkbox" style="transform: scale(1.5)"  name="statutFilter" th:id="'statutFilter' + ${iter.index}"  th:value="${st}"  th:checked="${#lists.contains(statutSelectedValues, '' + st)}" onchange="submit();" /> 
 								<label class="mx-1" th:for="'statutFilter' + ${iter.index}" th:text="${T(data.entitys.Commande).getStatutLibelle(st)}"></label>
 							</div>
 						</div>

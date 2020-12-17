@@ -56,7 +56,7 @@ public class UiRestController {
 			return ResponseEntity.badRequest().body("cmd n'est pas trouvé");//.body("Produit n'est pas trouvé");//new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 	}
 	
-	@PostMapping("/setStatutCmd") //
+	@PostMapping("/setStatutCmd") 
 	public ResponseEntity<Object> setStatutCmd(@RequestBody RestCommande restCmd) {
 		System.out.println("setStatutCmd");
 		System.out.println(restCmd);

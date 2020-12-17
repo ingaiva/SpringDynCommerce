@@ -15,6 +15,15 @@
 	 height: auto;
 	 max-width: 100%;
 }
+.imgTrasition{
+	transition: all 0.2s ease-in;
+}
+
+.imgTrasition:hover {	
+	border: 1px #333333bb;
+	box-shadow: 3px 3px 3px 3px #333333bb;		
+}
+
 .divCenterContainer {
 /* 	width: 100%; */
 /* 	margin-left: auto; */
@@ -64,7 +73,13 @@
 
 .divProduitBoxColor{
 	background-color:white;
-	box-shadow: 0 1px 1px 1px cadetblue;
+	box-shadow: 0 1px 1px 1px #333333bb;
+	transition: all 0.5s ease-in;
+}
+.divProduitBoxColor:hover {
+	opacity: 1;
+	border: 1px #333333bb;
+	box-shadow: 3px 3px 3px 3px #333333bb;		
 }
 
 .divProduit, .divCategorie {
@@ -150,9 +165,17 @@
     margin-top: 1%;
     margin-bottom: 1%;
 }
-.divCategorieColor{
+/* .divCategorieColor{
 	background-color:#f4f4f4;
 	box-shadow: 0 2px 2px 2px rgb(236, 236, 236);
+} */
+.divCategorieColor{	
+	background-color: lightgray;
+	box-shadow: 0 1px 1px 1px #333333bb;
+	background-image: url('/images/pic02.jpg');
+	background-size: cover;
+	color: white;
+	border-radius: 5px;
 }
 .etiquetteDelaisColor{
 	background-color: #ceffce;
@@ -256,4 +279,30 @@
     /* width: 400px; */
     border-radius: 5px;
     
+}
+
+.divInfoCompte{
+	background-image: url("/images/pic01.jpg");
+	background-size: cover;
+	color: white;
+}
+.infoCompteBlack{
+	color: black;
+}
+.footerContact{
+	background-image: url("/images/pic02.jpg");
+	background-size: cover;	
+	background-color: #f6f6f6;
+	margin: 5px;
+	border: #f6f6f6 solid 1px;
+	border-radius: 5px;
+	color: white;
+}
+	
+	
+footer{
+	background-image: url("/images/pic03.jpg");
+	background-size: cover;	
+	color: white;
+	padding: 10px 10px;
 }

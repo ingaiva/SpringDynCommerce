@@ -16,8 +16,8 @@
 		<form class="" method="post" th:action="@{saveCompte}" th:object="${user}">
 			<div th:replace="fragments/general.html :: infoCompte"></div>	
 			<div class="d-flex text-center py-2">
-				<button type="submit" class="btn btn-outline-success mx-1">Valider</button>
-				<a th:href="@{accueil}" class="mx-1 btn btn-outline-danger">Annuler</a>
+				<button type="submit" class="btn btn-outline-success mx-1"><i class="fa fa-floppy-o mx-2" aria-hidden="true"></i>Enregistrer</button>
+				<a th:href="@{accueil}" class="mx-1 btn btn-outline-primary">Annuler</a>
 			</div>
 		</form>
 	</div>	
@@ -33,14 +33,31 @@
         	let $liTag =  $('#liCompte');   // 
        
         	if ($liTag.hasClass('active')) {         
-          		return false;
+          		//return false;
         	}
-        	
+        	else {
+        		
        		$liTag.siblings('.active').removeClass('active');
         	$liTag.addClass('active');  
         	
         	 let $liBisTag =  $('#liHome');   //
         	$liBisTag.siblings('.active').removeClass('active');
+        	}
+        	
+        	var old = document.getElementById("oldPwd");
+        	var current = document.getElementById("password");
+			
+        	if(old.value != null) {
+        		current.value = old.value;
+        		old.value = null;
+        	}
+        	
+        	 $('#editMail').on('click', function(event) {
+        		 event.preventDefault();
+       		   	$('#mail').prop("readonly", false); // Element(s) are now enabled.
+       		  	$("#editMail").hide();
+             });
+        	
       	})
       	
       	 $('.lblPtV').popover({
@@ -50,7 +67,9 @@
                 
                 return $(elementId).html();
             }
-        });
+        }); 		
+
+ 		
     </script>	
 </body>
 <footer th:replace="fragments/general.html :: footerTrade"></footer>

@@ -2,26 +2,36 @@ package app.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
+import app.utility.FilterCmd;
+import app.utility.StatisticProduit;
+import app.utility.UserModel;
 import data.Utilitys;
 import data.entitys.CategorieProduit;
 import data.entitys.Commande;
+import data.entitys.CommandeProduit;
 import data.entitys.PointVente;
 import data.entitys.Produit;
 import data.entitys.User;
@@ -29,6 +39,7 @@ import data.entitys.User;
 
 
 @Controller
+//@RequestMapping("/")
 public class HomeController {
 	@Autowired
 	data.repositorys.RepoProduit prodR;
@@ -52,27 +63,9 @@ public class HomeController {
 	data.repositorys.RepoPointVente ptsVR;
 	
 	@GetMapping({ "/","/accueil" })
-	public String getAcceuilFrm(Model model) {	
-		//, HttpSession session
-		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();		
-		Set<Produit> lstProdSansCat=prodR.getProduitWithDependencyByCategorieNull();
-		
-		boolean hasProd=(lstProdSansCat.size()>0);
-		if (! hasProd) {
-			for (CategorieProduit cat : lstCat) {
-				cat.setPhotos(phR.getByCategorie(cat.getId()));				
-				if (cat.getProduits().size()>0) {
-					hasProd=true;
-					break;
-				}
-			}			
-		}
-		
-		model.addAttribute("hasProd", hasProd);	
-		model.addAttribute("lstCat", lstCat);	
-		model.addAttribute("lstProdSansCat", lstProdSansCat);	
-		 
-		return "viewAccueil";
+	public String getAcceuilFrm(Model model) {			
+		return "index";
+
 	}
 	
 	@PostMapping("/listUser")
@@ -105,9 +98,8 @@ public class HomeController {
 		
 
 		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();
-		model.addAttribute("lstCat", lstCat);
+		model.addAttribute("lstCat", lstCat);		
 		
-		// System.out.println("dans listUser get: ");
 		model.addAttribute("pointsV", ptsVR.findAll());
 		model.addAttribute("ptvSelectedValues", ptVFilterValues);
 		List<User> users = null;
@@ -116,38 +108,53 @@ public class HomeController {
 		} else
 			users = usrR.findAll();
 
-		List<String> statutValues = new ArrayList<String>();
-		statutValues.add(Commande.StatutCommande.Finalise.toString());
-		for (User usr : users) {
-			usr.setNbCmd(cmdR.getCountByUserFiltered(usr.getId(), statutValues));
-			usr.setTotalCmd(cmdR.getTotalByUserFiltered(usr.getId(), statutValues));
-		}
+//		List<String> statutValues = new ArrayList<String>();
+//		statutValues.add(Commande.StatutCommande.Finalise.toString());
+//		for (User usr : users) {
+//			usr.setNbCmd(cmdR.getCountByUserFiltered(usr.getId(), statutValues));
+//			usr.setTotalCmd(cmdR.getTotalByUserFiltered(usr.getId(), statutValues));
+//		}
 		model.addAttribute("lstUsr", users);
-
+		model.addAttribute("redirectAction", "listUser");
 		return "viewLstUser";
 	}
 	
-	@PostMapping("/saveUser")
-	public String postListUser(Model model,@ModelAttribute("user")User user,
+	@PostMapping("/viewUser")
+	public ModelAndView postUser(Model model,@ModelAttribute("userModel")UserModel uModel,
 			@RequestParam(name="action",required = false) String action, 
 			@RequestParam(name = "ptV", required = false) List<Long> selectedValues,
-			@RequestParam(name="redirectAction",required = false) String redirectToAction) {				
+			@RequestParam(name="redirectAction",required = false) String redirectToAction) {	
+		
+		
+		if(uModel.getFilter()==null ) 
+			uModel.setFilter(new FilterCmd()) ;
+		if(action!=null && action.equalsIgnoreCase("effacerFilters")) 
+			uModel.getFilter().effacer();	
+		else if(action!=null ) 
+			uModel.getFilter().checkDates();
 		
 		if(action!=null && action.equalsIgnoreCase("savePtV")) {
-			return savePointsVente(model, user, action, selectedValues,redirectToAction);//			
+			return savePointsVente(model, uModel, action, selectedValues,redirectToAction);//			
 		}
-		return getListUserFrm(model,null);
+		else if(action!=null ) {
+			return getUserFrm(model,uModel.getUser().getId(),action,redirectToAction,uModel.getFilter());
+		}
+		
+		
+		return new ModelAndView("listUser"); //getListUserFrm(model,null);;
 	}
 	
-	public String savePointsVente(Model model, @ModelAttribute("user") User user,
+	private ModelAndView savePointsVente(Model model, @ModelAttribute("userModel")UserModel uModel,
 			@RequestParam(name = "action", required = false) String action,
 			@RequestParam(name = "ptV", required = false) List<Long> selectedValues,
 			@RequestParam(name="redirectAction",required = false) String redirectToAction) {
-
+		
+				
 		if (selectedValues == null)
 			selectedValues = new ArrayList<Long>();
-
-		user = usrR.getOne(user.getId());		
+		
+		
+		User user = usrR.getOne(uModel.getUser().getId());		
 		List<PointVente> lstInDb = ptsVR.findAllByUsers(user);
 		for (Long idPtV : selectedValues) {
 			PointVente pt = ptsVR.getOne(idPtV);
@@ -161,40 +168,76 @@ public class HomeController {
 		}
 		user.setPointsVente(lstInDb);
 		usrR.save(user);
-		return getUserFrm(model,user.getId(),action,redirectToAction);	
-
+		return getUserFrm(model,user.getId(),action,redirectToAction,uModel.getFilter());		
 	}
 	
+
+	@PostMapping("/user")
+	public ModelAndView postUserFrm(Model model,
+			@RequestParam(name = "id") Long id,
+			@RequestParam(name="action",required = false) String action,
+			@RequestParam(name="redirectAction",required = false) String redirectToAction,
+			RedirectAttributes ra) {		
+		
+		return getUserFrm(model,id,action,redirectToAction,null);
+	}
+
 	@GetMapping("/viewUser")
-	public String getUserFrm(Model model,@RequestParam(name = "id") Long id,@RequestParam(name="action",required = false) String action,
-			@RequestParam(name="redirectAction",required = false) String redirectToAction) {
+	public ModelAndView getUserView(@RequestParam(name = "id") Long id,Model model) {
+		return getUserFrm(model, id, null, null,null);
+	}
+	//@GetMapping("/viewUser")
+	public ModelAndView getUserFrm(Model model,
+			@RequestParam(name = "id") Long id,
+			@RequestParam(name="action",required = false) String action,
+			@RequestParam(name="redirectAction",required = false) String redirectToAction,
+			@RequestParam(name = "filter",required = false) FilterCmd filter) {
 		
-		
-		Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();
-		model.addAttribute("lstCat", lstCat);
-		
-		List<String> statutValues = new ArrayList<String>();
-		statutValues.add(Commande.StatutCommande.Finalise.toString());
-		User usr=(User) usrR.getOne(id)	;
-		usr.setCommandes(cmdR.getCommandesUser(id));
-		usr.setPointsVente(ptsVR.findAllByUsers(usr));
-		usr.setNbCmd(cmdR.getCountByUserFiltered(id,statutValues ));		
-		usr.setTotalCmd(cmdR.getTotalByUserFiltered(id,statutValues ));
-		
-		String redirectAction="listUser";
-		if (action!=null && action.equalsIgnoreCase("viewUserFromCommande")) {
-			redirectAction="listCmd";
+		if(usrR.existsById(id)) {
+			
+			if(redirectToAction==null) {
+				redirectToAction="/listUser";
+			}
+			model.addAttribute("redirectAction", redirectToAction);
+			
+			Set<CategorieProduit> lstCat = catR.getCategoriesWithDependency();
+			model.addAttribute("lstCat", lstCat);
+			
+			if(filter==null)
+				filter = new FilterCmd(id);
+			
+			User usr=(User) usrR.getOne(id)	;		
+			usr.setCommandesFiltered(cmdR.findAll(filter.getCriteria(),Sort.by(Sort.Direction.DESC, "id")));		
+					
+			UserModel uModel=new UserModel(usr,filter);
+			model.addAttribute("userModel", uModel);
+			
+			List<PointVente> pointsV = ptsVR.findAll();
+			model.addAttribute("pointsV",pointsV);
+			model.addAttribute("pointsVselected",usr.getLstIdPtv());
+			
+			List<Commande> lstCmd =usr.getCommandesFiltered();		
+			StatisticProduit stat=new StatisticProduit();
+			if (action != null && action.equalsIgnoreCase("loadStats") && lstCmd!=null) {
+				stat.setLoaded(true);
+				for (Commande cmd : lstCmd) {
+					for (CommandeProduit cp : cmd.getLignesCommandeProduit()) {
+						Produit curProd = cp.getProduit();
+						stat.addProduit(curProd, cp.getQte());
+					}
+				}
+			}			
+			model.addAttribute("stat", stat);	
+			
+			return new ModelAndView("viewCompte", model.asMap());
+			
 		}
-		
-		model.addAttribute("redirectAction", redirectAction);
-		
-		model.addAttribute("user", usr);
-		
-		List<PointVente> pointsV = ptsVR.findAll();
-		model.addAttribute("pointsV",pointsV);
-		model.addAttribute("pointsVselected",usr.getLstIdPtv());
-		
-		return 	"viewCompte";
+		else {
+			model.addAttribute("msg", "Client demandé n'existe pas");
+			return new ModelAndView("error", model.asMap());//"error";
+		}
+			
+		//return 	"viewCompte";
 	}
 	
 	@GetMapping("/listPointVente")
@@ -213,13 +256,19 @@ public class HomeController {
 	
 	@GetMapping("/viewPtVente")
 	public String getPointVenteFrm(Model model, @RequestParam(name="id") Long id) {
-		PointVente pointVenteToEdit =ptsVR.getOne(id);
-		if (pointVenteToEdit==null) 
-			return "redirect:/accueil";		
-		else {			
-			model.addAttribute("ptV", pointVenteToEdit);
-			return "viewPointVente";
-		}		
+		if(ptsVR.existsById(id)) {
+			PointVente pointVenteToEdit =ptsVR.getOne(id);
+			if (pointVenteToEdit==null) 
+				return "redirect:/accueil";		
+			else {			
+				model.addAttribute("ptV", pointVenteToEdit);
+				return "viewPointVente";
+			}		
+			
+		}
+		else
+			model.addAttribute("msg", "Le point de vente demandé n'existe pas");
+			return "error";
 	}
 	
 	private void updatePointVenteSansPhoto(PointVente pointVenteToEdit) {
@@ -261,13 +310,7 @@ public class HomeController {
 				if(pointVenteToEdit.getId()==null) {
 					ptsVR.save(pointVenteToEdit);	
 				}	
-				updatePointVenteSansPhoto(pointVenteToEdit);
-				/*
-				 * ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(),
-				 * pointVenteToEdit.getDescription(), pointVenteToEdit.getEmplacementText(),
-				 * pointVenteToEdit.getHorairesText(), pointVenteToEdit.getInfoComp(),
-				 * pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
-				 */
+				updatePointVenteSansPhoto(pointVenteToEdit);				
 				ptsVR.updatePhoto(pointVenteToEdit.getId(), Utilitys.getImageData(file));
 				return getPointVenteFrm(model,pointVenteToEdit.getId());	
 			}		
@@ -275,13 +318,7 @@ public class HomeController {
 				if(pointVenteToEdit.getId()==null) {
 					ptsVR.save(pointVenteToEdit);	
 				}	
-				updatePointVenteSansPhoto(pointVenteToEdit);
-				/*
-				 * ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(),
-				 * pointVenteToEdit.getDescription(), pointVenteToEdit.getEmplacementText(),
-				 * pointVenteToEdit.getHorairesText(), pointVenteToEdit.getInfoComp(),
-				 * pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
-				 */
+				updatePointVenteSansPhoto(pointVenteToEdit);				
 				ptsVR.deletePhoto(pointVenteToEdit.getId());				
 				return getPointVenteFrm(model,pointVenteToEdit.getId());	
 			}
@@ -289,13 +326,7 @@ public class HomeController {
 				if(pointVenteToEdit.getId()==null) {
 					ptsVR.save(pointVenteToEdit);	
 				}
-				updatePointVenteSansPhoto(pointVenteToEdit);
-				/*
-				 * ptsVR.updateInfo(pointVenteToEdit.getId(), pointVenteToEdit.getLibelle(),
-				 * pointVenteToEdit.getDescription(), pointVenteToEdit.getEmplacementText(),
-				 * pointVenteToEdit.getHorairesText(), pointVenteToEdit.getInfoComp(),
-				 * pointVenteToEdit.getPhotoTitre(), pointVenteToEdit.isActif());
-				 */
+				updatePointVenteSansPhoto(pointVenteToEdit);			
 					
 		}
 		
